@@ -4,8 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const supabaseUrl  = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseKey  = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl  = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://xyzplaceholder.supabase.co';
+const supabaseKey  = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder';
 
 // SecureStore adapter para auth tokens
 const ExpoSecureStoreAdapter = {
