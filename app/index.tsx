@@ -36,14 +36,14 @@ export default function Index() {
         <Text style={styles.subtitle}>Nutritional Override System</Text>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
             onPress={() => router.push('/login')}
           >
             <Text style={styles.primaryButtonText}>INITIATE LOGIN</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={() => router.push('/calculator')}
           >
@@ -51,7 +51,7 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.copyright}>© 2026 CAMILA. ALL RIGHTS RESERVED.</Text>
+        <Text style={styles.copyright}>© 2026 Camila Olivares Arce... ALL RIGHTS RESERVED.</Text>
       </View>
     </View>
   );
