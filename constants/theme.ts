@@ -1,37 +1,37 @@
 // constants/theme.ts
 export const COLORS = {
   // Backgrounds
-  bg:     '#050505', // Deep abyss black
-  bg1:    '#0f0a0a', // Dark blood undertone
-  bg2:    '#1a1111', // Slightly lighter dark red-black
-  bg3:    '#251515',
-  bg4:    '#301b1b',
+  bg:     '#0f0f13', // --bg-dark
+  bg1:    '#19191e', // Slightly lighter for cards/headers
+  bg2:    '#232328',
+  bg3:    '#2d2d32',
+  bg4:    '#37373c',
 
-  // Brand (Horror Punk)
-  neon:   '#a3ff00', // Toxic Acid Green
-  neon2:  '#7acc00',
-  stg:    '#00693e', // Keep original STG just in case, or change to darker green
-  pink:   '#ff003c', // Blood Red / Neon Red
-  pink2:  '#cc0030', // Darker Blood Red
-  purple: '#8000ff', // Deep ultraviolet
-  purple2:'#5500aa',
+  // Brand (Horror Punk from HTML)
+  neon:   '#00ff88', // --neon-green
+  neon2:  '#00cc6a',
+  stg:    '#00693E', // --st-green
+  pink:   '#ff99cc', // --cute-pink
+  pink2:  '#cc7aa3',
+  purple: '#9d00ff', // --punk-purple
+  purple2:'#7d00cc',
 
   // Semantic
-  gold:   '#ffaa00', // Warning orange-gold
-  red:    '#ff0000', // Pure bright red
-  sky:    '#00ffff', // Cyan for contrast
+  gold:   '#ffaa00', 
+  red:    '#ff0055', 
+  sky:    '#00d0ff', 
   orange: '#ff5500',
 
   // Text
-  text:   '#e0e0e0',
-  muted:  '#807070', // Grey with red hue
-  dim:    '#504040',
+  text:   '#e2e2e2', // --text-main
+  muted:  '#a0a0a0', // --text-muted
+  dim:    '#606060',
   white:  '#ffffff',
 
   // Card
-  card:   'rgba(26, 17, 17, 0.95)',
-  border: 'rgba(255, 0, 60, 0.3)', // Red border
-  borderB:'rgba(163, 255, 0, 0.4)', // Acid green border
+  card:   'rgba(25, 25, 30, 0.95)', // --bg-card opaque
+  border: 'rgba(255, 153, 204, 0.3)', // Pinkish border
+  borderB:'rgba(0, 255, 136, 0.4)', // Neon green border
 };
 
 export const FONTS = {
@@ -58,18 +58,25 @@ export const RADIUS = {
 
 export const SHADOWS = {
   neon: {
-    shadowColor: '#a3ff00',
+    shadowColor: '#00ff88',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 15,
     elevation: 10,
   },
   pink: {
-    shadowColor: '#ff003c',
+    shadowColor: '#ff99cc',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
     elevation: 8,
+  },
+  purple: {
+    shadowColor: '#9d00ff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 10,
   },
   card: {
     shadowColor: '#000000',

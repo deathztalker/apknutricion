@@ -121,16 +121,14 @@ export default function Calculator() {
           <Text style={[styles.tabText, activeTab === 'input' && styles.activeTabText]}>INPUT</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'results' && styles.activeTab, !results && styles.disabledTab]} 
-          onPress={() => results && setActiveTab('results')}
-          disabled={!results}
+          style={[styles.tab, activeTab === 'results' && styles.activeTab]} 
+          onPress={() => setActiveTab('results')}
         >
           <Text style={[styles.tabText, activeTab === 'results' && styles.activeTabText]}>METRICS</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'ai' && styles.activeTab, !aiAnalysis && styles.disabledTab]} 
-          onPress={() => aiAnalysis && setActiveTab('ai')}
-          disabled={!aiAnalysis}
+          style={[styles.tab, activeTab === 'ai' && styles.activeTab]} 
+          onPress={() => setActiveTab('ai')}
         >
           <Text style={[styles.tabText, activeTab === 'ai' && styles.activeTabText]}>AI CLINIC</Text>
         </TouchableOpacity>
@@ -186,6 +184,13 @@ export default function Calculator() {
                 </>
               )}
             </TouchableOpacity>
+          </View>
+        )}
+
+        {activeTab === 'results' && !results && (
+          <View style={styles.center}>
+            <Ionicons name="stats-chart" size={64} color={COLORS.bg4} />
+            <Text style={styles.emptyText}>EJECUTE EL ANÁLISIS PRIMERO</Text>
           </View>
         )}
 
@@ -256,6 +261,13 @@ export default function Calculator() {
           </View>
         )}
 
+        {activeTab === 'ai' && !aiAnalysis && (
+          <View style={styles.center}>
+            <Ionicons name="hardware-chip" size={64} color={COLORS.bg4} />
+            <Text style={styles.emptyText}>LA INTELIGENCIA ARTIFICIAL ESPERA DATOS...</Text>
+          </View>
+        )}
+
         {activeTab === 'ai' && aiAnalysis && (
           <View style={styles.section}>
             <View style={styles.aiHeader}>
@@ -290,6 +302,19 @@ export default function Calculator() {
 }
 
 const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+    gap: 16,
+  },
+  emptyText: {
+    color: COLORS.dim,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.bg,
