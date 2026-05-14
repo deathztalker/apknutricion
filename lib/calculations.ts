@@ -257,6 +257,14 @@ export function calcSomatotype(
   };
 }
 
+// ── Sarcopenia (Fuerza de Agarre - EWGSOP2) ───────────────
+export function calcSarcopeniaRisk(gripStrength: number | null, sex: 'M' | 'F' | ''): string | null {
+  if (!gripStrength || !sex) return null;
+  const cutoff = sex === 'M' ? 27 : 16;
+  if (gripStrength < cutoff) return 'Probable Sarcopenia (Baja Fuerza)';
+  return 'Fuerza Muscular Normal';
+}
+
 // ── MASTER CALCULATOR ──────────────────────────────────────
 export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M' | 'F' | ''): CalculationResult {
   const w    = n(form.weight_kg);
@@ -305,6 +313,9 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
     h, w
   );
 
+  // Sarcopenia
+  const sarcRisk = calcSarcopeniaRisk(n(form.grip_strength_kg as any), sex);
+
   return {
     bmi,
     bmiStatus: bmiSt?.status ?? null,
@@ -330,6 +341,7 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
     weightLossRisk: wLoss?.risk ?? null,
     macros,
     somatotype: somato,
+    sarcopeniaRisk: sarcRisk,
   };
 }
 

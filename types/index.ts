@@ -43,6 +43,10 @@ export interface ClinicalRecord {
   mna_score?: number;           // Mini Nutritional Assessment
   muscle_mass_kg?: number;      // For Cunningham
   somatotype?: { endo: number; meso: number; ecto: number };
+  
+  // V3 Additions (Sarcopenia / MNA)
+  grip_strength_kg?: number;
+  calf_circumference_cm?: number;
 }
 
 export interface RecordFormData extends Partial<ClinicalRecord> {
@@ -56,6 +60,8 @@ export interface RecordFormData extends Partial<ClinicalRecord> {
   weight_loss_weeks?: string;
   med_dose?: string;
   med_conc?: string;
+  grip_strength_kg?: any;
+  calf_circumference_cm?: any;
   // Overrides for parsing
   weight_kg?: any;
   height_cm?: any;
@@ -128,6 +134,7 @@ export interface CalculationResult {
   weightLossRisk: string | null;
   macros: MacroResult | null;
   somatotype?: { endo: number; meso: number; ecto: number; x: number; y: number } | null;
+  sarcopeniaRisk?: string | null;
 }
 
 export interface ClinicalAlert {

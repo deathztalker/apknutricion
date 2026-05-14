@@ -180,6 +180,22 @@ export default function Calculator() {
             <Text style={styles.sectionTitle}>EVALUACIÓN CLÍNICA (POSTRADO)</Text>
             
             <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>RIESGO DE SARCOPENIA (EWGSOP2)</Text>
+              <View style={styles.row}>
+                {renderInput('FUERZA AGARRE (KG)', 'grip_strength_kg', '0')}
+                {renderInput('PANTORRILLA (CM)', 'calf_circumference_cm', '0')}
+              </View>
+              {results?.sarcopeniaRisk ? (
+                <View style={styles.metricRow}>
+                  <Text style={styles.metricLabel}>DIAGNÓSTICO</Text>
+                  <Text style={[styles.metricValue, { color: results.sarcopeniaRisk.includes('Normal') ? COLORS.neon : COLORS.pink }]}>
+                    {results.sarcopeniaRisk}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={styles.resultCard}>
               <Text style={styles.cardHeader}>TALLA ESTIMADA (CHUMLEA)</Text>
               <View style={styles.row}>
                 {renderInput('ALT. RODILLA (CM)', 'knee_height', '0')}

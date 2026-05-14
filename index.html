@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camila Olivares | Nutricionista & Horror Punk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Creepster&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f0f13;
+            --bg-card: rgba(25, 25, 30, 0.7);
+            --st-green: #00693E;
+            --neon-green: #00ff88;
+            --cute-pink: #ff99cc;
+            --punk-purple: #9d00ff;
+            --text-main: #e2e2e2;
+            --text-muted: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 100px; /* Evita que el navbar superponga los títulos */
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--punk-purple); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
+        ::selection {
+            background: var(--neon-green);
+            color: var(--bg-dark);
+            text-shadow: none;
+        }
+
+        a:focus-visible, button:focus-visible {
+            outline: 2px dashed var(--cute-pink);
+            outline-offset: 5px;
+            border-radius: 4px;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 105, 62, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(157, 0, 255, 0.15) 0%, transparent 50%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Hero Section */
+        header {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* Glitch effect for Horror Punk vibe */
+        .glitch {
+            font-family: 'Creepster', cursive;
+            color: var(--neon-green);
+            font-size: 4rem;
+            position: relative;
+            text-shadow: 2px 2px var(--punk-purple), -2px -2px var(--cute-pink);
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            cursor: crosshair;
+        }
+
+        .glitch:hover {
+            animation: text-glitch-extreme 0.2s infinite;
+            color: var(--cute-pink);
+        }
+
+        @keyframes text-glitch-extreme {
+            0% { transform: translate(0) }
+            20% { transform: translate(-3px, 3px) skewX(10deg) }
+            40% { transform: translate(-3px, -3px) }
+            60% { transform: translate(3px, 3px) skewX(-10deg) }
+            80% { transform: translate(3px, -3px) }
+            100% { transform: translate(0) }
+        }
+
+        .subtitle {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 7rem 2rem 2rem 2rem;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background: rgba(15, 15, 19, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        * {
+            cursor: none !important; /* Custom horror cursor */
+        }
+
+        .nav-brand {
+            font-family: 'Creepster', cursive;
+            color: var(--neon-green);
+            font-size: 1.8rem;
+            text-decoration: none;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px var(--punk-purple);
+            animation: horror-brand 3s infinite alternate;
+        }
+        
+        .mobile-name { display: none; }
+
+        @keyframes horror-brand {
+            0% { color: var(--neon-green); text-shadow: 2px 2px var(--punk-purple); transform: scale(1); }
+            33% { color: var(--cute-pink); text-shadow: -2px 2px var(--st-green); }
+            66% { color: var(--punk-purple); text-shadow: 2px -2px var(--neon-green); }
+            95% { transform: scale(1); filter: blur(0px); }
+            97% { transform: scale(1.05) skew(5deg); filter: blur(1px); color: white; }
+            100% { color: var(--neon-green); text-shadow: -2px -2px var(--punk-purple); transform: scale(1); filter: blur(0px); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .nav-links a:not(.btn-cv):hover {
+            color: var(--cute-pink);
+            animation: terror-shake 0.2s infinite;
+            text-shadow: 2px 0 0 var(--neon-green), -2px 0 0 var(--punk-purple);
+        }
+
+        @keyframes terror-shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-2px, 0px) rotate(1deg); }
+            40% { transform: translate(1px, -1px) rotate(-1deg); }
+            60% { transform: translate(-1px, 2px) rotate(0deg); }
+            80% { transform: translate(2px, -1px) rotate(1deg); }
+            100% { transform: translate(0px, 0px) rotate(-1deg); }
+        }
+
+        /* Halloween Navbar Effects */
+        .spider-container {
+            position: absolute;
+            top: 0;
+            left: 20%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: spider-drop 6s infinite ease-in-out;
+            z-index: 1001;
+            cursor: none;
+        }
+
+        .spider-container:hover {
+            animation-play-state: paused;
+        }
+        
+        .spider-container:hover i {
+            color: var(--neon-green);
+            transform: scale(1.8) rotate(180deg);
+            transition: all 0.3s;
+            filter: drop-shadow(0 0 10px var(--neon-green));
+        }
+        
+        .spider-thread {
+            width: 1px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .spider-container i {
+            color: var(--punk-purple);
+            font-size: 1.2rem;
+            margin-top: -2px;
+            filter: drop-shadow(0 0 5px var(--punk-purple));
+            transition: all 0.3s;
+        }
+        
+        @keyframes spider-drop {
+            0%, 100% { transform: translateY(-70px); }
+            40%, 60% { transform: translateY(15px); }
+        }
+
+        .creepy-cat {
+            position: absolute;
+            bottom: -5px;
+            right: 25%;
+            color: var(--neon-green);
+            font-size: 1.5rem;
+            animation: cat-peek 5s infinite;
+            transform-origin: bottom center;
+            z-index: 1001;
+            text-shadow: 0 0 10px var(--neon-green);
+            cursor: none;
+            transition: all 0.3s ease;
+        }
+
+        .creepy-cat:hover {
+            animation: none;
+            transform: translateY(-20px) scale(1.5);
+            color: var(--cute-pink);
+            text-shadow: 0 0 20px var(--cute-pink);
+        }
+        
+        @keyframes cat-peek {
+            0%, 60%, 100% { transform: translateY(30px) rotate(0deg); opacity: 0; }
+            70% { transform: translateY(0px) rotate(-15deg); opacity: 1; }
+            80% { transform: translateY(0px) rotate(15deg); opacity: 1; }
+            90% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+        }
+
+        .btn-cv {
+            background: rgba(0, 105, 62, 0.2);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green) !important;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-cv:hover {
+            background: var(--neon-green);
+            color: var(--bg-dark) !important;
+            box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+            transform: scale(1.05);
+            animation: toxic-btn 1s infinite alternate;
+        }
+
+        @keyframes toxic-btn {
+            0% { border-color: var(--neon-green); box-shadow: 0 0 20px var(--neon-green); }
+            100% { border-color: var(--st-green); box-shadow: 0 0 40px var(--st-green), inset 0 0 10px var(--bg-dark); }
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 0;
+            position: relative;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 2rem;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(255, 153, 204, 0.3);
+            animation: float 4s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--punk-purple), var(--neon-green));
+            filter: blur(20px);
+            opacity: 0.6;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            15% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.8), 0 0 60px rgba(255, 153, 204, 0.4); }
+            30% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            50% { transform: translateY(-15px) rotate(3deg); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            100% { transform: translateY(0px) rotate(0deg); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        /* Glitch en Avatar al Hover */
+        .avatar:hover {
+            animation: avatar-glitch 0.15s infinite;
+            filter: contrast(150%) saturate(200%) hue-rotate(90deg);
+            cursor: crosshair;
+        }
+
+        @keyframes avatar-glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-6px, 6px) }
+            40% { transform: translate(-6px, -6px) }
+            60% { transform: translate(6px, 6px) }
+            80% { transform: translate(6px, -6px) }
+            100% { transform: translate(0) }
+        }
+
+        /* Cards (Glassmorphism) */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--st-green);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 15px 35px rgba(0, 255, 136, 0.15), 0 0 15px rgba(157, 0, 255, 0.1), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            border-left-color: var(--neon-green);
+        }
+
+        .section-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2rem;
+            color: var(--neon-green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .section-title:hover {
+            animation: neon-flicker 2s infinite alternate;
+            color: white;
+        }
+
+        @keyframes neon-flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { text-shadow: 0 0 5px var(--neon-green), 0 0 15px var(--neon-green), 0 0 30px var(--neon-green); opacity: 1; }
+            20%, 24%, 55% { text-shadow: none; opacity: 0.4; color: var(--st-green); }
+        }
+
+        .section-title i {
+            color: var(--cute-pink);
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Timeline for Education/Experience */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin-top: 1.5rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--neon-green), var(--punk-purple));
+            box-shadow: 0 0 10px var(--neon-green);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -37px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            border: 3px solid var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green), inset 0 0 5px var(--neon-green);
+            transition: all 0.3s ease;
+            animation: pulse-node 2s infinite;
+        }
+
+        @keyframes pulse-node {
+            0% { box-shadow: 0 0 10px var(--neon-green), inset 0 0 5px var(--neon-green); }
+            50% { box-shadow: 0 0 20px var(--cute-pink), inset 0 0 10px var(--cute-pink); border-color: var(--cute-pink); }
+            100% { box-shadow: 0 0 10px var(--neon-green), inset 0 0 5px var(--neon-green); }
+        }
+
+        .timeline-item:hover::before {
+            background: var(--neon-green);
+            transform: scale(1.3);
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: var(--cute-pink);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .timeline-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Skills Tags */
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            background: rgba(0, 105, 62, 0.2);
+            color: var(--neon-green);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            border: 1px solid var(--st-green);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .skill-tag:hover {
+            background: var(--neon-green);
+            color: var(--bg-dark);
+            transform: scale(1.05) rotate(-2deg);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .skill-tag.pink {
+            background: rgba(255, 153, 204, 0.1);
+            color: var(--cute-pink);
+            border-color: var(--cute-pink);
+        }
+        
+        .skill-tag.pink:hover {
+            background: var(--cute-pink);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px rgba(255, 153, 204, 0.4);
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        /* Floating elements (Ghosts, apples, crosses) */
+        .floating-icon {
+            position: absolute;
+            opacity: 0.15;
+            z-index: -1;
+            font-size: 3rem;
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: none;
+            background: transparent !important;
+        }
+
+        .f1 { top: 10%; left: 5%; color: var(--neon-green); animation: float 6s infinite; }
+        .f2 { top: 30%; right: 10%; color: var(--cute-pink); animation: float 5s infinite 1s; }
+        .f3 { bottom: 20%; left: 15%; color: var(--punk-purple); animation: float 7s infinite 2s; }
+        .f4 { bottom: 40%; right: 5%; color: white; animation: float 4s infinite 0.5s; font-size: 2rem;}
+
+        /* Contact */
+        .contact-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .contact-links a {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.05);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .contact-links a:hover {
+            transform: translateY(-5px);
+        }
+        
+        .contact-links a.email:hover { background: var(--neon-green); color: var(--bg-dark); box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3); border-color: var(--neon-green); }
+        .contact-links a.linkedin:hover { background: #0077b5; color: white; box-shadow: 0 5px 15px rgba(0, 119, 181, 0.3); border-color: #0077b5; }
+        .contact-links a.whatsapp:hover { background: #25D366; color: white; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); border-color: #25D366; }
+        .contact-links a.instagram:hover { background: var(--cute-pink); color: var(--bg-dark); box-shadow: 0 5px 15px rgba(255, 153, 204, 0.3); border-color: var(--cute-pink); }
+
+        #particles {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            opacity: 0.15;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 10px currentColor;
+            background: transparent !important;
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: none;
+        }
+
+        /* Custom Cursor */
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 1.8rem;
+            animation: cursor-color 1s infinite alternate;
+            transform: translate(-30%, -20%);
+        }
+        
+        @keyframes cursor-color {
+            0% { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
+            100% { color: var(--punk-purple); filter: drop-shadow(0 0 8px var(--punk-purple)); }
+        }
+
+        /* Boton Subir */
+        #btn-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(157, 0, 255, 0.2);
+            border: 2px solid var(--punk-purple);
+            color: var(--neon-green);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        #btn-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #btn-top:hover {
+            background: var(--punk-purple);
+            color: white;
+            box-shadow: 0 0 20px var(--neon-green);
+            transform: scale(1.1) translateY(-5px);
+            border-color: var(--neon-green);
+        }
+
+        @media (max-width: 768px) {
+            .desktop-name { display: none; }
+            .mobile-name { display: inline; }
+            
+            .glitch { font-size: 2rem; letter-spacing: 2px; }
+            .subtitle { font-size: 1rem; }
+            .container { padding: 5rem 1rem 1rem 1rem; }
+            .card { padding: 1.5rem; }
+            
+            .navbar { padding: 0.8rem 1rem; }
+            .nav-brand { font-size: 1.5rem; letter-spacing: 1px; }
+            .btn-cv { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+            .nav-links a:not(.btn-cv) { display: none; }
+            
+            .spider-container { left: 2%; }
+            .creepy-cat { right: 5%; font-size: 1.2rem; }
+            
+            .contact-links a { width: 40px; height: 40px; font-size: 1.2rem; }
+        }
+
+        /* Overhaul Additions */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .project-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 153, 204, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .project-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,153,204,0.1), transparent);
+            transform: skewX(-20deg); transition: 0.5s;
+        }
+        .project-card:hover::before { left: 150%; }
+        .project-card:hover {
+            border-color: var(--cute-pink);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(255, 153, 204, 0.2);
+        }
+        .subtitle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--st-green);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .subtitle span {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid var(--neon-green);
+            width: 27ch;
+            color: var(--st-green);
+            animation: typing 2.5s steps(27) forwards, blink-caret 0.75s step-end infinite;
+        }
+
+        .icon-pop {
+            opacity: 0;
+            transform: scale(0);
+            animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation-delay: 2.5s;
+        }
+        .icon-pop.delay { animation-delay: 2.8s; }
+        .icon-pop.fa-apple-whole { color: var(--neon-green); filter: drop-shadow(0 0 8px var(--neon-green)); }
+        .icon-pop.fa-skull { color: var(--cute-pink); filter: drop-shadow(0 0 8px var(--cute-pink)); }
+
+        @keyframes pop-in {
+            to { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 27ch }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--neon-green) }
+        }
+
+        .scroll-indicator {
+            text-align: center;
+            margin-top: 3rem;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: var(--punk-purple);
+            animation: bounce 2s infinite;
+            opacity: 0.7;
+            filter: drop-shadow(0 0 5px var(--punk-purple));
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+        .project-icon {
+            font-size: 2.5rem;
+            color: var(--cute-pink);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .project-card:hover .project-icon { transform: scale(1.2) rotate(5deg); }
+        .project-card h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+        }
+        .project-card p { font-size: 0.95rem; margin: 0; }
+
+        /* Nutri-Tool Modal (CESFAM Dashboard) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .modal-content {
+            width: 95%; max-width: 650px;
+            background: var(--bg-card); border: 1px solid var(--neon-green);
+            box-shadow: 0 0 30px rgba(0,255,136,0.2);
+            position: relative; padding: 2rem; transform: scale(0.8); transition: all 0.3s ease;
+            max-height: 95vh; overflow-y: auto; cursor: auto;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        .close-btn {
+            position: absolute; top: 15px; right: 15px; background: none; border: none;
+            color: var(--cute-pink); font-size: 1.5rem; transition: transform 0.3s;
+        }
+        .close-btn:hover { transform: rotate(90deg) scale(1.2); text-shadow: 0 0 10px var(--cute-pink); cursor: pointer; }
+        
+        .tool-tabs { display: flex; gap: 5px; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid rgba(0,255,136,0.3); }
+        .tab-btn { 
+            background: transparent; border: none; color: var(--text-muted); 
+            padding: 10px 15px; cursor: pointer; font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s; white-space: nowrap; border-radius: 4px 4px 0 0; font-size: 0.95rem;
+        }
+        .tab-btn:hover { color: var(--neon-green); background: rgba(0,255,136,0.1); }
+        .tab-btn.active { color: var(--bg-dark); background: var(--neon-green); box-shadow: 0 -2px 10px rgba(0,255,136,0.4); }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
+
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media(max-width: 500px) { .grid-inputs { grid-template-columns: 1fr; } }
+
+        .input-group { margin-bottom: 0.8rem; width: 100%; text-align: left; }
+        .input-group label { display: block; color: var(--st-green); font-size: 0.85rem; margin-bottom: 5px; font-family: 'Fredoka', sans-serif;}
+        .input-group input, .input-group select { 
+            width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.6); box-sizing: border-box;
+            border: 1px solid var(--punk-purple); color: white; border-radius: 4px;
+            font-family: 'Outfit', sans-serif; transition: all 0.3s; cursor: text;
+        }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+        .input-group select option { background: var(--bg-dark); color: white; }
+
+        .dashboard-results { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;
+            background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(157, 0, 255, 0.3);
+        }
+        .res-box { 
+            background: rgba(0,255,136,0.05); padding: 10px; border-radius: 4px; text-align: center;
+            border-bottom: 2px solid var(--neon-green); display: flex; flex-direction: column; justify-content: center;
+        }
+        .res-box span { font-size: 0.8rem; color: var(--st-green); font-family: 'Fredoka', sans-serif; text-transform: uppercase; }
+        .res-box strong { font-size: 1.5rem; color: white; margin: 5px 0; font-family: 'Creepster', cursive; letter-spacing: 1px; transition: color 0.3s; }
+        .res-box small { font-size: 0.8rem; color: var(--text-muted); transition: color 0.3s; }
+
+        .nt-history { margin-top: 1rem; max-height: 350px; overflow-y: auto; }
+        .nt-history ul { list-style: none; padding: 0; margin: 0; }
+        .nt-history li { 
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); 
+            padding: 10px; margin-bottom: 8px; border-radius: 4px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nt-history li .delete-record { color: var(--cute-pink); cursor: pointer; font-size: 1.1rem; }
+        .nt-history li .delete-record:hover { transform: scale(1.2); }
+
+        #open-nutritool {
+            background: transparent; border: 1px solid var(--neon-green);
+            color: var(--neon-green); border-radius: 50%; width: 40px; height: 40px;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s; animation: pulse-node 2s infinite; cursor: pointer;
+        }
+        #open-nutritool:hover { background: var(--neon-green); color: var(--bg-dark); transform: scale(1.1) rotate(15deg); box-shadow: 0 0 15px var(--neon-green); }
+
+        .quote-section {
+            text-align: center;
+            padding: 4rem 1rem;
+            margin: 1rem 0;
+            position: relative;
+            z-index: 2;
+        }
+        .quote-icon {
+            font-size: 3rem;
+            color: rgba(0, 255, 136, 0.15);
+            margin-bottom: 1rem;
+        }
+        blockquote {
+            font-size: 1.6rem;
+            font-family: 'Fredoka', sans-serif;
+            color: var(--neon-green);
+            font-style: italic;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        .ecg-line {
+            width: 100%;
+            height: 50px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 50'%3E%3Cpath d='M0,25 L100,25 L105,5 L115,45 L125,25 L300,25 L305,25 L315,5 L325,20 L335,5 L345,25 L500,25 L505,25 L515,45 L525,15 L535,45 L545,25 L700,25 L705,10 L715,45 L720,5 L730,40 L740,25 L900,25 L905,5 L915,25 L925,25 L935,5 L945,25 L1000,25' fill='none' stroke='%2300ff88' stroke-width='2.5' filter='drop-shadow(0 0 5px %2300ff88)' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            background-size: 1000px 50px;
+            animation: ecg-move 4s linear infinite;
+            opacity: 0.8;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        .ecg-line:hover {
+            filter: hue-rotate(90deg) brightness(1.5);
+            animation: ecg-move 1s linear infinite;
+        }
+        @keyframes ecg-move {
+            from { background-position: 0 0; }
+            to { background-position: -1000px 0; }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px dashed rgba(157, 0, 255, 0.3);
+            color: var(--text-muted);
+            font-family: 'Fredoka', sans-serif;
+            position: relative;
+            z-index: 2;
+        }
+        footer i { 
+            display: inline-block;
+            animation: horror-heart 1.5s infinite; 
+        }
+        @keyframes horror-heart {
+            0%, 100% { transform: scale(1) rotate(0deg); color: var(--neon-green); text-shadow: 0 0 5px var(--neon-green); }
+            25% { transform: scale(1.2) rotate(-10deg); color: var(--cute-pink); text-shadow: 0 0 10px var(--cute-pink); }
+            50% { transform: scale(1) rotate(0deg); color: var(--punk-purple); text-shadow: 0 0 5px var(--punk-purple); }
+            75% { transform: scale(1.2) rotate(10deg); color: black; text-shadow: 0 0 15px var(--neon-green); }
+        }
+        
+        /* Punk Tables UI */
+        .punk-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+        }
+        .punk-table th {
+            padding: 12px 15px;
+            border-bottom: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Fredoka', sans-serif;
+        }
+        .punk-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .punk-table tbody tr:hover td {
+            background: rgba(0, 255, 136, 0.05);
+            color: var(--neon-green);
+        }
+        .punk-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-normal { background: rgba(0,255,136,0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
+        .badge-warning { background: rgba(157,0,255,0.1); color: #d080ff; border: 1px solid var(--punk-purple); }
+        .badge-danger { background: rgba(255,0,85,0.1); color: var(--cute-pink); border: 1px solid var(--cute-pink); }
+        
+        .table-container {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        .table-container:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 4px 20px rgba(0,255,136,0.15);
+        }
+        .table-container h4 {
+            background: rgba(0,255,136,0.05);
+            margin: 0;
+            padding: 12px 15px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            border-bottom: 1px solid rgba(0,255,136,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .res-box {
+            background: var(--bg-dark);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            border-bottom: 3px solid var(--neon-green);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+        }
+        .res-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,255,136,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="spider-container">
+            <div class="spider-thread"></div>
+            <i class="fa-solid fa-spider"></i>
+        </div>
+        <div class="creepy-cat">
+            <i class="fa-solid fa-cat"></i>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="#" class="nav-brand">
+                <span class="desktop-name">Camila Olivares Arce</span>
+                <span class="mobile-name">Camila O.</span>
+            </a>
+            <button id="open-nutritool" title="Escáner Nutricional">
+                <i class="fa-solid fa-vial-virus"></i>
+            </button>
+        </div>
+        <div class="nav-links">
+            <a href="#perfil">Perfil</a>
+            <a href="#formacion">Formación</a>
+            <a href="#proyectos">Proyectos</a>
+            <a href="#competencias">Competencias</a>
+            <a href="camila_cv_print.html" class="btn-cv" target="_blank"><i class="fa-solid fa-file-pdf"></i> Ver CV</a>
+        </div>
+    </nav>
+
+    <i class="fa-solid fa-ghost floating-icon f1"></i>
+    <i class="fa-solid fa-apple-whole floating-icon f2"></i>
+    <i class="fa-solid fa-skull floating-icon f3"></i>
+    <i class="fa-solid fa-staff-snake floating-icon f4"></i>
+
+    <div class="container">
+        <header class="hero">
+            <div class="avatar-container">
+                <div class="avatar-bg"></div>
+                <img src="camila_avatar.png" alt="Camila Olivares" class="avatar">
+            </div>            <h1 class="glitch">Camila Eugenia<br>Olivares Arce</h1>
+            <div class="subtitle-container">
+                <div class="subtitle">
+                    <span>Nutricionista en Formación</span>
+                    <i class="fa-solid fa-apple-whole icon-pop"></i>
+                    <i class="fa-solid fa-skull icon-pop delay"></i>
+                </div>
+            </div>
+            
+            <div class="contact-links" style="justify-content: center;">
+                <a href="mailto:cammeeramone@gmail.com" class="email" title="Email"><i class="fa-solid fa-envelope"></i></a>
+                <a href="#" class="linkedin" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://wa.me/56950978738" class="whatsapp" title="WhatsApp" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/camidelosgatos?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" class="instagram" title="Instagram" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+
+            <div class="scroll-indicator">
+                <i class="fa-solid fa-angles-down"></i>
+            </div>
+        </header>
+
+        <section class="card reveal" id="perfil">
+            <h2 class="section-title"><i class="fa-solid fa-user-doctor"></i> Perfil Profesional</h2>
+            <p>
+                Nutricionista en formación por la <strong>Universidad Santo Tomás</strong>, actualmente desarrollando mi internado profesional. Mi formación abarca cuatro pilares fundamentales: <strong>Intervención Dietoterapéutica, Salud Pública, Gestión de Servicios de Alimentación e Investigación en Salud</strong>. Me especializo en la evaluación clínica y el abordaje nutricional integral a lo largo de todo el ciclo vital.
+            </p>
+            <p>
+                Bajo un fuerte compromiso ético y de responsabilidad social, mi enfoque se centra en una nutrición empática, el uso eficiente y sostenible de los recursos alimentarios, y la promoción de hábitos de vida saludables. Destaco por mi capacidad de trabajo interdisciplinario y mi proactividad para derribar mitos alimentarios mediante la educación en salud.
+            </p>
+        </section>
+
+        <div class="quote-section reveal">
+            <i class="fa-solid fa-quote-left quote-icon"></i>
+            <blockquote>"La nutrición no se trata de restricciones que asustan, sino de empoderar al paciente con ciencia, empatía y sin mitos."</blockquote>
+        </div>
+
+        <section class="card reveal" id="formacion">
+            <h2 class="section-title"><i class="fa-solid fa-graduation-cap"></i> Formación y Experiencia</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Actualidad</div>
+                    <div class="timeline-title">Internado / Práctica Profesional</div>
+                    <div class="timeline-subtitle">Universidad Santo Tomás</div>
+                    <p>Aplicando conocimientos clínicos y comunitarios en un entorno real. Evaluando pacientes, diseñando planes de alimentación y derribando barreras nutricionales con empatía y ciencia.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">En curso</div>
+                    <div class="timeline-title">Estudiante de Nutrición y Dietética</div>
+                    <div class="timeline-subtitle">Universidad Santo Tomás</div>
+                    <p>Formación teórico-práctica con énfasis en diagnóstico nutricional, inocuidad alimentaria y educación comunitaria. Trabajo bajo el sello institucional de ética, respeto por la diversidad y rigor científico.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card reveal" id="proyectos">
+            <h2 class="section-title"><i class="fa-solid fa-flask-vial"></i> Intervenciones & Proyectos</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-icon"><i class="fa-solid fa-apple-whole"></i></div>
+                    <h3>Taller de Etiquetado</h3>
+                    <p>Educación comunitaria para interpretar sellos y elegir alimentos de forma consciente y responsable.</p>
+                </div>
+                <div class="project-card">
+                    <div class="project-icon"><i class="fa-solid fa-utensils"></i></div>
+                    <h3>Gestión Institucional</h3>
+                    <p>Diseño y evaluación de minutas alimentarias para servicios de alimentación masiva.</p>
+                </div>
+                <div class="project-card">
+                    <div class="project-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+                    <h3>Salud Pública</h3>
+                    <p>Operativos de evaluación nutricional enfocados en la intervención temprana y equidad en salud.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card reveal" id="competencias">
+            <h2 class="section-title"><i class="fa-solid fa-dna"></i> Competencias Clínicas</h2>
+            <div class="skills">
+                <span class="skill-tag">Intervención Dietoterapéutica 🩺</span>
+                <span class="skill-tag">Salud Pública y Epidemiología 🌍</span>
+                <span class="skill-tag">Gestión de Servicios de Alimentación 🍽️</span>
+                <span class="skill-tag">Inocuidad Alimentaria 🛡️</span>
+                <span class="skill-tag">Educación en Salud 🍏</span>
+                <span class="skill-tag">Investigación Científica 📊</span>
+                <span class="skill-tag">Sostenibilidad Alimentaria 🌿</span>
+                <span class="skill-tag">Bromatología 🔬</span>
+            </div>
+        </section>
+
+        <section class="card reveal" id="contacto">
+            <h2 class="section-title"><i class="fa-solid fa-heart-pulse"></i> Signos Vitales (Contacto)</h2>
+            <div class="ecg-line"></div>
+            <p style="text-align: center; margin-top: 1rem; font-size: 1.2rem;">¿Lista para iniciar un tratamiento o un nuevo proyecto? Escríbeme y hagamos ciencia juntos.</p>
+            <div class="contact-links" style="justify-content: center; margin-top: 1.5rem;">
+                <a href="mailto:cammeeramone@gmail.com" class="email" title="Email"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://wa.me/56950978738" class="whatsapp" title="WhatsApp" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/camidelosgatos?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" class="instagram" title="Instagram" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </section>
+
+        <!-- Nutri-Tool Modal (CESFAM Dashboard) -->
+        <div id="nutritool-modal" class="modal-overlay">
+            <div class="modal-content card">
+                <button id="close-nutritool" class="close-btn" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="section-title" style="margin-bottom: 0.5rem; font-size: 1.5rem;"><i class="fa-solid fa-laptop-medical"></i> Terminal Clínica CESFAM</h2>
+                
+                <div class="tool-tabs">
+                    <button class="tab-btn active" data-target="tab-scanner"><i class="fa-solid fa-radar"></i> CESFAM</button>
+                    <button class="tab-btn" data-target="tab-anamnesis"><i class="fa-solid fa-clipboard-list"></i> Anamnesis</button>
+                    <button class="tab-btn" data-target="tab-macros"><i class="fa-solid fa-chart-pie"></i> Macros</button>
+                    <button class="tab-btn" data-target="tab-sports"><i class="fa-solid fa-dumbbell"></i> Deportiva</button>
+                    <button class="tab-btn" data-target="tab-clinical"><i class="fa-solid fa-hospital-user"></i> Clínica</button>
+                    <button class="tab-btn" data-target="tab-tables"><i class="fa-solid fa-table-list"></i> Tablas</button>
+                    <button class="tab-btn" data-target="tab-history"><i class="fa-solid fa-database"></i> Historial</button>
+                </div>
+
+                <div class="nutri-form">
+                    <!-- TAB 1: ESCANER DASHBOARD -->
+                    <div id="tab-scanner" class="tab-content active">
+                        <div class="grid-inputs">
+                            <div class="input-group" style="grid-column: span 2;">
+                                <label>Nombre del Paciente</label>
+                                <input type="text" id="p-name" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div class="input-group">
+                                <label>Edad (Años)</label>
+                                <input type="number" id="p-age" placeholder="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label>Género Biológico</label>
+                                <select id="p-gender" class="nutri-select">
+                                    <option value="F">Femenino</option>
+                                    <option value="M">Masculino</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Peso (kg)</label>
+                                <input type="number" id="p-weight" placeholder="0.0">
+                            </div>
+                            <div class="input-group">
+                                <label>Altura (cm)</label>
+                                <input type="number" id="p-height" placeholder="0.0">
+                            </div>
+                            <div class="input-group">
+                                <label>Cintura (cm) - Opcional</label>
+                                <input type="number" id="p-waist" placeholder="0.0">
+                            </div>
+                            <div class="input-group">
+                                <label>Factor de Actividad</label>
+                                <select id="p-activity" class="nutri-select">
+                                    <option value="1.2">Sedentario (Letargo)</option>
+                                    <option value="1.375">Ligero (1-3 días)</option>
+                                    <option value="1.55">Moderado (3-5 días)</option>
+                                    <option value="1.725">Activo (Frenesí)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>PA Sistólica (PAS)</label>
+                                <input type="number" id="p-pas" placeholder="mmHg (Ej. 120)">
+                            </div>
+                            <div class="input-group">
+                                <label>PA Diastólica (PAD)</label>
+                                <input type="number" id="p-pad" placeholder="mmHg (Ej. 80)">
+                            </div>
+                        </div>
+
+                        <div class="dashboard-results">
+                            <div class="res-box">
+                                <span>IMC Clínico</span>
+                                <strong id="out-imc">--</strong>
+                                <small id="out-imc-status">Esperando datos...</small>
+                            </div>
+                            <div class="res-box">
+                                <span>Peso Ideal</span>
+                                <strong id="out-ideal" style="font-size: 1.2rem; margin-top: 10px;">-- kg</strong>
+                            </div>
+                            <div class="res-box">
+                                <span>Riesgo CV / ICT</span>
+                                <strong id="out-cv" style="font-size: 1.1rem; margin-top: 5px;">--</strong>
+                                <small id="out-ict" style="color:var(--text-muted); display:block; margin-top:3px;">ICT: --</small>
+                            </div>
+                            <div class="res-box">
+                                <span>Presión Arterial</span>
+                                <strong id="out-bp" style="font-size: 1.1rem; margin-top: 5px;">--/--</strong>
+                            </div>
+                            <div class="res-box">
+                                <span>Req. Hídrico</span>
+                                <strong id="out-water">-- L</strong>
+                            </div>
+                            <div class="res-box">
+                                <span>Gasto Total</span>
+                                <strong id="out-kcal" style="font-size: 1.2rem; margin-top: 10px;">-- kcal</strong>
+                            </div>
+                            <div class="res-box" style="cursor: pointer; background: rgba(157,0,255,0.1); border-bottom-color: var(--punk-purple);" onclick="document.querySelector('[data-target=\'tab-macros\']').click()">
+                                <span>Macros (PRO/CHO/LIP)</span>
+                                <strong id="out-macro-sum" style="font-size: 1rem; margin-top: 10px;">-- / -- / --</strong>
+                                <small style="color:var(--cute-pink)">Ir a Pestaña <i class="fa-solid fa-arrow-right"></i></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 1.5: ANAMNESIS Y ALERGIAS -->
+                    <div id="tab-anamnesis" class="tab-content">
+                        <h3 style="color:var(--neon-green); font-family:'Fredoka', sans-serif; margin-top:0;">Anamnesis Clínica y Alimentaria</h3>
+                        <div class="grid-inputs" style="grid-template-columns: 1fr 1fr;">
+                            <div class="input-group">
+                                <label>Patologías Base</label>
+                                <input type="text" id="a-pathology" placeholder="Ej. HTA, DM2, Hipotiroidismo...">
+                            </div>
+                            <div class="input-group">
+                                <label>Alergias / Intolerancias</label>
+                                <input type="text" id="a-allergies" placeholder="Ej. APLV, Celíaco, Lactosa...">
+                            </div>
+                            <div class="input-group">
+                                <label>Tipo de Dieta</label>
+                                <select id="a-diet" style="background: var(--bg-dark); color: white; border: 1px solid var(--st-green); padding: 8px; border-radius: 5px;">
+                                    <option value="Omnívora">Omnívora</option>
+                                    <option value="Vegetariana">Vegetariana</option>
+                                    <option value="Vegana">Vegana</option>
+                                    <option value="Pescatariana">Pescatariana</option>
+                                    <option value="Keto / Otra">Keto / Otra</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Consumo de Líquidos</label>
+                                <select id="a-liquids" style="background: var(--bg-dark); color: white; border: 1px solid var(--st-green); padding: 8px; border-radius: 5px;">
+                                    <option value="< 1 Litro (Bajo)">Menos de 1 Litro</option>
+                                    <option value="1 a 2 Litros (Adecuado)">1 a 2 Litros</option>
+                                    <option value="> 2 Litros (Alto)">Más de 2 Litros</option>
+                                    <option value="Principalmente Bebidas">Principalmente Bebidas Azucaradas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <label>Tránsito Intestinal y Digestión</label>
+                            <input type="text" id="a-digestion" placeholder="Ej. Constipación (frecuencia), Reflujo, Normal...">
+                        </div>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <label>Observaciones Alimentarias</label>
+                            <textarea id="a-obs" rows="2" style="width: 100%; box-sizing: border-box; background: var(--bg-dark); border: 1px solid var(--st-green); color: white; padding: 10px; border-radius: 5px; font-family: 'Outfit', sans-serif;" placeholder="Aversiones alimentarias, horarios de comida, uso de suplementos..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: MACROS -->
+                    <div id="tab-macros" class="tab-content">
+                        <div class="input-group">
+                            <label>Calorías Totales Objetivo (Kcal)</label>
+                            <input type="number" id="m-kcal" placeholder="Ej. 2000">
+                        </div>
+                        <div class="grid-inputs">
+                            <div class="input-group">
+                                <label>% Proteínas</label>
+                                <input type="number" id="m-pro" value="20">
+                            </div>
+                            <div class="input-group">
+                                <label>% Carbohidratos</label>
+                                <input type="number" id="m-cho" value="50">
+                            </div>
+                            <div class="input-group">
+                                <label>% Lípidos</label>
+                                <input type="number" id="m-lip" value="30">
+                            </div>
+                        </div>
+                        <div style="text-align:right; font-size:0.85rem; margin-top:-10px; margin-bottom:15px; padding-right:5px;">Suma Total: <b id="m-sum-perc" style="color:var(--neon-green);">100%</b></div>
+                        <div class="dashboard-results" style="grid-template-columns: 1fr 1fr 1fr;">
+                            <div class="res-box"><span>Proteínas (4 kcal/g)</span><strong id="out-g-pro">-- g</strong></div>
+                            <div class="res-box"><span>Carbohidratos (4 kcal/g)</span><strong id="out-g-cho">-- g</strong></div>
+                            <div class="res-box"><span>Lípidos (9 kcal/g)</span><strong id="out-g-lip">-- g</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: DEPORTIVA -->
+                    <div id="tab-sports" class="tab-content">
+                        <h3 style="color:var(--neon-green); font-family:'Fredoka', sans-serif; margin-top:0;">Composición Corporal (Faulkner)</h3>
+                        <div class="grid-inputs">
+                            <div class="input-group"><label>Tríceps (mm)</label><input type="number" id="pl-tri" placeholder="0.0"></div>
+                            <div class="input-group"><label>Subescapular (mm)</label><input type="number" id="pl-sub" placeholder="0.0"></div>
+                            <div class="input-group"><label>Supraespinal (mm)</label><input type="number" id="pl-sup" placeholder="0.0"></div>
+                            <div class="input-group"><label>Abdominal (mm)</label><input type="number" id="pl-abd" placeholder="0.0"></div>
+                        </div>
+                        <div class="dashboard-results" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top:15px;">
+                            <div class="res-box"><span>∑ 4 Pliegues</span><strong id="out-sum-folds" style="color:#00d0ff;">-- mm</strong></div>
+                            <div class="res-box"><span>% Grasa</span><strong id="out-fat-perc">-- %</strong></div>
+                            <div class="res-box"><span>Masa Grasa</span><strong id="out-fat-mass">-- kg</strong></div>
+                            <div class="res-box"><span>Masa Magra</span><strong id="out-lean-mass">-- kg</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: HOSPITALARIA -->
+                    <div id="tab-clinical" class="tab-content">
+                        <h3 style="color:var(--neon-green); font-family:'Fredoka', sans-serif; margin-top:0;">Clínica y Paciente Postrado</h3>
+                        
+                        <div class="responsive-grid" style="margin-bottom:15px;">
+                            <!-- Panel Renal -->
+                            <div style="background:var(--bg-dark); padding:10px; border:1px solid var(--st-green); border-radius:5px;">
+                                <h4 style="color:white; margin-top:0; font-size:0.95rem;">Filtración Renal (Cockcroft-Gault)</h4>
+                                <div class="input-group">
+                                    <label>Creatinina Sérica (mg/dL)</label>
+                                    <input type="number" id="h-crea" placeholder="Ej. 1.2">
+                                </div>
+                                <div style="margin-top:10px;">
+                                    <span style="font-size:0.85rem; color:var(--text-muted);">TFG: <b id="out-tfg" style="color:var(--neon-green);">--</b></span><br>
+                                    <span style="font-size:0.85rem; color:var(--text-muted);">KDIGO: <b id="out-kdigo" style="color:white;">--</b></span>
+                                </div>
+                            </div>
+
+                            <!-- Panel Chumlea -->
+                            <div style="background:var(--bg-dark); padding:10px; border:1px solid var(--st-green); border-radius:5px;">
+                                <h4 style="color:white; margin-top:0; font-size:0.95rem;">Talla Estimada (Chumlea)</h4>
+                                <div class="input-group">
+                                    <label>Altura de Rodilla (cm)</label>
+                                    <input type="number" id="h-knee" placeholder="Ej. 50">
+                                </div>
+                                <div style="margin-top:10px;">
+                                    <span style="font-size:0.85rem; color:var(--text-muted);">Talla: <b id="out-chumlea" style="color:var(--neon-green);">-- cm</b></span><br>
+                                    <button class="btn-cv" id="btn-use-chumlea" style="padding:4px 8px; font-size:0.75rem; margin-top:5px; background:transparent; border:1px solid var(--punk-purple); color:var(--punk-purple); cursor:pointer;">Usar en Escáner <i class="fa-solid fa-bolt"></i></button>
+                                    <small style="display:block; color:gray; font-size:0.7rem; margin-top:5px; line-height:1.2;">
+                                        <i class="fa-solid fa-circle-info"></i> Envía esta talla al panel principal para auto-calcular IMC (ideal para pacientes postrados).
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Pérdida de Peso -->
+                        <div style="background:var(--bg-dark); padding:10px; border:1px solid var(--st-green); border-radius:5px;">
+                            <h4 style="color:white; margin-top:0; font-size:0.95rem;">Screening: Riesgo por Pérdida de Peso</h4>
+                            <div class="input-group" style="max-width:200px;">
+                                <label>Peso Habitual / Histórico (kg)</label>
+                                <input type="number" id="h-usual-weight" placeholder="Ej. 70">
+                            </div>
+                            <div style="margin-top:10px;">
+                                <span style="font-size:0.85rem; color:var(--text-muted);">% de Pérdida Involuntaria: <b id="out-weight-loss" style="color:var(--neon-green);">-- %</b></span><br>
+                                <span style="font-size:0.85rem; color:var(--text-muted);">Riesgo Nutricional: <b id="out-loss-risk" style="color:white;">--</b></span>
+                            </div>
+                        </div>
+
+                        <!-- Panel Dosis Medicamentos/Suplementos -->
+                        <div style="background:var(--bg-dark); padding:10px; border:1px solid var(--punk-purple); border-radius:5px;">
+                            <h4 style="color:var(--cute-pink); margin-top:0; font-size:0.95rem;"><i class="fa-solid fa-pills"></i> Dosis (Fármaco/Suplemento)</h4>
+                            <p style="font-size:0.75rem; color:gray; margin-top:-5px;">Basado en el peso actual del paciente.</p>
+                            <div class="responsive-grid" style="gap:10px;">
+                                <div class="input-group">
+                                    <label>Dosis Prescrita (mg/kg)</label>
+                                    <input type="number" id="c-dosis" placeholder="Ej. 15">
+                                </div>
+                                <div class="input-group">
+                                    <label>Concentración (mg/ml)</label>
+                                    <input type="number" id="c-conc" placeholder="Ej. 50">
+                                </div>
+                            </div>
+                            <div style="margin-top:10px; text-align:center; background:rgba(157,0,255,0.1); padding:8px; border-radius:5px;">
+                                <span style="font-size:0.85rem; color:var(--text-muted);">Volumen a Administrar:<br><b id="out-dosis-vol" style="color:var(--cute-pink); font-size:1.3rem;">-- ml</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: Tablas de Referencia -->
+                    <div id="tab-tables" class="tab-content">
+                        <h3 style="color:var(--neon-green); font-family:'Fredoka', sans-serif; margin-top:0;"><i class="fa-solid fa-book-medical"></i> Biblioteca Clínica</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Guía rápida de criterios diagnósticos actualizados para evaluación inmediata.</p>
+                        
+                        <div class="table-container">
+                            <h4><i class="fa-solid fa-weight-scale" style="color:var(--neon-green);"></i> Estado Nutricional (IMC)</h4>
+                            <table class="punk-table">
+                                <thead>
+                                    <tr>
+                                        <th>Diagnóstico</th>
+                                        <th>Adulto (18-64)</th>
+                                        <th>Adulto Mayor (65+)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="punk-badge badge-warning">Bajo Peso</span></td>
+                                        <td>< 18.5</td>
+                                        <td>< 23.0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-normal">Normal</span></td>
+                                        <td>18.5 - 24.9</td>
+                                        <td>23.0 - 27.9</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-warning">Sobrepeso</span></td>
+                                        <td>25.0 - 29.9</td>
+                                        <td>28.0 - 31.9</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-danger">Obesidad</span></td>
+                                        <td>≥ 30.0</td>
+                                        <td>≥ 32.0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="table-container">
+                            <h4><i class="fa-solid fa-heart-pulse" style="color:var(--cute-pink);"></i> Riesgo Cardiovascular (Cintura)</h4>
+                            <table class="punk-table">
+                                <thead>
+                                    <tr>
+                                        <th>Riesgo</th>
+                                        <th>Hombres</th>
+                                        <th>Mujeres</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="punk-badge badge-normal">Bajo Riesgo</span></td>
+                                        <td>< 90 cm</td>
+                                        <td>< 80 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-danger">Alto Riesgo</span></td>
+                                        <td>≥ 90 cm</td>
+                                        <td>≥ 80 cm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="table-container">
+                            <h4><i class="fa-solid fa-stethoscope" style="color:#00d0ff;"></i> Presión Arterial (HTA MINSAL)</h4>
+                            <table class="punk-table">
+                                <thead>
+                                    <tr>
+                                        <th>Categoría</th>
+                                        <th>PAS (Sistólica)</th>
+                                        <th>PAD (Diastólica)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="punk-badge badge-normal">Óptima</span></td>
+                                        <td>< 120</td>
+                                        <td>< 80</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-normal" style="border-color:gray; color:white;">Normal</span></td>
+                                        <td>120 - 129</td>
+                                        <td>80 - 84</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-warning">Normal Alta</span></td>
+                                        <td>130 - 139</td>
+                                        <td>85 - 89</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="punk-badge badge-danger">Hipertensión</span></td>
+                                        <td>≥ 140</td>
+                                        <td>≥ 90</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: Base de Datos -->
+                    <div id="tab-history" class="tab-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--st-green); padding-bottom: 5px; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="color: var(--neon-green); font-family: 'Fredoka', sans-serif; margin:0; font-size: 1.1rem;">Pacientes Guardados</h3>
+                            <div style="display:flex; gap:5px;">
+                                <input type="file" id="h-import-csv" accept=".csv" style="display:none;">
+                                <button id="btn-trigger-import" class="btn-cv" style="padding: 5px 10px; font-size: 0.8rem; background: transparent; border-color: var(--punk-purple); color: var(--punk-purple); cursor: pointer;" title="Importar pacientes desde CSV">
+                                    <i class="fa-solid fa-upload"></i>
+                                </button>
+                                <button id="btn-export-csv" class="btn-cv" style="padding: 5px 10px; font-size: 0.8rem; background: rgba(0,255,136,0.1); border-color: var(--neon-green); cursor: pointer;">
+                                    Exportar <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="h-search-patient" placeholder="🔍 Buscar paciente por nombre, fecha o patología..." style="width: 100%; box-sizing: border-box; background: var(--bg-dark); border: 1px solid var(--st-green); color: white; padding: 10px; border-radius: 5px; font-family: 'Outfit', sans-serif;">
+                        </div>
+                        <div class="nt-history">
+                            <ul id="nt-history-list"></ul>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div id="global-patient-actions" style="display:flex; gap:10px; margin-top:15px; padding-top: 15px; border-top: 1px solid var(--st-green);">
+                    <button id="btn-save-patient" class="btn-cv" style="flex:2; justify-content: center; background: rgba(0, 255, 136, 0.1); border-color: var(--neon-green); cursor: pointer;">
+                        Guardar Ficha <i class="fa-solid fa-floppy-disk"></i>
+                    </button>
+                    <button id="btn-clear-patient" class="btn-cv" style="flex:1; justify-content: center; background: rgba(255, 0, 85, 0.1); border-color: var(--cute-pink); color: var(--cute-pink) !important; cursor: pointer;">
+                        Limpiar <i class="fa-solid fa-eraser"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 Camila Olivares Arce. Diseñado con <i class="fa-solid fa-heart"></i> y estética Horror Punk.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Scroll Reveal Logic
+        function reveal() {
+            const reveals = document.querySelectorAll(".reveal");
+            const windowHeight = window.innerHeight;
+            reveals.forEach(el => {
+                const elementTop = el.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    el.classList.add("active");
+                }
+            });
+        }
+        window.addEventListener("scroll", reveal);
+        reveal();
+
+        // Nutri-Tool CESFAM Logic
+        const modal = document.getElementById('nutritool-modal');
+        const btnOpen = document.getElementById('open-nutritool');
+        const btnClose = document.getElementById('close-nutritool');
+        
+        if (btnOpen) btnOpen.addEventListener('click', () => modal.classList.add('active'));
+        if (btnClose) btnClose.addEventListener('click', () => modal.classList.remove('active'));
+        if (modal) modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('active'); });
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
+            });
+        });
+
+        const historyList = document.getElementById('nt-history-list');
+        let currentPatient = null;
+
+        function initPatient() {
+            if(!currentPatient) {
+                currentPatient = { 
+                    name: "Paciente Anónimo", date: new Date().toLocaleDateString(), 
+                    age: "-", gender: "-", weight: "-", height: "-", waist: "-", 
+                    imc: "-", status: "-", idealWeight: "-", cvRisk: "-", ict: "-", bp: "-", 
+                    tmb: "-", kcal: "-", water: "-", macros: "-", 
+                    fatPerc: "-", fatMass: "-", leanMass: "-", tfg: "-", kdigo: "-", medDosis: "-",
+                    pathologies: "-", allergies: "-", diet: "-", liquids: "-", digestion: "-", obs: "-"
+                };
+            }
+        }
+
+        window.toggleDetails = function(index) {
+            const det = document.getElementById('history-details-' + index);
+            const icon = document.getElementById('toggle-icon-' + index);
+            if(det.style.display === 'none') {
+                det.style.display = 'block';
+                if(icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+            } else {
+                det.style.display = 'none';
+                if(icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+            }
+        };
+
+        function generateClinicalSuggestion(rec) {
+            let sug = [];
+            if(rec.status && (rec.status.includes('Obeso') || rec.status.includes('Obesidad'))) sug.push("Evaluar déficit calórico. Fomentar actividad física y monitorear riesgo CV.");
+            else if(rec.status && (rec.status.includes('Bajo Peso') || rec.status.includes('Desnutrición'))) sug.push("Riesgo de malnutrición. Sugerir dieta hipercalórica e hiperproteica.");
+            
+            if(rec.cvRisk && rec.cvRisk.includes('Alto')) sug.push("Riesgo CV Alto. Énfasis en dieta cardioprotectora (baja en sodio/saturadas).");
+            if(rec.bp && (rec.bp.includes('HTA') || rec.bp.includes('Elevada'))) sug.push("Presión Arterial alterada. Considerar derivación médica y dieta DASH.");
+            if(rec.kdigo && (rec.kdigo.includes('G3') || rec.kdigo.includes('G4') || rec.kdigo.includes('G5'))) sug.push("Deterioro renal. Ajustar aporte proteico, fósforo y potasio según indicación.");
+            if(rec.pathologies && rec.pathologies !== '-' && rec.pathologies.toLowerCase().includes('dm')) sug.push("Diabético: Control estricto de CHO y Carga Glicémica.");
+            
+            if(sug.length === 0) return "Paciente compensado sin alertas críticas. Mantener controles preventivos.";
+            return sug.join(" ");
+        }
+
+        function loadHistory() {
+            const records = JSON.parse(localStorage.getItem('cesfamRecords') || '[]');
+            historyList.innerHTML = '';
+            if(records.length === 0) {
+                historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 1rem;">No hay pacientes registrados aún...</p>';
+                return;
+            }
+            records.forEach((rec, index) => {
+                const li = document.createElement('li');
+                li.style.cssText = "background:var(--bg-lighter); margin-bottom:10px; border-radius:5px; border-left: 4px solid var(--neon-green); overflow:hidden;";
+                li.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer;" onclick="toggleDetails(${index})">
+                        <div style="flex-grow:1; line-height: 1.4;">
+                            <strong style="color:var(--neon-green); font-family:'Fredoka',sans-serif; font-size:1.1rem;">${rec.name || 'Paciente Anónimo'}</strong> <small style="color:var(--text-muted);">(${rec.date || '-'})</small><br>
+                            <span style="font-size:0.85rem; color:white;">IMC: <b>${rec.imc || '-'}</b> (${rec.status || '-'})</span>
+                        </div>
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <i class="fa-solid fa-chevron-down" id="toggle-icon-${index}" style="color:var(--neon-green);"></i>
+                            <i class="fa-solid fa-trash delete-record" title="Eliminar Ficha" onclick="event.stopPropagation(); deleteRecord(${index})" style="padding:5px; color:var(--cute-pink);"></i>
+                        </div>
+                    </div>
+                    <div id="history-details-${index}" style="display:none; padding:15px; border-top:1px solid rgba(0,255,136,0.2); font-size:0.85rem; background: rgba(0,0,0,0.2); color:white;">
+                        <div class="responsive-grid" style="gap:10px; margin-bottom:15px;">
+                            <div><strong>Edad:</strong> ${rec.age || '-'} | <strong>Peso:</strong> ${rec.weight || '-'}kg | <strong>Alt:</strong> ${rec.height || '-'}cm</div>
+                            <div><strong>Presión:</strong> ${rec.bp || '-'} | <strong>Riesgo CV:</strong> ${rec.cvRisk || '-'}</div>
+                            <div><strong>Gasto:</strong> ${rec.kcal || '-'} | <strong>Agua:</strong> ${rec.water || '-'}</div>
+                            <div><strong>Macros:</strong> ${rec.macros || '-'}</div>
+                            <div><strong>Composición:</strong> Grasa ${rec.fatPerc || '-'}% | Magra ${rec.leanMass || '-'}kg</div>
+                            <div><strong>Renal:</strong> TFG ${rec.tfg || '-'} (${rec.kdigo || '-'})</div>
+                            <div><strong>Dosis/Supl.:</strong> ${rec.medDosis || '-'}</div>
+                            <div style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.2); padding-top:5px; margin-top:5px;"><strong>Patologías:</strong> ${rec.pathologies || '-'}</div>
+                            <div style="grid-column: 1 / -1;"><strong>Alergias:</strong> ${rec.allergies || '-'} | <strong>Dieta:</strong> ${rec.diet || '-'}</div>
+                            <div style="grid-column: 1 / -1;"><strong>Tránsito/Líquidos:</strong> ${rec.digestion || '-'} / ${rec.liquids || '-'}</div>
+                            <div style="grid-column: 1 / -1;"><strong>Obs:</strong> ${rec.obs || '-'}</div>
+                        </div>
+                        <div style="padding:10px; background:rgba(157,0,255,0.1); border-left:3px solid var(--punk-purple); border-radius:3px;">
+                            <strong style="color:var(--cute-pink); display:block; margin-bottom:3px;"><i class="fa-solid fa-robot"></i> Sugerencia IA Clínica:</strong> 
+                            ${generateClinicalSuggestion(rec)}
+                        </div>
+                    </div>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+
+        // Live Search History
+        const hSearchInput = document.getElementById('h-search-patient');
+        if(hSearchInput) {
+            hSearchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const listItems = document.querySelectorAll('#nt-history-list li');
+                listItems.forEach(li => {
+                    const text = li.innerText.toLowerCase();
+                    if(text.includes(term)) {
+                        li.style.display = '';
+                    } else {
+                        li.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        window.deleteRecord = function(index) {
+            if(confirm("¿Seguro que deseas eliminar el registro de este paciente?")) {
+                const records = JSON.parse(localStorage.getItem('cesfamRecords') || '[]');
+                records.splice(index, 1);
+                localStorage.setItem('cesfamRecords', JSON.stringify(records));
+                loadHistory();
+            }
+        };
+
+        // Export to CSV
+        const btnExportCsv = document.getElementById('btn-export-csv');
+        if(btnExportCsv) {
+            btnExportCsv.addEventListener('click', () => {
+                const records = JSON.parse(localStorage.getItem('cesfamRecords') || '[]');
+                if(records.length === 0) return alert("No hay pacientes para exportar.");
+                
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for UTF-8
+                csvContent += "Nombre,Fecha,Edad,Genero,Peso(kg),Altura(cm),Cintura(cm),IMC,Estado IMC,Peso Ideal(kg),Riesgo CV,ICT,Presion Arterial,TMB,Kcal Total,Agua,Macros(P/C/L),Grasa %,Masa Grasa(kg),Masa Magra(kg),TFG(ml/min),KDIGO,Patologias,Alergias,Dieta,Liquidos,Digestion,Observaciones\n";
+                
+                records.forEach(r => {
+                    const row = `"${r.name || '-'}","${r.date || '-'}","${r.age || '-'}","${r.gender || '-'}","${r.weight || '-'}","${r.height || '-'}","${r.waist || '-'}","${r.imc || '-'}","${r.status || '-'}","${r.idealWeight || '-'}","${r.cvRisk || '-'}","${r.ict || '-'}","${r.bp || '-'}","${r.tmb || '-'}","${r.kcal || '-'}","${r.water || '-'}","${r.macros || '-'}","${r.fatPerc || '-'}","${r.fatMass || '-'}","${r.leanMass || '-'}","${r.tfg || '-'}","${r.kdigo || '-'}","${r.pathologies || '-'}","${r.allergies || '-'}","${r.diet || '-'}","${r.liquids || '-'}","${r.digestion || '-'}","${r.obs || '-'}"`;
+                    csvContent += row + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Pacientes_MultiArea_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        // Import from CSV
+        const btnTriggerImport = document.getElementById('btn-trigger-import');
+        const hImportCsv = document.getElementById('h-import-csv');
+        
+        if(btnTriggerImport && hImportCsv) {
+            btnTriggerImport.addEventListener('click', () => hImportCsv.click());
+            
+            hImportCsv.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if(!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const content = evt.target.result;
+                    const lines = content.split('\n');
+                    if(lines.length < 2) return alert("El archivo está vacío o no es válido.");
+                    
+                    let importedCount = 0;
+                    const records = JSON.parse(localStorage.getItem('cesfamRecords') || '[]');
+                    
+                    for(let i = 1; i < lines.length; i++) {
+                        let row = lines[i].trim();
+                        if(!row) continue;
+                        
+                        if(row.startsWith('"')) row = row.substring(1);
+                        if(row.endsWith('"')) row = row.substring(0, row.length - 1);
+                        
+                        const cols = row.split('","');
+                        if(cols.length < 28) continue;
+                        
+                        records.push({
+                            name: cols[0], date: cols[1], age: cols[2], gender: cols[3], weight: cols[4],
+                            height: cols[5], waist: cols[6], imc: cols[7], status: cols[8], idealWeight: cols[9],
+                            cvRisk: cols[10], ict: cols[11], bp: cols[12], tmb: cols[13], kcal: cols[14],
+                            water: cols[15], macros: cols[16], fatPerc: cols[17], fatMass: cols[18], leanMass: cols[19],
+                            tfg: cols[20], kdigo: cols[21], pathologies: cols[22], allergies: cols[23], diet: cols[24],
+                            liquids: cols[25], digestion: cols[26], obs: cols[27]
+                        });
+                        importedCount++;
+                    }
+                    
+                    if(importedCount > 0) {
+                        localStorage.setItem('cesfamRecords', JSON.stringify(records));
+                        loadHistory();
+                        alert(`¡Se importaron ${importedCount} pacientes con éxito!`);
+                    } else {
+                        alert("No se pudieron importar pacientes. Verifica que sea el formato correcto.");
+                    }
+                    hImportCsv.value = "";
+                };
+                reader.readAsText(file, 'UTF-8');
+            });
+        }
+
+        // Auto-calculate CESFAM Dashboard on input
+        const scannerInputs = ['p-age', 'p-gender', 'p-weight', 'p-height', 'p-waist', 'p-activity', 'p-pas', 'p-pad'];
+        scannerInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', () => { calculateDashboard(); calculateSports(); calculateClinical(); });
+        });
+
+        function calculateDashboard() {
+            initPatient();
+            const name = document.getElementById('p-name').value || "Paciente Anónimo";
+            const age = parseInt(document.getElementById('p-age').value) || 0;
+            const gender = document.getElementById('p-gender').value;
+            const w = parseFloat(document.getElementById('p-weight').value) || 0;
+            const h = parseFloat(document.getElementById('p-height').value) || 0;
+            const waist = parseFloat(document.getElementById('p-waist').value) || 0;
+            const act = parseFloat(document.getElementById('p-activity').value) || 1.2;
+
+            currentPatient.name = name;
+            if(age > 0) currentPatient.age = age;
+            currentPatient.gender = gender;
+            if(w > 0) currentPatient.weight = w;
+            if(h > 0) currentPatient.height = h;
+            if(waist > 0) currentPatient.waist = waist;
+
+            // IMC & MINSAL Rules
+            let imc = 0, imcStatus = "Incompleto", imcColor = "var(--text-muted)";
+            if(w > 0 && h > 0) {
+                const hM = h / 100;
+                imc = w / (hM * hM);
+                
+                if (age > 0 && age < 18) {
+                    imcStatus = "Usar Curvas OMS"; 
+                    imcColor = "var(--punk-purple)";
+                } else if(age >= 65) {
+                    if(imc < 23) { imcStatus = "Enflaquecido"; imcColor = "var(--cute-pink)"; }
+                    else if(imc < 28) { imcStatus = "Normal"; imcColor = "var(--neon-green)"; }
+                    else if(imc < 32) { imcStatus = "Sobrepeso"; imcColor = "var(--punk-purple)"; }
+                    else { imcStatus = "Obesidad"; imcColor = "red"; }
+                } else {
+                    if(imc < 18.5) { imcStatus = "Bajo Peso"; imcColor = "var(--cute-pink)"; }
+                    else if(imc < 25) { imcStatus = "Normal"; imcColor = "var(--neon-green)"; }
+                    else if(imc < 30) { imcStatus = "Sobrepeso"; imcColor = "var(--punk-purple)"; }
+                    else { imcStatus = "Obesidad"; imcColor = "red"; }
+                }
+                document.getElementById('out-imc').textContent = imc.toFixed(1);
+                document.getElementById('out-imc-status').textContent = imcStatus;
+                document.getElementById('out-imc-status').style.color = imcColor;
+                document.getElementById('out-imc').style.color = imcColor;
+                
+                currentPatient.imc = imc.toFixed(1);
+                currentPatient.status = imcStatus;
+            } else {
+                document.getElementById('out-imc').textContent = "--";
+                document.getElementById('out-imc-status').textContent = "Esperando datos...";
+                document.getElementById('out-imc-status').style.color = "var(--text-muted)";
+                document.getElementById('out-imc').style.color = "white";
+            }
+
+            // Peso Ideal (Lorentz/Broca) y Ajustado
+            let idealWeight = 0;
+            if(h > 0) {
+                if (h > 150) {
+                    if(gender === 'M') idealWeight = h - 100 - ((h - 150) / 4);
+                    else idealWeight = h - 100 - ((h - 150) / 2.5);
+                } else {
+                    idealWeight = gender === 'M' ? (h - 100) : (h - 105);
+                }
+                
+                let idealText = idealWeight.toFixed(1) + " kg";
+                if(imc >= 30 && w > idealWeight) {
+                    const ajWeight = idealWeight + 0.25 * (w - idealWeight);
+                    idealText += `<br><span style="font-size:0.85rem; color:var(--neon-green);">Ajustado (Obesi): ${ajWeight.toFixed(1)} kg</span>`;
+                }
+                
+                document.getElementById('out-ideal').innerHTML = idealText;
+                document.getElementById('out-ideal').style.color = "white";
+                currentPatient.idealWeight = idealWeight.toFixed(1);
+            } else {
+                document.getElementById('out-ideal').textContent = "-- kg";
+                document.getElementById('out-ideal').style.color = "white";
+            }
+
+            // Riesgo CV (Waist circumference)
+            let cvStatus = "--", cvColor = "white", ictVal = "--";
+            if(waist > 0) {
+                if(gender === 'F') {
+                    if(waist <= 80) { cvStatus = "Normal"; cvColor = "var(--neon-green)"; }
+                    else if(waist <= 88) { cvStatus = "Alto"; cvColor = "var(--punk-purple)"; }
+                    else { cvStatus = "Muy Alto"; cvColor = "red"; }
+                } else {
+                    if(waist <= 94) { cvStatus = "Normal"; cvColor = "var(--neon-green)"; }
+                    else if(waist <= 102) { cvStatus = "Alto"; cvColor = "var(--punk-purple)"; }
+                    else { cvStatus = "Muy Alto"; cvColor = "red"; }
+                }
+                
+                if (h > 0) {
+                    const ict = waist / h;
+                    ictVal = ict.toFixed(2);
+                    let ictStatus = ict < 0.5 ? "Riesgo Bajo" : "Riesgo Alto";
+                    let ictCol = ict < 0.5 ? "var(--neon-green)" : "red";
+                    document.getElementById('out-ict').innerHTML = `ICT: <span style="color:${ictCol}">${ictVal} (${ictStatus})</span>`;
+                    currentPatient.ict = ictVal;
+                } else {
+                    document.getElementById('out-ict').textContent = "ICT: (Falta Altura)";
+                    currentPatient.ict = "-";
+                }
+
+                document.getElementById('out-cv').textContent = cvStatus;
+                document.getElementById('out-cv').style.color = cvColor;
+                currentPatient.cvRisk = cvStatus;
+            } else {
+                document.getElementById('out-cv').textContent = "--";
+                document.getElementById('out-cv').style.color = "white";
+                document.getElementById('out-ict').textContent = "ICT: --";
+            }
+
+            // Presión Arterial (MINSAL)
+            const pas = parseInt(document.getElementById('p-pas').value) || 0;
+            const pad = parseInt(document.getElementById('p-pad').value) || 0;
+            let bpStatus = "--", bpColor = "white";
+            
+            if(pas > 0 && pad > 0) {
+                if (pas >= 180 || pad >= 110) { bpStatus = "Crisis / Etapa 3"; bpColor = "red"; }
+                else if (pas >= 160 || pad >= 100) { bpStatus = "HTA Etapa 2"; bpColor = "red"; }
+                else if (pas >= 140 || pad >= 90) { bpStatus = "HTA Etapa 1"; bpColor = "red"; }
+                else if (pas >= 130 || pad >= 85) { bpStatus = "Normal Alta"; bpColor = "var(--punk-purple)"; }
+                else if (pas >= 120 || pad >= 80) { bpStatus = "Normal"; bpColor = "var(--neon-green)"; }
+                else if (pas < 90 || pad < 60) { bpStatus = "Hipotensión"; bpColor = "var(--cute-pink)"; }
+                else { bpStatus = "Óptima"; bpColor = "var(--neon-green)"; }
+                
+                document.getElementById('out-bp').innerHTML = `${pas}/${pad} <span style="display:block; font-size:0.85rem; color:${bpColor}; margin-top:3px;">${bpStatus}</span>`;
+                currentPatient.bp = `${pas}/${pad} (${bpStatus})`;
+            } else {
+                document.getElementById('out-bp').innerHTML = '--/-- <span style="display:block; font-size:0.85rem; color:var(--text-muted); margin-top:3px;">Esperando...</span>';
+                currentPatient.bp = "-";
+            }
+
+            // TMB & Kcal (Mifflin-St Jeor)
+            let tmb = 0, totalKcal = 0;
+            if(w > 0 && h > 0 && age > 0) {
+                if(gender === 'M') tmb = (10 * w) + (6.25 * h) - (5 * age) + 5;
+                else tmb = (10 * w) + (6.25 * h) - (5 * age) - 161;
+                
+                totalKcal = tmb * act;
+                document.getElementById('out-kcal').textContent = `${totalKcal.toFixed(0)} kcal`;
+                document.getElementById('out-kcal').style.color = "var(--cute-pink)";
+                
+                // Autofill Macros
+                document.getElementById('m-kcal').value = totalKcal.toFixed(0);
+                
+                currentPatient.tmb = tmb.toFixed(0);
+                currentPatient.kcal = totalKcal.toFixed(0);
+            } else {
+                document.getElementById('out-kcal').textContent = "-- kcal";
+                document.getElementById('out-kcal').style.color = "white";
+            }
+
+            // Water requirement
+            let waterText = "-- L";
+            if(w > 0) {
+                const factor = (age >= 65) ? 30 : 35;
+                const water = (w * factor) / 1000;
+                waterText = `${water.toFixed(1)} L`;
+                document.getElementById('out-water').textContent = waterText;
+                document.getElementById('out-water').style.color = "#00d0ff"; // Blueish
+                currentPatient.water = waterText;
+            } else {
+                document.getElementById('out-water').textContent = "-- L";
+                document.getElementById('out-water').style.color = "white";
+            }
+
+            calculateMacros();
+        }
+
+        // Macros Logic
+        const macroInputs = ['m-kcal', 'm-pro', 'm-cho', 'm-lip'];
+        macroInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', calculateMacros);
+        });
+
+        function calculateMacros() {
+            initPatient();
+            const kcal = parseFloat(document.getElementById('m-kcal').value);
+            const pPro = parseFloat(document.getElementById('m-pro').value) || 0;
+            const pCho = parseFloat(document.getElementById('m-cho').value) || 0;
+            const pLip = parseFloat(document.getElementById('m-lip').value) || 0;
+            const w = parseFloat(document.getElementById('p-weight').value) || 0;
+
+            const sum = pPro + pCho + pLip;
+            const elSum = document.getElementById('m-sum-perc');
+            if(elSum) {
+                elSum.textContent = sum.toFixed(1) + "%";
+                elSum.style.color = Math.abs(sum - 100) > 0.1 ? "var(--cute-pink)" : "var(--neon-green)";
+            }
+
+            if(kcal > 0 && Math.abs(sum - 100) < 0.1) {
+                const gPro = (kcal * (pPro / 100)) / 4;
+                const gCho = (kcal * (pCho / 100)) / 4;
+                const gLip = (kcal * (pLip / 100)) / 9;
+
+                let pkPro = w > 0 ? (gPro/w).toFixed(1) + " g/kg" : "";
+                let pkCho = w > 0 ? (gCho/w).toFixed(1) + " g/kg" : "";
+                let pkLip = w > 0 ? (gLip/w).toFixed(1) + " g/kg" : "";
+
+                document.getElementById('out-g-pro').innerHTML = `${gPro.toFixed(0)} g <br><small style="color:var(--neon-green)">${pkPro}</small>`;
+                document.getElementById('out-g-cho').innerHTML = `${gCho.toFixed(0)} g <br><small style="color:var(--neon-green)">${pkCho}</small>`;
+                document.getElementById('out-g-lip').innerHTML = `${gLip.toFixed(0)} g <br><small style="color:var(--neon-green)">${pkLip}</small>`;
+
+                const macroText = `${gPro.toFixed(0)}g / ${gCho.toFixed(0)}g / ${gLip.toFixed(0)}g`;
+                document.getElementById('out-macro-sum').textContent = macroText;
+                
+                currentPatient.macros = macroText;
+            } else {
+                document.getElementById('out-g-pro').textContent = "--";
+                document.getElementById('out-g-cho').textContent = "--";
+                document.getElementById('out-g-lip').textContent = "--";
+                document.getElementById('out-macro-sum').textContent = "Revisar %";
+            }
+        }
+
+        // Sports Logic (Faulkner)
+        const sportsInp = ['pl-tri', 'pl-sub', 'pl-sup', 'pl-abd'];
+        sportsInp.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', calculateSports);
+        });
+
+        function calculateSports() {
+            initPatient();
+            const tri = parseFloat(document.getElementById('pl-tri').value) || 0;
+            const sub = parseFloat(document.getElementById('pl-sub').value) || 0;
+            const sup = parseFloat(document.getElementById('pl-sup').value) || 0;
+            const abd = parseFloat(document.getElementById('pl-abd').value) || 0;
+            const w = parseFloat(document.getElementById('p-weight').value) || 0;
+
+            if(tri > 0 && sub > 0 && sup > 0 && abd > 0 && w > 0) {
+                const fatPerc = ((tri + sub + sup + abd) * 0.153) + 5.783;
+                const fatMass = w * (fatPerc / 100);
+                const leanMass = w - fatMass;
+                const sumFolds = tri + sub + sup + abd;
+
+                document.getElementById('out-sum-folds').textContent = sumFolds.toFixed(1) + " mm";
+                document.getElementById('out-fat-perc').textContent = fatPerc.toFixed(1) + " %";
+                document.getElementById('out-fat-mass').textContent = fatMass.toFixed(1) + " kg";
+                document.getElementById('out-lean-mass').textContent = leanMass.toFixed(1) + " kg";
+                
+                currentPatient.fatPerc = fatPerc.toFixed(1);
+                currentPatient.fatMass = fatMass.toFixed(1);
+                currentPatient.leanMass = leanMass.toFixed(1);
+            } else {
+                document.getElementById('out-sum-folds').textContent = "-- mm";
+                document.getElementById('out-fat-perc').textContent = "-- %";
+                document.getElementById('out-fat-mass').textContent = "-- kg";
+                document.getElementById('out-lean-mass').textContent = "-- kg";
+            }
+        }
+
+        // Clinical Logic
+        const clinicInp = ['h-crea', 'h-knee', 'h-usual-weight', 'c-dosis', 'c-conc'];
+        clinicInp.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', calculateClinical);
+        });
+
+        const btnUseChumlea = document.getElementById('btn-use-chumlea');
+        if(btnUseChumlea) {
+            btnUseChumlea.addEventListener('click', () => {
+                const estH = document.getElementById('out-chumlea').innerText.replace(' cm', '').trim();
+                if(estH && estH !== '--') {
+                    const hInput = document.getElementById('p-height');
+                    hInput.value = estH;
+                    calculateDashboard();
+                    
+                    // Redirigir a la pestaña de Escáner
+                    const tabScanner = document.querySelector('[data-target="tab-scanner"]');
+                    if(tabScanner) tabScanner.click();
+
+                    // Feedback visual
+                    hInput.style.transition = "background-color 0.3s";
+                    hInput.style.backgroundColor = "rgba(0, 255, 136, 0.5)";
+                    setTimeout(() => hInput.style.backgroundColor = "var(--bg-dark)", 1000);
+                } else {
+                    alert("Falta información. Para usar Chumlea necesitas ingresar la 'Altura de Rodilla' y también asegurarte de haber ingresado la 'Edad' en la pestaña principal.");
+                }
+            });
+        }
+
+        function calculateClinical() {
+            initPatient();
+            const crea = parseFloat(document.getElementById('h-crea').value) || 0;
+            const knee = parseFloat(document.getElementById('h-knee').value) || 0;
+            const uWeight = parseFloat(document.getElementById('h-usual-weight').value) || 0;
+            
+            const age = parseInt(document.getElementById('p-age').value) || 0;
+            const w = parseFloat(document.getElementById('p-weight').value) || 0;
+            const gender = document.getElementById('p-gender').value;
+
+            // Renal: Cockcroft-Gault
+            if(crea > 0 && age > 0 && w > 0) {
+                let tfg = ((140 - age) * w) / (72 * crea);
+                if(gender === 'F') tfg = tfg * 0.85;
+                
+                let kdigo = "";
+                let kColor = "white";
+                if(tfg >= 90) { kdigo = "G1 (Normal)"; kColor = "var(--neon-green)"; }
+                else if(tfg >= 60) { kdigo = "G2 (Leve)"; kColor = "var(--neon-green)"; }
+                else if(tfg >= 45) { kdigo = "G3a (Mod-Leve)"; kColor = "var(--punk-purple)"; }
+                else if(tfg >= 30) { kdigo = "G3b (Mod-Grave)"; kColor = "var(--punk-purple)"; }
+                else if(tfg >= 15) { kdigo = "G4 (Grave)"; kColor = "red"; }
+                else { kdigo = "G5 (Falla Renal)"; kColor = "red"; }
+
+                document.getElementById('out-tfg').textContent = tfg.toFixed(1) + " ml/min";
+                document.getElementById('out-kdigo').textContent = kdigo;
+                document.getElementById('out-kdigo').style.color = kColor;
+                
+                currentPatient.tfg = tfg.toFixed(1);
+                currentPatient.kdigo = kdigo.split(' ')[0];
+            } else {
+                document.getElementById('out-tfg').textContent = "--";
+                document.getElementById('out-kdigo').textContent = "--";
+                document.getElementById('out-kdigo').style.color = "white";
+            }
+
+            // Chumlea (Altura Rodilla)
+            if(knee > 0 && age > 0) {
+                let estHeight = 0;
+                if(gender === 'M') estHeight = 64.19 - (0.04 * age) + (2.02 * knee);
+                else estHeight = 84.88 - (0.24 * age) + (1.83 * knee);
+                document.getElementById('out-chumlea').textContent = estHeight.toFixed(1) + " cm";
+            } else {
+                document.getElementById('out-chumlea').textContent = "-- cm";
+            }
+
+            // Screening Pérdida de Peso
+            if(uWeight > 0 && w > 0 && uWeight > w) {
+                const lossPerc = ((uWeight - w) / uWeight) * 100;
+                document.getElementById('out-weight-loss').textContent = lossPerc.toFixed(1) + " %";
+                
+                let risk = "Leve";
+                let riskColor = "white";
+                if(lossPerc >= 10) { risk = "Severo (Riesgo Alto)"; riskColor = "red"; }
+                else if (lossPerc >= 5) { risk = "Moderado (Alerta)"; riskColor = "var(--punk-purple)"; }
+                
+                document.getElementById('out-loss-risk').textContent = risk;
+                document.getElementById('out-loss-risk').style.color = riskColor;
+            } else if (w >= uWeight && uWeight > 0) {
+                document.getElementById('out-weight-loss').textContent = "0 %";
+                document.getElementById('out-loss-risk').textContent = "Sin pérdida";
+                document.getElementById('out-loss-risk').style.color = "var(--neon-green)";
+            } else {
+                document.getElementById('out-weight-loss').textContent = "-- %";
+                document.getElementById('out-loss-risk').textContent = "--";
+                document.getElementById('out-loss-risk').style.color = "white";
+            }
+
+            // Dosis Fármacos/Suplementos
+            const dosis = parseFloat(document.getElementById('c-dosis').value) || 0;
+            const conc = parseFloat(document.getElementById('c-conc').value) || 0;
+            
+            if(w > 0 && dosis > 0 && conc > 0) {
+                const vol = (w * dosis) / conc;
+                document.getElementById('out-dosis-vol').textContent = vol.toFixed(2) + " ml";
+                currentPatient.medDosis = `${vol.toFixed(2)} ml (${dosis}mg/kg)`;
+            } else {
+                document.getElementById('out-dosis-vol').textContent = "-- ml";
+                currentPatient.medDosis = "-";
+            }
+        }
+
+        // Anamnesis Logic
+        const anamnesisInputs = ['a-pathology', 'a-allergies', 'a-diet', 'a-liquids', 'a-digestion', 'a-obs'];
+        anamnesisInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', updateAnamnesis);
+        });
+
+        function updateAnamnesis() {
+            initPatient();
+            currentPatient.pathologies = document.getElementById('a-pathology').value || "-";
+            currentPatient.allergies = document.getElementById('a-allergies').value || "-";
+            currentPatient.diet = document.getElementById('a-diet').value || "-";
+            currentPatient.liquids = document.getElementById('a-liquids').value || "-";
+            currentPatient.digestion = document.getElementById('a-digestion').value || "-";
+            currentPatient.obs = document.getElementById('a-obs').value.replace(/(\r\n|\n|\r)/gm, " ") || "-"; // CSV safe
+        }
+
+        // Clear Patient
+        const btnClearPatient = document.getElementById('btn-clear-patient');
+        if(btnClearPatient) {
+            btnClearPatient.addEventListener('click', () => {
+                document.querySelectorAll('.nutri-form input, .nutri-form textarea').forEach(inp => inp.value = '');
+                document.getElementById('m-pro').value = '20';
+                document.getElementById('m-cho').value = '50';
+                document.getElementById('m-lip').value = '30';
+                document.getElementById('p-activity').value = '1.2';
+                
+                const selectDiet = document.getElementById('a-diet');
+                if(selectDiet) selectDiet.value = 'Omnívora';
+                const selectLiq = document.getElementById('a-liquids');
+                if(selectLiq) selectLiq.value = '< 1 Litro (Bajo)';
+
+                currentPatient = null;
+                calculateDashboard();
+                calculateSports();
+                calculateClinical();
+            });
+        }
+
+        // Save Patient
+        const btnSavePatient = document.getElementById('btn-save-patient');
+        if(btnSavePatient) {
+            btnSavePatient.addEventListener('click', () => {
+                if(!currentPatient) return alert("Nada que guardar.");
+                
+                // Ensure all fields from Anamnesis are captured even if they didn't trigger input event
+                updateAnamnesis();
+
+                // Force name update on save in case they typed it last
+                currentPatient.name = document.getElementById('p-name').value || "Paciente Anónimo";
+                
+                const records = JSON.parse(localStorage.getItem('cesfamRecords') || '[]');
+                records.push(currentPatient);
+                localStorage.setItem('cesfamRecords', JSON.stringify(records));
+                loadHistory();
+                
+                const originalText = btnSavePatient.innerHTML;
+                btnSavePatient.innerHTML = '¡Ficha Guardada con Éxito! <i class="fa-solid fa-check"></i>';
+                btnSavePatient.style.background = "var(--neon-green)";
+                btnSavePatient.style.color = "var(--bg-dark)";
+                setTimeout(() => { 
+                    btnSavePatient.innerHTML = originalText; 
+                    btnSavePatient.style.background = "rgba(0, 255, 136, 0.1)";
+                    btnSavePatient.style.color = "white";
+                }, 2000);
+            });
+        }
+
+        loadHistory();
+
+        // Cat Easter Egg (Clicking the navbar cat)
+        const creepyCat = document.querySelector('.creepy-cat');
+        if(creepyCat) {
+            creepyCat.addEventListener('click', () => {
+                for(let i=0; i<8; i++) {
+                    setTimeout(() => {
+                        const paw = document.createElement('i');
+                        paw.className = 'fa-solid fa-paw';
+                        paw.style.color = Math.random() > 0.5 ? 'var(--neon-green)' : 'var(--cute-pink)';
+                        paw.style.fontSize = (Math.random() * 3 + 2) + 'rem';
+                        paw.style.position = 'fixed';
+                        paw.style.zIndex = '9999';
+                        paw.style.left = (Math.random() * 80 + 10) + 'vw';
+                        paw.style.top = (Math.random() * 80 + 10) + 'vh';
+                        paw.style.opacity = '0';
+                        paw.style.transform = `scale(0.1) rotate(${Math.random() * 60 - 30}deg)`;
+                        paw.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                        paw.style.textShadow = `0 0 15px ${paw.style.color}`;
+                        paw.style.pointerEvents = 'none';
+                        
+                        document.body.appendChild(paw);
+                        
+                        // Aparecer
+                        setTimeout(() => { paw.style.opacity = '1'; paw.style.transform = `scale(1) rotate(${Math.random() * 60 - 30}deg)`; }, 50);
+                        // Desvanecer
+                        setTimeout(() => { paw.style.opacity = '0'; paw.style.transform = 'scale(1.5)'; }, 800);
+                        // Eliminar
+                        setTimeout(() => { paw.remove(); }, 1300);
+                    }, i * 150);
+                }
+            });
+        }
+
+        // Interactive glow effect following mouse on cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+                
+                card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 255, 136, 0.05) 0%, rgba(25, 25, 30, 0.7) 50%)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'rgba(25, 25, 30, 0.7)';
+            });
+        });
+
+        // Partículas Misfits x Nutrición con parallax al scrollear
+        const particlesContainer = document.createElement('div');
+        particlesContainer.id = 'particles';
+        document.body.prepend(particlesContainer);
+
+        const icons = [
+            'fa-skull', 'fa-apple-whole', 'fa-staff-snake', 'fa-ghost', 
+            'fa-leaf', 'fa-bolt', 'fa-heart-pulse', 'fa-paw', 'fa-syringe', 
+            'fa-bacterium', 'fa-fish'
+        ];
+        const colors = ['var(--neon-green)', 'var(--cute-pink)', 'var(--punk-purple)', 'var(--st-green)'];
+
+        const particles = [];
+        for(let i = 0; i < 75; i++) {
+            const el = document.createElement('i');
+            const icon = icons[Math.floor(Math.random() * icons.length)];
+            el.className = `fa-solid ${icon} particle`;
+            
+            const top = Math.random() * 150 - 25;
+            const left = Math.random() * 100;
+            
+            el.style.left = `${left}vw`;
+            el.style.top = `${top}vh`;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            el.style.color = color;
+            el.style.fontSize = `${Math.random() * 1.5 + 0.8}rem`;
+            
+            const speed = (Math.random() * 0.6 + 0.2) * (Math.random() > 0.5 ? 1 : -1);
+            const rotSpeed = (Math.random() * 0.8 + 0.2) * (Math.random() > 0.5 ? 1 : -1);
+            
+            particles.push({ el, top, left, speed, rotSpeed, originalColor: color, currentY: 0, currentRot: 0 });
+            particlesContainer.appendChild(el);
+        }
+
+        // Custom Cursor Logic
+        const cursor = document.createElement('i');
+        cursor.id = 'custom-cursor';
+        cursor.className = 'fa-solid fa-hand-pointer'; 
+        document.body.appendChild(cursor);
+
+        document.addEventListener('mousemove', e => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+            
+            // Efecto repulsión en las partículas
+            particles.forEach(p => {
+                const rect = p.el.getBoundingClientRect();
+                const dx = rect.left + rect.width / 2 - mouseX;
+                const dy = rect.top + rect.height / 2 - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 80) {
+                    p.el.style.transform = `translate(${dx * 0.8}px, ${dy * 0.8}px) rotate(${p.currentRot}deg) scale(1.5)`;
+                    p.el.style.color = 'white';
+                } else {
+                    p.el.style.transform = `translateY(${p.currentY}px) rotate(${p.currentRot}deg) scale(1)`;
+                    p.el.style.color = p.originalColor;
+                }
+            });
+        });
+
+        // Boton Subir Logic
+        const btnTop = document.createElement('button');
+        btnTop.id = 'btn-top';
+        btnTop.title = 'Subir';
+        btnTop.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
+        document.body.appendChild(btnTop);
+
+        btnTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            
+            // Particulas parallax
+            particles.forEach(p => {
+                const currentY = scrolled * p.speed;
+                const currentRot = scrolled * p.rotSpeed;
+                p.el.style.transform = `translateY(${currentY}px) rotate(${currentRot}deg)`;
+            });
+
+            // Mostrar/Ocultar boton subir
+            if (scrolled > 400) {
+                btnTop.classList.add('show');
+            } else {
+                btnTop.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
