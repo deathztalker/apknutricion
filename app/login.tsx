@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  KeyboardAvoidingView, 
+  Platform, 
+  ScrollView, 
+  ActivityIndicator, 
+  Alert,
+  Animated
+} from 'react-native';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SHADOWS } from '../constants/theme';
+import { COLORS, SHADOWS, FONTS } from '../constants/theme';
 import { authService } from '../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -13,9 +24,32 @@ export default function Login() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Misfits flickering animation
+  const flickerAnim = useRef(new Animated.Value(1)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const runFlicker = () => {
+      Animated.sequence([
+        Animated.timing(flickerAnim, { toValue: 0.2, duration: 40, useNativeDriver: true }),
+        Animated.timing(flickerAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
+        Animated.timing(flickerAnim, { toValue: 0.3, duration: 60, useNativeDriver: true }),
+        Animated.timing(flickerAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+        Animated.delay(1500 + Math.random() * 3000),
+      ]).start(() => runFlicker());
+    };
+
+    runFlicker();
+  }, []);
+
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && !fullName)) {
-      Alert.alert('Error', 'Por favor completa todos los campos.');
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+      ]).start();
+      Alert.alert('SYSTEM ERROR', 'INCOMPLETE CREDENTIALS');
       return;
     }
 
@@ -28,19 +62,14 @@ export default function Login() {
       } else {
         const { error } = await authService.signUp(email, password, fullName);
         if (error) throw error;
-        Alert.alert('Éxito', 'Cuenta creada. Por favor verifica tu correo si es necesario.');
+        Alert.alert('REGISTRY COMPLETE', 'Clinical identity created.');
         setIsLogin(true);
       }
     } catch (error: any) {
-      Alert.alert('Error de Autenticación', error.message || 'Ocurrió un error inesperado.');
+      Alert.alert('AUTH FAILURE', error.message || 'Access Denied.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleLogin = async () => {
-    Alert.alert('Google Auth', 'La integración de Google Auth requiere configuración en Supabase Cloud Dashboard.');
-    // Aquí iría la lógica de AuthSession o GoogleSignin
   };
 
   return (
@@ -48,26 +77,31 @@ export default function Login() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <LinearGradient
-        colors={[COLORS.bg1, COLORS.bg3, COLORS.bg]}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={styles.blackBackground} />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>{isLogin ? 'ACCESS' : 'REGISTRY'}</Text>
+          <Animated.View style={{ opacity: flickerAnim, transform: [{ translateX: shakeAnim }] }}>
+            <Ionicons name="skull" size={100} color={COLORS.white} style={styles.misfitsSkull} />
+          </Animated.View>
+          
+          <Animated.Text style={[styles.title, { opacity: flickerAnim }]}>
+            {isLogin ? 'MISFITS\nSYSTEM' : 'NEW\nREVENANT'}
+          </Animated.Text>
+          
+          <View style={styles.toxicBar} />
           <Text style={styles.subtitle}>
-            {isLogin ? 'Enter your credentials to override' : 'Create a new clinical identity'}
+            {isLogin ? 'I want your brains... and your data' : 'Join the crimson ghost brigade'}
           </Text>
         </View>
 
         <View style={styles.form}>
           {!isLogin && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>FULL NAME</Text>
+              <Text style={styles.label}>CLINICAL ALIAS</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Dr. John Doe"
+                placeholder="Subject Zero"
                 placeholderTextColor={COLORS.dim}
                 value={fullName}
                 onChangeText={setFullName}
@@ -76,10 +110,10 @@ export default function Login() {
           )}
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>EMAIL ADDRESS</Text>
+            <Text style={styles.label}>FREQUENCY (EMAIL)</Text>
             <TextInput
               style={styles.input}
-              placeholder="terminal@system.com"
+              placeholder="hell@system.com"
               placeholderTextColor={COLORS.dim}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -89,7 +123,7 @@ export default function Login() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>PASSWORD</Text>
+            <Text style={styles.label}>ENCRYPTION (PASSWORD)</Text>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
@@ -106,26 +140,26 @@ export default function Login() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={COLORS.neon} />
+              <ActivityIndicator color={COLORS.bg} />
             ) : (
               <Text style={styles.primaryButtonText}>
-                {isLogin ? 'INITIALIZE SESSION' : 'COMPLETE REGISTRY'}
+                {isLogin ? 'INITIALIZE OVERRIDE' : 'GENERATE IDENTITY'}
               </Text>
             )}
           </TouchableOpacity>
 
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
+            <Text style={styles.dividerText}>DIGITAL VOID</Text>
             <View style={styles.divider} />
           </View>
 
           <TouchableOpacity 
             style={[styles.button, styles.googleButton]}
-            onPress={handleGoogleLogin}
+            onPress={() => Alert.alert('GOOGLE AUTH', 'System link required.')}
           >
             <Ionicons name="logo-google" size={20} color={COLORS.white} style={{ marginRight: 10 }} />
-            <Text style={styles.googleButtonText}>CONTINUE WITH GOOGLE</Text>
+            <Text style={styles.googleButtonText}>SIGN IN WITH BLOOD</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -133,7 +167,7 @@ export default function Login() {
             onPress={() => setIsLogin(!isLogin)}
           >
             <Text style={styles.switchButtonText}>
-              {isLogin ? "DON'T HAVE AN ACCOUNT? REGISTER" : "ALREADY REGISTERED? LOGIN"}
+              {isLogin ? "DON'T HAVE AN IDENTITY? MUTATE" : "ALREADY INFECTED? LOG IN"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -145,7 +179,11 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: '#000',
+  },
+  blackBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000',
   },
   scrollContent: {
     flexGrow: 1,
@@ -156,20 +194,36 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     alignItems: 'center',
   },
-  title: {
-    fontSize: 40,
-    fontWeight: '900',
-    color: COLORS.neon,
-    letterSpacing: 4,
-    textShadowColor: COLORS.neon,
+  misfitsSkull: {
+    marginBottom: 10,
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
+    textShadowRadius: 20,
+  },
+  title: {
+    fontSize: 56,
+    fontFamily: FONTS.horror,
+    color: COLORS.white,
+    letterSpacing: -2,
+    textAlign: 'center',
+    lineHeight: 56,
+    textShadowColor: 'rgba(255, 255, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  toxicBar: {
+    width: 80,
+    height: 4,
+    backgroundColor: COLORS.neon,
+    marginVertical: 15,
+    borderRadius: 2,
+    ...SHADOWS.neon,
   },
   subtitle: {
-    fontSize: 14,
-    color: COLORS.pink,
+    fontSize: 12,
+    color: COLORS.muted,
+    fontStyle: 'italic',
     letterSpacing: 1,
-    marginTop: 8,
     textTransform: 'uppercase',
     textAlign: 'center',
   },
@@ -177,59 +231,57 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignSelf: 'center',
-    gap: 20,
+    gap: 16,
   },
   inputContainer: {
-    gap: 8,
+    gap: 6,
   },
   label: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 'bold',
-    color: COLORS.muted,
-    letterSpacing: 1,
+    color: COLORS.white,
+    letterSpacing: 2,
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: COLORS.bg4,
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 2,
+    borderColor: '#222',
+    borderRadius: 0,
     padding: 16,
-    color: COLORS.text,
+    color: COLORS.white,
     fontSize: 16,
   },
   button: {
     paddingVertical: 18,
-    borderRadius: 8,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+    borderWidth: 2,
   },
   primaryButton: {
-    backgroundColor: 'rgba(163, 255, 0, 0.1)',
-    borderWidth: 1,
-    borderColor: COLORS.neon,
-    ...SHADOWS.neon,
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.white,
     marginTop: 10,
   },
   googleButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'transparent',
+    borderColor: '#444',
   },
   disabledButton: {
     opacity: 0.5,
   },
   primaryButtonText: {
-    color: COLORS.neon,
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 2,
+    color: '#000',
+    fontFamily: FONTS.horror,
+    fontSize: 24,
+    letterSpacing: 1,
   },
   googleButtonText: {
     color: COLORS.white,
     fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 1,
+    fontWeight: '900',
+    letterSpacing: 2,
   },
   dividerContainer: {
     flexDirection: 'row',
@@ -238,24 +290,28 @@ const styles = StyleSheet.create({
   },
   divider: {
     flex: 1,
-    height: 1,
-    backgroundColor: COLORS.bg4,
+    height: 2,
+    backgroundColor: '#111',
   },
   dividerText: {
-    color: COLORS.dim,
+    color: '#333',
     paddingHorizontal: 16,
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 4,
   },
   switchButton: {
-    marginTop: 10,
+    marginTop: 15,
     alignItems: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: COLORS.neon,
   },
   switchButtonText: {
-    color: COLORS.muted,
+    color: COLORS.neon,
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 1,
-    textDecorationLine: 'underline',
   },
 });

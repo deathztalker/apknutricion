@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
-import { COLORS, SHADOWS } from '../../constants/theme';
+import { COLORS, SHADOWS, FONTS } from '../../constants/theme';
 import { patientService, supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { Patient } from '../../types';
@@ -21,7 +21,7 @@ export default function Dashboard() {
       if (error) throw error;
       setPatients(data || []);
     } catch (error) {
-      console.error('Error fetching patients:', error);
+      console.error('Error fetching subjects:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -44,9 +44,9 @@ export default function Dashboard() {
     >
       <View style={styles.patientInfo}>
         <Text style={styles.patientName}>{item.full_name.toUpperCase()}</Text>
-        <Text style={styles.patientDetails}>{item.insurance} • {item.sex === 'M' ? 'Male' : 'Female'}</Text>
+        <Text style={styles.patientDetails}>{item.insurance} • {item.sex === 'M' ? 'MALE' : 'FEMALE'}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color={COLORS.neon} />
+      <Ionicons name="skull" size={24} color={COLORS.white} />
     </TouchableOpacity>
   );
 
@@ -54,10 +54,10 @@ export default function Dashboard() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={COLORS.dim} style={styles.searchIcon} />
+          <Ionicons name="search" size={20} color={COLORS.white} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="SEARCH SUBJECT..."
+            placeholder="FIND SUBJECT..."
             placeholderTextColor={COLORS.dim}
             value={search}
             onChangeText={setSearch}
@@ -67,7 +67,7 @@ export default function Dashboard() {
 
       {loading && !refreshing ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.neon} />
+          <ActivityIndicator size="large" color={COLORS.white} />
         </View>
       ) : (
         <FlatList
@@ -76,12 +76,12 @@ export default function Dashboard() {
           keyExtractor={(item) => item.id!}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.neon} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.white} />
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="skull-outline" size={64} color={COLORS.bg4} />
-              <Text style={styles.emptyText}>NO SUBJECTS FOUND IN SYSTEM</Text>
+              <Ionicons name="skull-outline" size={80} color={COLORS.dim} />
+              <Text style={styles.emptyText}>NO SUBJECTS IN THE VOID</Text>
             </View>
           }
         />
@@ -89,9 +89,9 @@ export default function Dashboard() {
 
       <TouchableOpacity 
         style={styles.fab}
-        onPress={() => {/* Aquí iría el modal para agregar paciente */}}
+        onPress={() => {/* Add patient logic */}}
       >
-        <Ionicons name="add" size={30} color={COLORS.bg} />
+        <Ionicons name="add" size={32} color={COLORS.bg} />
       </TouchableOpacity>
     </View>
   );
@@ -100,65 +100,66 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: '#000',
   },
   header: {
-    padding: 16,
-    backgroundColor: COLORS.bg1,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.bg4,
+    padding: 20,
+    backgroundColor: '#000',
+    borderBottomWidth: 2,
+    borderBottomColor: '#222',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
+    borderRadius: 0,
     paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: COLORS.bg4,
+    borderWidth: 2,
+    borderColor: '#333',
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    height: 48,
-    color: COLORS.text,
+    height: 50,
+    color: COLORS.white,
     fontSize: 14,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 2,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   listContent: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 100,
     gap: 12,
   },
   patientCard: {
-    backgroundColor: COLORS.bg1,
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 0,
+    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.neon,
-    borderWidth: 1,
-    borderColor: COLORS.bg4,
-    ...SHADOWS.card,
+    borderLeftWidth: 6,
+    borderLeftColor: COLORS.white,
+    borderWidth: 2,
+    borderColor: '#222',
   },
   patientInfo: {
     flex: 1,
   },
   patientName: {
-    color: COLORS.text,
-    fontSize: 16,
-    fontWeight: '900',
+    color: COLORS.white,
+    fontSize: 22,
+    fontFamily: FONTS.horror,
     letterSpacing: 1,
   },
   patientDetails: {
     color: COLORS.muted,
-    fontSize: 12,
+    fontSize: 11,
     marginTop: 4,
-    textTransform: 'uppercase',
+    fontWeight: '900',
+    letterSpacing: 2,
   },
   center: {
     flex: 1,
@@ -168,24 +169,29 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     marginTop: 100,
-    gap: 16,
+    gap: 20,
   },
   emptyText: {
     color: COLORS.dim,
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: FONTS.horror,
+    fontSize: 24,
     letterSpacing: 2,
+    textAlign: 'center',
   },
   fab: {
     position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.neon,
+    bottom: 30,
+    right: 30,
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
+    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOWS.neon,
+    shadowColor: COLORS.white,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
   },
 });

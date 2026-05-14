@@ -2,8 +2,27 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { COLORS } from '../constants/theme';
 import { View, StyleSheet } from 'react-native';
+import { useFonts, Creepster_400Regular } from '@expo-google-fonts/creepster';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Creepster_400Regular,
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -11,7 +30,10 @@ export default function RootLayout() {
         screenOptions={{
           headerStyle: { backgroundColor: COLORS.bg1 },
           headerTintColor: COLORS.neon,
-          headerTitleStyle: { fontWeight: 'bold' },
+          headerTitleStyle: { 
+            fontWeight: 'bold',
+            fontFamily: 'Creepster_400Regular',
+          },
           contentStyle: { backgroundColor: COLORS.bg },
           animation: 'fade',
         }}

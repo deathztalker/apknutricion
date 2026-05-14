@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { COLORS, SHADOWS } from '../../../constants/theme';
+import { COLORS, SHADOWS, FONTS } from '../../../constants/theme';
 import { patientService, recordService } from '../../../lib/supabase';
 import { Patient, ClinicalRecord } from '../../../types';
 import { LineChart } from 'react-native-chart-kit';
@@ -90,12 +90,12 @@ export default function PatientProfile() {
               width={SCREEN_WIDTH - 40}
               height={220}
               chartConfig={{
-                backgroundColor: COLORS.bg1,
+                backgroundColor: COLORS.bgCard,
                 backgroundGradientFrom: COLORS.bg1,
-                backgroundGradientTo: COLORS.bg1,
+                backgroundGradientTo: COLORS.bg,
                 decimalPlaces: 1,
-                color: (opacity = 1) => `rgba(163, 255, 0, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(128, 112, 112, ${opacity})`,
+                color: (opacity = 1) => `rgba(0, 255, 136, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(226, 226, 222, ${opacity})`,
                 style: { borderRadius: 16 },
                 propsForDots: { r: "6", strokeWidth: "2", stroke: COLORS.bg }
               }}
@@ -115,21 +115,21 @@ export default function PatientProfile() {
             style={styles.actionButton}
             onPress={() => router.push({ pathname: '/calculator', params: { patientId: id } })}
           >
-            <Ionicons name="add-circle" size={24} color={COLORS.bg} />
+            <Ionicons name="add-circle" size={24} color={COLORS.neon} />
             <Text style={styles.actionButtonText}>NEW EVALUATION</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: COLORS.purple }]}
+            style={[styles.actionButton, { borderColor: COLORS.purple }]}
             onPress={() => router.push(`/(app)/patient/${id}/labs`)}
           >
-            <Ionicons name="flask" size={24} color={COLORS.bg} />
-            <Text style={styles.actionButtonText}>BIOCHEMICAL TERMINAL</Text>
+            <Ionicons name="flask" size={24} color={COLORS.purple} />
+            <Text style={[styles.actionButtonText, { color: COLORS.purple }]}>BIOCHEMICAL TERMINAL</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.actionButton, styles.secondaryAction]}>
-            <Ionicons name="document-text" size={24} color={COLORS.neon} />
-            <Text style={styles.secondaryActionText}>CREATE MEAL PLAN</Text>
+            <Ionicons name="document-text" size={24} color={COLORS.pink} />
+            <Text style={[styles.actionButtonText, { color: COLORS.pink }]}>CREATE MEAL PLAN</Text>
           </TouchableOpacity>
         </View>
 
@@ -144,7 +144,7 @@ export default function PatientProfile() {
                 </Text>
                 <Text style={styles.historySummary}>IMC: {record.bmi} • {record.weight_kg} kg</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.dim} />
+              <Ionicons name="chevron-forward" size={20} color={COLORS.neon} />
             </View>
           ))}
         </View>
@@ -162,13 +162,13 @@ const styles = StyleSheet.create({
     padding: 40,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.bg4,
+    borderBottomColor: COLORS.border,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.bg3,
+    backgroundColor: COLORS.bgCard,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -178,21 +178,25 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 32,
-    fontWeight: '900',
+    fontFamily: FONTS.horror,
     color: COLORS.neon,
   },
   name: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: COLORS.text,
+    fontSize: 32,
+    fontFamily: FONTS.horror,
+    color: COLORS.neon,
     letterSpacing: 2,
     textAlign: 'center',
+    textShadowColor: COLORS.neon,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   subtitle: {
     fontSize: 12,
-    color: COLORS.muted,
+    color: COLORS.pink,
     marginTop: 8,
     letterSpacing: 1,
+    fontWeight: 'bold',
   },
   content: {
     padding: 20,
@@ -204,11 +208,11 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: COLORS.bg1,
+    backgroundColor: COLORS.bgCard,
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.bg4,
+    borderColor: COLORS.border,
     alignItems: 'center',
   },
   statLabel: {
@@ -226,70 +230,71 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '900',
+    fontSize: 24,
+    fontFamily: FONTS.horror,
     color: COLORS.pink,
-    letterSpacing: 2,
+    letterSpacing: 1,
+    textShadowColor: COLORS.pink,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   chart: {
     marginVertical: 8,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   noDataCard: {
     height: 150,
-    backgroundColor: COLORS.bg1,
+    backgroundColor: COLORS.bgCard,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
     borderStyle: 'dashed',
     borderWidth: 1,
-    borderColor: COLORS.bg4,
+    borderColor: COLORS.border,
   },
   noDataText: {
     color: COLORS.dim,
     fontWeight: 'bold',
+    fontFamily: FONTS.horror,
   },
   actions: {
     gap: 12,
   },
   actionButton: {
-    backgroundColor: COLORS.neon,
+    backgroundColor: 'rgba(0, 255, 136, 0.05)',
     height: 56,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
+    borderWidth: 1,
+    borderColor: COLORS.neon,
     ...SHADOWS.neon,
+    shadowOpacity: 0.1,
   },
   actionButtonText: {
-    color: COLORS.bg,
-    fontSize: 16,
-    fontWeight: '900',
+    color: COLORS.neon,
+    fontSize: 18,
+    fontFamily: FONTS.horror,
     letterSpacing: 1,
   },
   secondaryAction: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: COLORS.neon,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  secondaryActionText: {
-    color: COLORS.neon,
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 1,
+    borderColor: COLORS.pink,
+    ...SHADOWS.pink,
+    shadowOpacity: 0.1,
   },
   historyItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.bg1,
+    backgroundColor: COLORS.bgCard,
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.bg4,
+    borderColor: COLORS.border,
   },
   historyDate: {
     fontSize: 12,

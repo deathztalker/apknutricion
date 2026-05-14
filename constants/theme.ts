@@ -1,59 +1,37 @@
 // constants/theme.ts
 export const COLORS = {
   // Backgrounds
-  bg:     '#0f0f13', // --bg-dark
-  bg1:    '#19191e', // Slightly lighter for cards/headers
-  bg2:    '#232328',
-  bg3:    '#2d2d32',
-  bg4:    '#37373c',
+  bg:      '#0f0f13', // --bg-dark
+  bg1:     '#19191e', // Slightly lighter for cards/headers
+  bg2:     '#232328',
+  bgCard:  'rgba(25, 25, 30, 0.7)', // --bg-card
 
   // Brand (Horror Punk from HTML)
-  neon:   '#00ff88', // --neon-green
-  neon2:  '#00cc6a',
-  stg:    '#00693E', // --st-green
-  pink:   '#ff99cc', // --cute-pink
-  pink2:  '#cc7aa3',
-  purple: '#9d00ff', // --punk-purple
-  purple2:'#7d00cc',
-
+  neon:    '#00ff88', // --neon-green
+  stg:     '#00693E', // --st-green
+  pink:    '#ff99cc', // --cute-pink
+  purple:  '#9d00ff', // --punk-purple
+  
   // Semantic
-  gold:   '#ffaa00', 
-  red:    '#ff0055', 
-  sky:    '#00d0ff', 
-  orange: '#ff5500',
+  gold:    '#ffaa00', 
+  red:     '#ff0055', 
+  sky:     '#00d0ff', 
 
   // Text
-  text:   '#e2e2e2', // --text-main
-  muted:  '#a0a0a0', // --text-muted
-  dim:    '#606060',
-  white:  '#ffffff',
+  text:    '#e2e2e2', // --text-main
+  muted:   '#a0a0a0', // --text-muted
+  dim:     '#606060',
+  white:   '#ffffff',
 
-  // Card
-  card:   'rgba(25, 25, 30, 0.95)', // --bg-card opaque
-  border: 'rgba(255, 153, 204, 0.3)', // Pinkish border
-  borderB:'rgba(0, 255, 136, 0.4)', // Neon green border
+  // Borders
+  border:  'rgba(0, 255, 136, 0.2)', // Neon green border
+  borderP: 'rgba(255, 153, 204, 0.3)', // Pinkish border
 };
 
 export const FONTS = {
-  regular: 'System',
-  bold:    'System',
-};
-
-export const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-};
-
-export const RADIUS = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
-  full: 999,
+  horror:  'Creepster_400Regular',
+  outfit:  'System', // We'll stick to system for body or load Outfit if needed
+  fredoka: 'System',
 };
 
 export const SHADOWS = {
@@ -77,13 +55,6 @@ export const SHADOWS = {
     shadowOpacity: 0.6,
     shadowRadius: 15,
     elevation: 10,
-  },
-  card: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.8,
-    shadowRadius: 12,
-    elevation: 8,
   },
 };
 
