@@ -4,6 +4,8 @@ export const COLORS = {
   bg:      '#0f0f13', // --bg-dark
   bg1:     '#19191e', // Slightly lighter for cards/headers
   bg2:     '#232328',
+  bg3:     '#2d2d32',
+  bg4:     '#37373c',
   bgCard:  'rgba(25, 25, 30, 0.7)', // --bg-card
 
   // Brand (Horror Punk from HTML)

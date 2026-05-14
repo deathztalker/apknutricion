@@ -115,6 +115,24 @@ export function generateRuleBasedAlerts(
       description: `TFG ${calc.gfr} ml/min. Restricción proteica ${pctRec} g/kg/día. Control de fósforo, potasio y sodio según estadio. Derivar a nefrólogo.` });
   }
 
+  // ── Sarcopenia ────────────────────────────────────────────
+  if (calc.sarcopeniaRisk && calc.sarcopeniaRisk.includes('Probable')) {
+    alerts.push({ severity: 'danger', icon: '💪', title: 'Probable Sarcopenia',
+      description: `Baja fuerza muscular (Grip: ${record.grip_strength_kg} kg). Aumentar aporte proteico a 1.2–1.5 g/kg y recomendar ejercicios de fuerza/resistencia.` });
+  }
+
+  // ── Screening Nutricional (MNA / VGS) ──────────────────────
+  if (record.mna_score !== undefined && record.mna_score < 12) {
+    const sev = record.mna_score < 8 ? 'danger' : 'warning';
+    alerts.push({ severity: sev, icon: '📋', title: 'Riesgo Nutricional (MNA)',
+      description: `Puntaje MNA: ${record.mna_score}. ${record.mna_score < 8 ? 'Desnutrición confirmada.' : 'Riesgo de desnutrición.'} Intervención inmediata necesaria.` });
+  }
+
+  if (record.vgs_status && record.vgs_status !== 'A') {
+    alerts.push({ severity: 'danger', icon: '⚠️', title: `Desnutrición VGS Tipo ${record.vgs_status}`,
+      description: `Valoración Global Subjetiva indica ${record.vgs_status === 'B' ? 'desnutrición moderada' : 'desnutrición severa'}. Priorizar soporte nutricional.` });
+  }
+
   // ── Pérdida de peso ───────────────────────────────────────
   if (calc.weightLossRisk === 'Severo 🚨') {
     alerts.push({ severity: 'danger', icon: '📉', title: 'Pérdida de Peso Severa',
@@ -139,81 +157,83 @@ function buildClinicalPrompt(
   calc: CalculationResult,
   ruleAlerts: ClinicalAlert[]
 ): string {
-  const age = patient.birth_date
-    ? Math.floor((Date.now() - new Date(patient.birth_date).getTime()) / (365.25 * 24 * 3600 * 1000))
-    : 0;
+  const age = patient.age || 0;
 
-  return `Eres una nutricionista clínica experta en Chile, con especialidad en dietoterapia y salud pública basada en normativa MINSAL.
+  return `Eres una nutricionista clínica experta en Chile, con especialidad en dietoterapia y salud pública basada en normativa MINSAL. Tu tarea es realizar un análisis exhaustivo y detallado.
+
+REGLAS CRÍTICAS:
+1. NO RESUMAS NOMBRES NI CONCEPTOS. Si el paciente se llama "Juan Pérez", usa su nombre completo. Si el concepto es "Hipertensión Arterial", usa el término completo.
+2. PROPORCIONA EL MÁXIMO DETALLE POSIBLE. No te limites a frases genéricas.
+3. TODO EL CONTENIDO DEBE ESTAR EN ESPAÑOL.
 
 DATOS DEL PACIENTE:
-- Nombre: ${patient.full_name || 'Paciente'}
+- Nombre Completo: ${patient.full_name || 'Paciente'}
 - Edad: ${age} años | Sexo: ${patient.sex === 'F' ? 'Femenino' : 'Masculino'}
 - Previsión: ${patient.insurance || 'FONASA'}
 
-ANTROPOMETRÍA:
-- Peso: ${record.weight_kg || '—'} kg | Talla: ${record.height_cm || '—'} cm
-- IMC: ${calc.bmi || '—'} (${calc.bmiStatus || '—'})
-- Cintura: ${record.waist_cm || '—'} cm | ICT: ${calc.ict || '—'}
-- Riesgo CV: ${calc.cvRisk || '—'}
-- Peso ideal: ${calc.idealWeight || '—'} kg${calc.adjustedWeight ? ` | Ajustado obesidad: ${calc.adjustedWeight} kg` : ''}
+ANTROPOMETRÍA Y SIGNOS VITALES:
+- Peso Actual: ${record.weight_kg || '—'} kg | Talla Actual: ${record.height_cm || '—'} cm
+- IMC (Índice de Masa Corporal): ${calc.bmi || '—'} (${calc.bmiStatus || '—'})
+- Circunferencia de Cintura: ${record.waist_cm || '—'} cm | ICT (Índice Cintura-Talla): ${calc.ict || '—'}
+- Riesgo Cardiovascular: ${calc.cvRisk || '—'}
+- Peso Ideal: ${calc.idealWeight || '—'} kg${calc.adjustedWeight ? ` | Peso Ajustado por Obesidad: ${calc.adjustedWeight} kg` : ''}
+- Presión Arterial: ${record.systolic_bp || '—'}/${record.diastolic_bp || '—'} mmHg (${calc.bpStatus || '—'})
 
-COMPOSICIÓN CORPORAL (Faulkner):
-- % Grasa: ${calc.fatPercent || '—'}% | Masa grasa: ${calc.fatMassKg || '—'} kg | Masa magra: ${calc.leanMassKg || '—'} kg
+COMPOSICIÓN CORPORAL (Método Faulkner):
+- Porcentaje de Grasa: ${calc.fatPercent || '—'}% | Masa Grasa: ${calc.fatMassKg || '—'} kg | Masa Magra: ${calc.leanMassKg || '—'} kg
 
-SARCOPENIA Y GERIATRÍA:
-- Fuerza de agarre: ${record.grip_strength_kg || '—'} kg | Riesgo EWGSOP2: ${calc.sarcopeniaRisk || '—'}
-- Perímetro pantorrilla: ${record.calf_circumference_cm || '—'} cm
-- Score MNA: ${record.mna_score || '—'} | VGS: ${record.vgs_status || '—'}
+ESTADO FUNCIONAL Y GERIATRÍA:
+- Fuerza de Agarre (Dinamometría): ${record.grip_strength_kg || '—'} kg | Riesgo de Sarcopenia (EWGSOP2): ${calc.sarcopeniaRisk || '—'}
+- Perímetro de Pantorrilla: ${record.calf_circumference_cm || '—'} cm
+- Puntuación MNA (Mini Nutritional Assessment): ${record.mna_score || '—'} | VGS (Valoración Global Subjetiva): ${record.vgs_status || '—'}
 
-SIGNOS VITALES:
-- PA: ${record.systolic_bp || '—'}/${record.diastolic_bp || '—'} mmHg (${calc.bpStatus || '—'})
-- FC: ${record.heart_rate || '—'} lpm | T°: ${record.temperature || '—'}°C | SatO2: ${record.oxygen_sat || '—'}%
-
-METABOLISMO:
-- TMB (Mifflin-St Jeor): ${calc.bmr || '—'} kcal | VCT: ${calc.tdee || '—'} kcal
-- Req. hídrico: ${calc.waterLiters || '—'} L/día
+METABOLISMO Y NUTRICIÓN:
+- Tasa Metabólica Basal (Mifflin-St Jeor): ${calc.bmr || '—'} kcal | Gasto Energético Total (VCT): ${calc.tdee || '—'} kcal
+- Requerimiento Hídrico Estimado: ${calc.waterLiters || '—'} L/día
 
 MACRONUTRIENTES PRESCRITOS:
-- PRO: ${calc.macros?.protG || '—'}g (${record.macro_prot_pct || 15}%) | CHO: ${calc.macros?.choG || '—'}g (${record.macro_cho_pct || 55}%) | LIP: ${calc.macros?.fatG || '—'}g (${record.macro_fat_pct || 30}%)
-- PRO/kg: ${calc.macros?.protGkg || '—'} g/kg/día
+- Proteínas: ${calc.macros?.protG || '—'}g (${record.macro_prot_pct || 15}%) | Carbohidratos: ${calc.macros?.choG || '—'}g (${record.macro_cho_pct || 55}%) | Lípidos: ${calc.macros?.fatG || '—'}g (${record.macro_fat_pct || 30}%)
+- Aporte Proteico por Kilo: ${calc.macros?.protGkg || '—'} g/kg/día
 
-LABORATORIO:
-- Glucosa: ${record.glucose_mg || '—'} mg/dL | HbA1c: ${record.hba1c || '—'}%
-- Colesterol T: ${record.total_chol || '—'} | HDL: ${record.hdl || '—'} | LDL: ${record.ldl || '—'} | TG: ${record.triglycerides || '—'} mg/dL
-- Hemoglobina: ${record.hemoglobin || '—'} g/dL | Ferritina: ${record.ferritin || '—'} ng/mL
-- Albúmina: ${record.albumin || '—'} g/dL
-- TFG: ${calc.gfr || '—'} ml/min | KDIGO: ${calc.kdigoStage || '—'}
+EXÁMENES DE LABORATORIO:
+- Glucemia en Ayunas: ${record.glucose_mg || '—'} mg/dL | Hemoglobina Glicosilada (HbA1c): ${record.hba1c || '—'}%
+- Perfil Lipídico: Colesterol Total ${record.total_chol || '—'}, HDL ${record.hdl || '—'}, LDL ${record.ldl || '—'}, Triglicéridos ${record.triglycerides || '—'} mg/dL
+- Perfil Hematológico: Hemoglobina ${record.hemoglobin || '—'} g/dL, Ferritina ${record.ferritin || '—'} ng/mL
+- Proteínas Viscerales: Albúmina Sérica ${record.albumin || '—'} g/dL
+- Función Renal: TFG (Tasa de Filtración Glomerular) ${calc.gfr || '—'} ml/min, Estadio KDIGO ${calc.kdigoStage || '—'}
 
-ANAMNESIS:
-- Patologías: ${record.pathologies?.join(', ') || 'No registradas'}
-- Alergias/Intolerancias: ${record.allergies?.join(', ') || 'Ninguna'}
-- Tipo de dieta: ${record.diet_type || '—'}
-- Suplementos: ${record.supplements || '—'}
-- Observaciones: ${record.observations || '—'}
+ANAMNESIS Y OBSERVACIONES:
+- Patologías Base: ${record.pathologies?.join(', ') || 'No registradas'}
+- Alergias e Intolerancias: ${record.allergies?.join(', ') || 'Ninguna'}
+- Tipo de Dieta Actual: ${record.diet_type || '—'}
+- Ingesta de Líquidos: ${record.liquid_intake || '—'}
+- Estado de Digestión: ${record.digestion_status || '—'}
+- Suplementación: ${record.supplements || '—'}
+- Observaciones Clínicas: ${record.observations || '—'}
 
-ALERTAS CLÍNICAS DETECTADAS:
+ALERTAS CLÍNICAS DETECTADAS POR EL SISTEMA:
 ${ruleAlerts.map(a => `[${a.severity.toUpperCase()}] ${a.title}: ${a.description}`).join('\n')}
 
-Por favor, proporciona un análisis clínico nutricional completo y estructurado en el siguiente formato JSON (sin markdown, solo JSON puro):
+Por favor, proporciona un análisis clínico nutricional completo, profesional y muy detallado estructurado en el siguiente formato JSON (sin markdown, solo JSON puro):
 
 {
-  "nutritional_diagnosis": "Diagnóstico nutricional completo según criterios MINSAL (2-3 oraciones)",
-  "summary": "Resumen ejecutivo del estado nutricional del paciente (3-4 oraciones narrativas en primera persona clínica)",
+  "nutritional_diagnosis": "Diagnóstico nutricional detallado y completo utilizando terminología técnica adecuada (mínimo 3 oraciones)",
+  "summary": "Análisis clínico integral y detallado del estado del paciente. Explica las relaciones entre los hallazgos antropométricos, de laboratorio y la anamnesis. No resumas excesivamente.",
   "recommendations": [
-    "Recomendación 1 específica y accionable",
-    "Recomendación 2...",
-    "Recomendación 3...",
-    "Recomendación 4...",
-    "Recomendación 5..."
+    "Recomendación dietoterapéutica específica 1",
+    "Recomendación dietoterapéutica específica 2",
+    "Recomendación de estilo de vida específica 3",
+    "Recomendación de suplementación o derivación 4",
+    "Otras recomendaciones detalladas..."
   ],
   "goals": [
-    "Meta nutricional 1 (SMART: específica, medible, alcanzable, relevante, temporalizada)",
-    "Meta 2...",
-    "Meta 3..."
+    "Meta nutricional 1 (Formato SMART detallado)",
+    "Meta nutricional 2...",
+    "Meta nutricional 3..."
   ],
-  "meal_plan_hints": "Orientaciones generales para el diseño del plan de alimentación (tipo de dieta, fraccionamiento, alimentos clave)",
-  "follow_up": "Frecuencia y tipo de seguimiento recomendado (plazo, indicadores a monitorear)",
-  "education_topics": ["Tema educativo 1", "Tema educativo 2", "Tema educativo 3"]
+  "meal_plan_hints": "Directrices detalladas para la elaboración del plan de alimentación, incluyendo selección de alimentos, técnicas culinarias y fraccionamiento.",
+  "follow_up": "Plan de seguimiento detallado indicando tiempos, indicadores críticos a reevaluar y posibles ajustes.",
+  "education_topics": ["Tema de educación alimentaria detallado 1", "Tema 2...", "Tema 3..."]
 }`;
 }
 

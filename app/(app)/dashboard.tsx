@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../../constants/theme';
 import { patientService, supabase } from '../../lib/supabase';

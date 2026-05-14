@@ -1,11 +1,17 @@
-// utils/calculations.ts — Motor de Cálculos Clínicos MINSAL Chile
+// lib/calculations.ts — Motor de Cálculos Clínicos MINSAL Chile
 import { CalculationResult, MacroResult, RecordFormData } from '@/types';
 import { COLORS } from '@/constants/theme';
 
-const n = (v: string | undefined): number => parseFloat(v || '0') || 0;
-const ni = (v: string | undefined): number => parseInt(v || '0') || 0;
+const n = (v: string | undefined | number): number => {
+  if (typeof v === 'number') return v;
+  return parseFloat(v || '0') || 0;
+};
+const ni = (v: string | undefined | number): number => {
+  if (typeof v === 'number') return v;
+  return parseInt(v || '0') || 0;
+};
 
-// ── IMC ────────────────────────────────────────────────────
+// ── IMC (Índice de Masa Corporal) ──────────────────────────
 export function calcBMI(weight: number, height_cm: number): number | null {
   if (!weight || !height_cm) return null;
   const hm = height_cm / 100;
@@ -16,7 +22,7 @@ export function bmiStatus(bmi: number, age: number): { status: string; color: st
   if (age < 18) return { status: 'Usar curvas OMS', color: COLORS.purple };
 
   if (age >= 65) {
-    if (bmi < 23)  return { status: 'Bajo Peso', color: COLORS.sky };
+    if (bmi < 23)  return { status: 'Bajo Peso (Enflaquecido)', color: COLORS.sky };
     if (bmi < 28)  return { status: 'Normal ✓', color: COLORS.neon };
     if (bmi < 32)  return { status: 'Sobrepeso', color: COLORS.gold };
     return { status: 'Obesidad', color: COLORS.red };
@@ -25,9 +31,9 @@ export function bmiStatus(bmi: number, age: number): { status: string; color: st
   if (bmi < 18.5) return { status: 'Bajo Peso', color: COLORS.sky };
   if (bmi < 25)   return { status: 'Normal ✓', color: COLORS.neon };
   if (bmi < 30)   return { status: 'Sobrepeso', color: COLORS.gold };
-  if (bmi < 35)   return { status: 'Obesidad I', color: COLORS.red };
-  if (bmi < 40)   return { status: 'Obesidad II', color: COLORS.red };
-  return { status: 'Obesidad III', color: COLORS.red };
+  if (bmi < 35)   return { status: 'Obesidad Grado I', color: COLORS.red };
+  if (bmi < 40)   return { status: 'Obesidad Grado II', color: COLORS.red };
+  return { status: 'Obesidad Grado III (Mórbida)', color: COLORS.red };
 }
 
 // ── Peso Ideal — Lorenz/Broca MINSAL ──────────────────────
@@ -50,7 +56,7 @@ export function calcBMR(weight: number, height_cm: number, age: number, sex: 'M'
   return Math.round(sex === 'M' ? base + 5 : base - 161);
 }
 
-// ── VCT ────────────────────────────────────────────────────
+// ── VCT (Valor Calórico Total) ────────────────────────────
 export function calcTDEE(bmr: number, activityFactor: number): number {
   return Math.round(bmr * activityFactor);
 }
@@ -76,7 +82,7 @@ export function calcMacros(kcal: number, protPct: number, choPct: number, fatPct
   };
 }
 
-// ── Cintura / Riesgo CV — MINSAL 2023 ─────────────────────
+// ── Cintura / Riesgo Cardiovascular — MINSAL 2023 ─────────
 export function calcCVRisk(waist: number, sex: 'M' | 'F' | ''): { risk: string; color: string } | null {
   if (!waist || !sex) return null;
   if (sex === 'F') {
@@ -99,12 +105,12 @@ export function calcICT(waist: number, height_cm: number): number | null {
 export function bpStatus(pas: number, pad: number): { status: string; color: string } {
   if (!pas || !pad) return { status: '—', color: COLORS.muted };
   if (pas < 90 || pad < 60)   return { status: 'Hipotensión', color: COLORS.sky };
-  if (pas < 120 && pad < 80)  return { status: 'Óptima ✓', color: COLORS.neon };
-  if (pas < 130 && pad < 85)  return { status: 'Normal', color: COLORS.neon };
-  if (pas < 140 && pad < 90)  return { status: 'Normal Alta', color: COLORS.gold };
-  if (pas < 160 && pad < 100) return { status: 'HTA Grado 1', color: COLORS.red };
-  if (pas < 180 && pad < 110) return { status: 'HTA Grado 2', color: COLORS.red };
-  return { status: 'HTA Grado 3 / Crisis', color: COLORS.red };
+  if (pas < 120 && pad < 80)  return { status: 'Presión Óptima ✓', color: COLORS.neon };
+  if (pas < 130 && pad < 85)  return { status: 'Presión Normal', color: COLORS.neon };
+  if (pas < 140 && pad < 90)  return { status: 'Presión Normal Alta', color: COLORS.gold };
+  if (pas < 160 && pad < 100) return { status: 'Hipertensión Grado 1', color: COLORS.red };
+  if (pas < 180 && pad < 110) return { status: 'Hipertensión Grado 2', color: COLORS.red };
+  return { status: 'Hipertensión Grado 3 / Crisis', color: COLORS.red };
 }
 
 // ── Composición Corporal — Faulkner 1983 ──────────────────
@@ -125,7 +131,7 @@ export function calcFaulkner(tri: number, sub: number, sup: number, abd: number,
   return { sigma, fatPct, fatMass, leanMass, category };
 }
 
-// ── TFG — Cockcroft-Gault / KDIGO 2022 ────────────────────
+// ── TFG (Tasa de Filtración Glomerular) — Cockcroft-Gault ──
 export function calcGFR(creatinine: number, age: number, weight: number, sex: 'M' | 'F' | '') {
   if (!creatinine || !age || !weight || !sex) return null;
   let gfr = ((140 - age) * weight) / (72 * creatinine);
@@ -134,12 +140,12 @@ export function calcGFR(creatinine: number, age: number, weight: number, sex: 'M
 
   let stage = '';
   let color = COLORS.neon;
-  if (gfr >= 90)       { stage = 'G1 — Normal'; color = COLORS.neon; }
-  else if (gfr >= 60)  { stage = 'G2 — Leve'; color = COLORS.neon; }
-  else if (gfr >= 45)  { stage = 'G3a — Mod-Leve'; color = COLORS.gold; }
-  else if (gfr >= 30)  { stage = 'G3b — Mod-Grave'; color = COLORS.gold; }
-  else if (gfr >= 15)  { stage = 'G4 — Grave'; color = COLORS.red; }
-  else                  { stage = 'G5 — Falla Renal'; color = COLORS.red; }
+  if (gfr >= 90)       { stage = 'G1 — Normal o Elevada'; color = COLORS.neon; }
+  else if (gfr >= 60)  { stage = 'G2 — Descenso Leve'; color = COLORS.neon; }
+  else if (gfr >= 45)  { stage = 'G3a — Descenso Leve-Moderado'; color = COLORS.gold; }
+  else if (gfr >= 30)  { stage = 'G3b — Descenso Moderado-Grave'; color = COLORS.gold; }
+  else if (gfr >= 15)  { stage = 'G4 — Descenso Grave'; color = COLORS.red; }
+  else                  { stage = 'G5 — Falla Renal Establecida'; color = COLORS.red; }
 
   return { gfr, stage, color };
 }
@@ -151,7 +157,7 @@ export function calcChumlea(kneeHeight: number, age: number, sex: 'M' | 'F' | ''
   return Math.round((84.88 - (0.24 * age) + (1.83 * kneeHeight)) * 10) / 10;
 }
 
-// ── Pérdida de Peso (Screening) ────────────────────────────
+// ── Pérdida de Peso (Screening Nutricional) ───────────────
 export function calcWeightLoss(usual: number, current: number, weeks: number) {
   if (!usual || !current || usual <= current) return null;
   const pct = Math.round(((usual - current) / usual) * 1000) / 10;
@@ -166,7 +172,7 @@ export function calcWeightLoss(usual: number, current: number, weeks: number) {
   return { pct, kgPerWeek, risk, color };
 }
 
-// ── Laboratorio: clasificación ─────────────────────────────
+// ── Laboratorio: Clasificación Clínica ─────────────────────
 export function labStatus(value: number | null | undefined, ranges: { low?: number; high?: number; optLow?: number; optHigh?: number }): { status: string; color: string } {
   if (!value) return { status: '—', color: COLORS.muted };
   const { low, high, optLow, optHigh } = ranges;
@@ -189,7 +195,7 @@ export const LAB_RANGES = {
   albumin:      { low: 3.5, optLow: 3.5, optHigh: 5.0 },
 };
 
-// ── TMB — Cunningham (Para deportistas) ──────────────────
+// ── TMB — Cunningham (Masa Libre de Grasa) ────────────────
 export function calcCunningham(leanMassKg: number): number | null {
   if (!leanMassKg || leanMassKg <= 0) return null;
   return Math.round(500 + (22 * leanMassKg));
@@ -199,13 +205,13 @@ export function calcCunningham(leanMassKg: number): number | null {
 export function mnaStatus(score: number): { status: string; color: string } {
   if (score >= 12) return { status: 'Estado Nutricional Normal', color: COLORS.neon };
   if (score >= 8)  return { status: 'Riesgo de Desnutrición', color: COLORS.gold };
-  return { status: 'Desnutrición', color: COLORS.red };
+  return { status: 'Desnutrición Confirmada', color: COLORS.red };
 }
 
 // ── Interpretación VGS (Valoración Global Subjetiva) ──────
 export function vgsStatus(status: 'A' | 'B' | 'C'): { status: string; color: string } {
-  if (status === 'A') return { status: 'Bien Nutrido', color: COLORS.neon };
-  if (status === 'B') return { status: 'Desnutrición Moderada', color: COLORS.gold };
+  if (status === 'A') return { status: 'Paciente Bien Nutrido', color: COLORS.neon };
+  if (status === 'B') return { status: 'Desnutrición Moderada o Riesgo', color: COLORS.gold };
   return { status: 'Desnutrición Severa', color: COLORS.red };
 }
 
@@ -225,11 +231,10 @@ export function calcSomatotype(
   const endo = -0.7182 + (0.1451 * correctedSum) - (0.00068 * Math.pow(correctedSum, 2)) + (0.0000014 * Math.pow(correctedSum, 3));
 
   // 2. Mesomorfia
-  // Requiere diámetros y corrección de perímetros por pliegues
   const hum = diameters.humerus || 0;
   const fem = diameters.femur || 0;
   const armCorr = (perimeters.arm || 0) - (folds.tri / 10);
-  const calfCorr = (perimeters.calf || 0) - (folds.abd / 10); // Usando abdominal como proxy si no hay pantorrilla
+  const calfCorr = (perimeters.calf || 0) - (folds.abd / 10); 
   
   const meso = (0.858 * hum) + (0.601 * fem) + (0.188 * armCorr) + (0.161 * calfCorr) - (0.131 * height_cm) + 4.5;
 
@@ -261,11 +266,11 @@ export function calcSomatotype(
 export function calcSarcopeniaRisk(gripStrength: number | null, sex: 'M' | 'F' | ''): string | null {
   if (!gripStrength || !sex) return null;
   const cutoff = sex === 'M' ? 27 : 16;
-  if (gripStrength < cutoff) return 'Probable Sarcopenia (Baja Fuerza)';
-  return 'Fuerza Muscular Normal';
+  if (gripStrength < cutoff) return 'Probable Sarcopenia (Baja Fuerza Muscular)';
+  return 'Fuerza Muscular dentro de Rango Normal';
 }
 
-// ── MASTER CALCULATOR ──────────────────────────────────────
+// ── CALCULADORA MAESTRA ────────────────────────────────────
 export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M' | 'F' | ''): CalculationResult {
   const w    = n(form.weight_kg);
   const h    = n(form.height_cm);
@@ -277,8 +282,8 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
   const pp   = ni(form.macro_prot_pct) || 15;
   const pc   = ni(form.macro_cho_pct) || 55;
   const pl   = ni(form.macro_fat_pct) || 30;
-  const knee = n(form.knee_height);
-  const uw   = n(form.usual_weight);
+  const knee = n(form.knee_height_cm);
+  const uw   = n(form.usual_weight_kg);
   const lwks = ni(form.weight_loss_weeks);
 
   const bmi    = calcBMI(w, h);
@@ -287,12 +292,10 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
   const adj    = bmi && bmi >= 30 && ideal ? calcAdjustedWeight(w, ideal) : null;
   const bmr    = calcBMR(w, h, age, sex);
   
-  // Faulkner para masa magra
   const faulk  = calcFaulkner(n(form.fold_triceps), n(form.fold_subscapular), n(form.fold_supraspinal), n(form.fold_abdominal), w, sex);
   const leanMass = faulk?.leanMass ?? n(form.muscle_mass_kg as any);
   const bmrC   = calcCunningham(leanMass);
 
-  // Usar Cunningham si el paciente es deportista o tiene masa magra calculada
   const finalBmr = bmrC && act >= 1.725 ? bmrC : bmr;
   const tdee   = finalBmr ? calcTDEE(finalBmr, act) : null;
 
@@ -305,16 +308,14 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
   const wLoss  = calcWeightLoss(uw, w, lwks);
   const macros = tdee ? calcMacros(tdee, pp, pc, pl, w) : null;
 
-  // Somatotipo
   const somato = calcSomatotype(
     { tri: n(form.fold_triceps), sub: n(form.fold_subscapular), sup: n(form.fold_supraspinal), abd: n(form.fold_abdominal) },
-    { humerus: n(form.diameter_humerus as any), femur: n(form.diameter_femur as any) },
-    { arm: n(form.perimeter_arm as any), calf: n(form.perimeter_calf as any) },
+    { humerus: n(form.diameter_humerus), femur: n(form.diameter_femur) },
+    { arm: n(form.perimeter_arm), calf: n(form.perimeter_calf) },
     h, w
   );
 
-  // Sarcopenia
-  const sarcRisk = calcSarcopeniaRisk(n(form.grip_strength_kg as any), sex);
+  const sarcRisk = calcSarcopeniaRisk(n(form.grip_strength_kg), sex);
 
   return {
     bmi,
@@ -345,17 +346,7 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
   };
 }
 
-// ── Edad desde fecha ────────────────────────────────────────
-export function calcAge(birthDate: string): number {
-  const today = new Date();
-  const birth = new Date(birthDate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return age;
-}
-
-// ── Formato ─────────────────────────────────────────────────
+// ── Formato de Fecha ────────────────────────────────────────
 export function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
 }

@@ -87,6 +87,7 @@ export default function LabsTerminal() {
                 <LabItem label="HbA1c" value={r.hba1c} unit="%" />
                 <LabItem label="COL. TOTAL" value={r.total_chol} unit="mg/dL" />
                 <LabItem label="TRIGLIC." value={r.triglycerides} unit="mg/dL" />
+                <LabItem label="ÁC. ÚRICO" value={r.uric_acid} unit="mg/dL" />
                 <LabItem label="TSH" value={r.tsh} unit="uUI/mL" />
                 <LabItem label="VITAMINA D" value={r.vitamin_d} unit="ng/mL" />
               </View>

@@ -81,6 +81,30 @@ export default function PatientProfile() {
           </View>
         </View>
 
+        {/* Functional Stats (Overhaul V2/V3) */}
+        {(latestRecord?.grip_strength_kg || latestRecord?.mna_score || latestRecord?.vgs_status) && (
+          <View style={styles.statsRow}>
+            {latestRecord?.grip_strength_kg && (
+              <View style={[styles.statCard, { borderColor: COLORS.purple }]}>
+                <Text style={styles.statLabel}>GRIP STRENGTH</Text>
+                <Text style={[styles.statValue, { color: COLORS.purple }]}>{latestRecord.grip_strength_kg} KG</Text>
+              </View>
+            )}
+            {latestRecord?.mna_score !== undefined && (
+              <View style={[styles.statCard, { borderColor: COLORS.gold }]}>
+                <Text style={styles.statLabel}>MNA SCORE</Text>
+                <Text style={[styles.statValue, { color: COLORS.gold }]}>{latestRecord.mna_score}</Text>
+              </View>
+            )}
+            {latestRecord?.vgs_status && (
+              <View style={[styles.statCard, { borderColor: COLORS.sky }]}>
+                <Text style={styles.statLabel}>VGS STATUS</Text>
+                <Text style={[styles.statValue, { color: COLORS.sky }]}>{latestRecord.vgs_status}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
         {/* Weight Trend Chart */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>WEIGHT EVOLUTION</Text>

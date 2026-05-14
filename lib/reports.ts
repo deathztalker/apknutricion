@@ -50,7 +50,7 @@ export async function generateClinicalReport(
             <div class="data-item"><span class="label">NOMBRE:</span> ${patient.full_name.toUpperCase()}</div>
             <div class="data-item"><span class="label">PREVISIÓN:</span> ${patient.insurance}</div>
             <div class="data-item"><span class="label">SEXO:</span> ${patient.sex === 'M' ? 'MASCULINO' : 'FEMENINO'}</div>
-            <div class="data-item"><span class="label">EDAD:</span> ${new Date().getFullYear() - new Date(patient.birth_date).getFullYear()} AÑOS</div>
+            <div class="data-item"><span class="label">EDAD:</span> ${patient.birth_date ? new Date().getFullYear() - new Date(patient.birth_date).getFullYear() : 'N/A'} AÑOS</div>
           </div>
         </div>
 
@@ -65,6 +65,21 @@ export async function generateClinicalReport(
             <div class="data-item"><span class="label">MASA MAGRA:</span> ${calc.leanMassKg} KG</div>
           </div>
         </div>
+
+        ${calc.somatotype || calc.sarcopeniaRisk ? `
+        <div class="section">
+          <div class="section-title">SOMATOTIPO Y SARCOPENIA</div>
+          <div class="grid">
+            ${calc.somatotype ? `
+            <div class="data-item"><span class="label">SOMATOTIPO:</span> ${calc.somatotype.endo} - ${calc.somatotype.meso} - ${calc.somatotype.ecto}</div>
+            ` : ''}
+            ${calc.sarcopeniaRisk ? `
+            <div class="data-item"><span class="label">RIESGO SARCOPENIA:</span> ${calc.sarcopeniaRisk}</div>
+            ` : ''}
+            ${record.grip_strength_kg ? `<div class="data-item"><span class="label">FUERZA AGARRE:</span> ${record.grip_strength_kg} KG</div>` : ''}
+          </div>
+        </div>
+        ` : ''}
 
         <div class="section">
           <div class="section-title">ESTADO CLÍNICO Y RENAL</div>
