@@ -22,7 +22,7 @@ jobs:
           expo-version: latest
 
       - name: 📦 Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: 🚀 Export Web
         run: npx expo export --platform web
