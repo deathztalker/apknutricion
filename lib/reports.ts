@@ -14,22 +14,22 @@ export async function generateClinicalReport(
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
         <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+          body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: ${COLORS.bg}; color: ${COLORS.text}; }
           .header { border-bottom: 4px solid ${COLORS.neon}; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-          .title { font-size: 28px; font-weight: 900; color: #000; margin: 0; }
-          .subtitle { font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+          .title { font-size: 28px; font-weight: 900; color: ${COLORS.neon}; margin: 0; letter-spacing: 2px; }
+          .subtitle { font-size: 14px; color: ${COLORS.pink}; text-transform: uppercase; letter-spacing: 1px; }
           
           .section { margin-bottom: 25px; }
-          .section-title { font-size: 16px; font-weight: bold; background: #f0f0f0; padding: 8px 12px; border-left: 4px solid ${COLORS.pink}; margin-bottom: 15px; }
+          .section-title { font-size: 16px; font-weight: bold; background: ${COLORS.bg1}; color: ${COLORS.neon}; padding: 8px 12px; border-left: 4px solid ${COLORS.pink}; margin-bottom: 15px; text-transform: uppercase; }
           
           .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-          .data-item { font-size: 13px; margin-bottom: 5px; }
-          .label { font-weight: bold; color: #555; }
+          .data-item { font-size: 13px; margin-bottom: 5px; color: ${COLORS.text}; }
+          .label { font-weight: bold; color: ${COLORS.muted}; }
           
           .ai-box { background: rgba(163, 255, 0, 0.05); border: 1px solid ${COLORS.neon}; padding: 15px; border-radius: 8px; }
-          .ai-text { font-size: 14px; line-height: 1.6; font-style: italic; }
+          .ai-text { font-size: 14px; line-height: 1.6; color: ${COLORS.text}; }
           
-          .footer { margin-top: 50px; font-size: 10px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }
+          .footer { margin-top: 50px; font-size: 10px; color: ${COLORS.dim}; text-align: center; border-top: 1px solid ${COLORS.bg4}; padding-top: 10px; }
         </style>
       </head>
       <body>
@@ -38,7 +38,7 @@ export async function generateClinicalReport(
             <h1 class="title">INFORME CLÍNICO NUTRICIONAL</h1>
             <span class="subtitle">NutriCESFAM System Override</span>
           </div>
-          <div style="text-align: right">
+          <div style="text-align: right; color: ${COLORS.muted}; font-size: 12px;">
             <span class="label">FECHA:</span> ${new Date().toLocaleDateString('es-CL')}<br/>
             <span class="label">S. ID:</span> ${patient.id?.slice(0,8)}
           </div>

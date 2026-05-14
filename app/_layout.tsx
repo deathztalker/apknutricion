@@ -19,7 +19,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="calculator" options={{ title: 'Calculadora Clínica' }} />
+        <Stack.Screen name="calculator" options={{ title: 'CLINICAL OVERRIDE' }} />
       </Stack>
     </View>
   );
