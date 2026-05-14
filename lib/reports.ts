@@ -61,8 +61,18 @@ export async function generateClinicalReport(
             <div class="data-item"><span class="label">TALLA:</span> ${record.height_cm} CM</div>
             <div class="data-item"><span class="label">IMC:</span> ${calc.bmi} (${calc.bmiStatus})</div>
             <div class="data-item"><span class="label">PESO IDEAL:</span> ${calc.idealWeight} KG</div>
-            <div class="data-item"><span class="label">% GRASA (FAULKNER):</span> ${calc.fatPercent}%</div>
+            <div class="data-item"><span class="label">% GRASA:</span> ${calc.fatPercent}%</div>
             <div class="data-item"><span class="label">MASA MAGRA:</span> ${calc.leanMassKg} KG</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">ESTADO CLÍNICO Y RENAL</div>
+          <div class="grid">
+            <div class="data-item"><span class="label">P. ARTERIAL:</span> ${record.systolic_bp}/${record.diastolic_bp} mmHg (${calc.bpStatus})</div>
+            <div class="data-item"><span class="label">GFR (RENAL):</span> ${calc.gfr ? `${calc.gfr} ml/min` : 'N/A'}</div>
+            <div class="data-item"><span class="label">ESTADIO KDIGO:</span> ${calc.kdigoStage || 'N/A'}</div>
+            <div class="data-item"><span class="label">PÉRDIDA PESO:</span> ${calc.weightLossPct ? `${calc.weightLossPct}% (${calc.weightLossRisk})` : 'ESTABLE'}</div>
           </div>
         </div>
 
@@ -73,6 +83,12 @@ export async function generateClinicalReport(
             <div class="data-item"><span class="label">VCT (REQ. DIARIO):</span> ${calc.tdee} KCAL</div>
             <div class="data-item"><span class="label">REQ. HÍDRICO:</span> ${calc.waterLiters} L/DÍA</div>
           </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">ANAMNESIS Y OBSERVACIONES</div>
+          <div class="data-item"><span class="label">TIPO DE DIETA:</span> ${record.diet_type || 'OMNÍVORA'}</div>
+          <div class="data-item" style="margin-top: 10px;"><span class="label">OBSERVACIONES:</span><br/>${record.observations || 'SIN OBSERVACIONES ADICIONALES'}</div>
         </div>
 
         <div class="section">
