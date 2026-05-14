@@ -54,6 +54,8 @@ export interface RecordFormData extends Partial<ClinicalRecord> {
   knee_height?: string;
   usual_weight?: string;
   weight_loss_weeks?: string;
+  med_dose?: string;
+  med_conc?: string;
   // Overrides for parsing
   weight_kg?: any;
   height_cm?: any;

@@ -43,7 +43,7 @@ export default function Calculator() {
   const [results, setResults] = useState<CalculationResult | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'input' | 'results' | 'ai'>('input');
+  const [activeTab, setActiveTab] = useState<'input' | 'clinical' | 'results' | 'ai' | 'tables'>('input');
 
   const handleCalculate = async () => {
     if (!form.weight_kg || !form.height_cm) {
@@ -59,11 +59,11 @@ export default function Calculator() {
     try {
       const analysis = await analyzeWithGemini(patient, form as any, calcResults);
       setAiAnalysis(analysis);
-      setActiveTab('results');
+      if (activeTab === 'input' || activeTab === 'clinical') setActiveTab('results');
     } catch (error) {
       console.error('AI Error:', error);
       Alert.alert('Aviso', 'No se pudo conectar con la IA. Se muestran solo alertas locales.');
-      setActiveTab('results');
+      if (activeTab === 'input' || activeTab === 'clinical') setActiveTab('results');
     } finally {
       setLoading(false);
     }
@@ -114,24 +114,23 @@ export default function Calculator() {
       <LinearGradient colors={[COLORS.bg1, COLORS.bg]} style={StyleSheet.absoluteFill} />
       
       <View style={styles.tabs}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'input' && styles.activeTab]} 
-          onPress={() => setActiveTab('input')}
-        >
-          <Text style={[styles.tabText, activeTab === 'input' && styles.activeTabText]}>INPUT</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'results' && styles.activeTab]} 
-          onPress={() => setActiveTab('results')}
-        >
-          <Text style={[styles.tabText, activeTab === 'results' && styles.activeTabText]}>METRICS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'ai' && styles.activeTab]} 
-          onPress={() => setActiveTab('ai')}
-        >
-          <Text style={[styles.tabText, activeTab === 'ai' && styles.activeTabText]}>AI CLINIC</Text>
-        </TouchableOpacity>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
+          <TouchableOpacity style={[styles.tab, activeTab === 'input' && styles.activeTab]} onPress={() => setActiveTab('input')}>
+            <Text style={[styles.tabText, activeTab === 'input' && styles.activeTabText]}>INPUT</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, activeTab === 'clinical' && styles.activeTab]} onPress={() => setActiveTab('clinical')}>
+            <Text style={[styles.tabText, activeTab === 'clinical' && styles.activeTabText]}>CLÍNICA</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, activeTab === 'results' && styles.activeTab]} onPress={() => setActiveTab('results')}>
+            <Text style={[styles.tabText, activeTab === 'results' && styles.activeTabText]}>METRICS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, activeTab === 'ai' && styles.activeTab]} onPress={() => setActiveTab('ai')}>
+            <Text style={[styles.tabText, activeTab === 'ai' && styles.activeTabText]}>AI CLINIC</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, activeTab === 'tables' && styles.activeTab]} onPress={() => setActiveTab('tables')}>
+            <Text style={[styles.tabText, activeTab === 'tables' && styles.activeTabText]}>TABLAS</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -170,20 +169,117 @@ export default function Calculator() {
               {renderInput('FAT', 'macro_fat_pct', '30')}
             </View>
 
-            <TouchableOpacity 
-              style={styles.calcButton} 
-              onPress={handleCalculate}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color={COLORS.bg} />
-              ) : (
-                <>
-                  <Ionicons name="flash" size={20} color={COLORS.bg} />
-                  <Text style={styles.calcButtonText}>EXECUTE ANALYSIS</Text>
-                </>
-              )}
+            <TouchableOpacity style={styles.calcButton} onPress={handleCalculate} disabled={loading}>
+              {loading ? <ActivityIndicator color={COLORS.bg} /> : <><Ionicons name="flash" size={20} color={COLORS.bg} /><Text style={styles.calcButtonText}>EXECUTE ANALYSIS</Text></>}
             </TouchableOpacity>
+          </View>
+        )}
+
+        {activeTab === 'clinical' && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>EVALUACIÓN CLÍNICA (POSTRADO)</Text>
+            
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>TALLA ESTIMADA (CHUMLEA)</Text>
+              <View style={styles.row}>
+                {renderInput('ALT. RODILLA (CM)', 'knee_height', '0')}
+              </View>
+              {results?.estimatedHeight ? (
+                <View style={styles.metricRow}>
+                  <Text style={styles.metricLabel}>TALLA CALCULADA</Text>
+                  <Text style={[styles.metricValue, { color: COLORS.neon }]}>{results.estimatedHeight} CM</Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>FILTRACIÓN RENAL (COCKCROFT-GAULT)</Text>
+              <View style={styles.row}>
+                {renderInput('CREATININA (mg/dL)', 'creatinine', '1.0')}
+              </View>
+              {results?.gfr ? (
+                <>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>TFG</Text>
+                    <Text style={[styles.metricValue, { color: COLORS.neon }]}>{results.gfr} ml/min</Text>
+                  </View>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>ESTADIO KDIGO</Text>
+                    <Text style={styles.metricValue}>{results.kdigoStage}</Text>
+                  </View>
+                </>
+              ) : null}
+            </View>
+
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>RIESGO POR PÉRDIDA DE PESO</Text>
+              <View style={styles.row}>
+                {renderInput('PESO HABITUAL (KG)', 'usual_weight', '0.0')}
+                {renderInput('TIEMPO (SEMANAS)', 'weight_loss_weeks', '0')}
+              </View>
+              {results?.weightLossPct ? (
+                <>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>PÉRDIDA</Text>
+                    <Text style={[styles.metricValue, { color: COLORS.pink }]}>{results.weightLossPct}%</Text>
+                  </View>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>RIESGO</Text>
+                    <Text style={styles.metricValue}>{results.weightLossRisk}</Text>
+                  </View>
+                </>
+              ) : null}
+            </View>
+
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>DOSIS FÁRMACO/SUPLEMENTO</Text>
+              <View style={styles.row}>
+                {renderInput('DOSIS PRESCRITA (mg/kg)', 'med_dose', '0')}
+                {renderInput('CONCENTRACIÓN (mg/ml)', 'med_conc', '0')}
+              </View>
+              {(form.med_dose && form.med_conc && form.weight_kg) ? (
+                <View style={styles.metricRow}>
+                  <Text style={styles.metricLabel}>VOLUMEN A ADMINISTRAR</Text>
+                  <Text style={[styles.metricValue, { color: COLORS.pink, fontSize: 18 }]}>
+                    {((parseFloat(form.med_dose) * parseFloat(form.weight_kg)) / parseFloat(form.med_conc)).toFixed(1)} ml
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            <TouchableOpacity style={styles.calcButton} onPress={handleCalculate} disabled={loading}>
+              {loading ? <ActivityIndicator color={COLORS.bg} /> : <><Ionicons name="flash" size={20} color={COLORS.bg} /><Text style={styles.calcButtonText}>UPDATE METRICS</Text></>}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {activeTab === 'tables' && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>BIBLIOTECA CLÍNICA</Text>
+            
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>ESTADO NUTRICIONAL (IMC)</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.neon}}>Normal Adulto:</Text> 18.5 - 24.9</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.neon}}>Normal Adulto Mayor:</Text> 23.0 - 27.9</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.pink}}>Obesidad Adulto:</Text> ≥ 30.0</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.pink}}>Obesidad Adulto Mayor:</Text> ≥ 32.0</Text>
+            </View>
+
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>RIESGO CARDIOVASCULAR (CINTURA)</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.neon}}>Hombres Bajo Riesgo:</Text> {'<'} 94 cm</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.pink}}>Hombres Alto Riesgo:</Text> ≥ 94 cm</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.neon}}>Mujeres Bajo Riesgo:</Text> {'<'} 80 cm</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.pink}}>Mujeres Alto Riesgo:</Text> ≥ 80 cm</Text>
+            </View>
+
+            <View style={styles.resultCard}>
+              <Text style={styles.cardHeader}>PRESIÓN ARTERIAL (HTA MINSAL)</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.neon}}>Óptima:</Text> {'<'} 120 / {'<'} 80</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.text}}>Normal:</Text> 120-129 / 80-84</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.purple}}>Normal Alta:</Text> 130-139 / 85-89</Text>
+              <Text style={styles.aiText}><Text style={{color: COLORS.pink}}>Hipertensión:</Text> ≥ 140 / ≥ 90</Text>
+            </View>
           </View>
         )}
 
@@ -325,8 +421,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.bg4,
   },
+  tabsScroll: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
   tab: {
-    flex: 1,
+    paddingHorizontal: 15,
     paddingVertical: 16,
     alignItems: 'center',
     borderBottomWidth: 2,
