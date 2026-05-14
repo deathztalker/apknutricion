@@ -1,9 +1,9 @@
-// lib/ai.ts — Motor de IA Clínica con Claude + Reglas MINSAL
+// lib/ai.ts — Motor de IA Clínica con Google Gemini + Reglas MINSAL
 import { ClinicalRecord, Patient, AIAnalysis, ClinicalAlert, CalculationResult } from '@/types';
-import { COLORS } from '@/constants/theme';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const CLAUDE_API_KEY = process.env.EXPO_PUBLIC_CLAUDE_API_KEY;
-const CLAUDE_MODEL   = 'claude-sonnet-4-20250514';
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // ══════════════════════════════════════════════════════════
 // REGLAS CLÍNICAS HARDCODEADAS (fallback offline + capa base)
@@ -28,7 +28,7 @@ export function generateRuleBasedAlerts(
     }
     if (calc.bmi >= 35) {
       alerts.push({ severity: 'danger', icon: '🚨', title: 'Obesidad Grado II–III',
-        description: `IMC ${calc.bmi} — Derivar a equipo multidisciplinario. Evaluar riesgo quirúrgico y comorbilidades asociadas.` });
+        description: `IMC ${calc.bmi} — Derivar a equipo multidisciplinario. Evaluar riesgo quirúrgico y comorbilidades operativas.` });
     }
   }
 
@@ -131,7 +131,7 @@ export function generateRuleBasedAlerts(
 }
 
 // ══════════════════════════════════════════════════════════
-// CLAUDE API — Análisis Narrativo Profundo
+// GEMINI API — Análisis Narrativo Profundo
 // ══════════════════════════════════════════════════════════
 function buildClinicalPrompt(
   patient: Partial<Patient>,
@@ -141,7 +141,7 @@ function buildClinicalPrompt(
 ): string {
   const age = patient.birth_date
     ? Math.floor((Date.now() - new Date(patient.birth_date).getTime()) / (365.25 * 24 * 3600 * 1000))
-    : record.ai_model ? 0 : 0;
+    : 0;
 
   return `Eres una nutricionista clínica experta en Chile, con especialidad en dietoterapia y salud pública basada en normativa MINSAL.
 
@@ -212,37 +212,21 @@ Por favor, proporciona un análisis clínico nutricional completo y estructurado
 }`;
 }
 
-export async function analyzeWithClaude(
+export async function analyzeWithGemini(
   patient: Partial<Patient>,
   record: Partial<ClinicalRecord>,
-  calc: CalculationResult,
-  onProgress?: (text: string) => void
+  calc: CalculationResult
 ): Promise<AIAnalysis> {
   const ruleAlerts = generateRuleBasedAlerts(record, calc, 0, patient.sex || '');
-  let rawText = '';
 
-  // ── Try Claude API ────────────────────────────────────────
-  if (CLAUDE_API_KEY && CLAUDE_API_KEY.startsWith('sk-ant')) {
+  if (GEMINI_API_KEY) {
     try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const prompt = buildClinicalPrompt(patient, record, calc, ruleAlerts);
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': CLAUDE_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: CLAUDE_MODEL,
-          max_tokens: 1800,
-          system: 'Eres una nutricionista clínica chilena experta. Responde SIEMPRE en JSON válido sin markdown ni backticks.',
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      const data = await response.json();
-      rawText = data.content?.[0]?.text || '';
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const rawText = response.text();
 
       // Parse JSON response
       const clean = rawText.replace(/```json|```/g, '').trim();
@@ -258,7 +242,7 @@ export async function analyzeWithClaude(
         raw_text: rawText,
       };
     } catch (err) {
-      console.warn('Claude API falló, usando análisis basado en reglas:', err);
+      console.warn('Gemini API falló, usando análisis basado en reglas:', err);
     }
   }
 
@@ -313,7 +297,7 @@ function generateRuleBasedAnalysis(
       'Incorporar actividad física moderada 3 veces por semana',
     ],
     follow_up: `Control nutricional en 4 semanas. Monitorear peso, ICC y adherencia al plan. ${bmi && bmi >= 30 ? 'Solicitar perfil lipídico y glucemia en control.' : ''}`,
-    raw_text: '[Análisis basado en reglas clínicas MINSAL — sin API key de Claude]',
+    raw_text: '[Análisis basado en reglas clínicas MINSAL — sin API key de Gemini]',
   };
 }
 
@@ -322,27 +306,19 @@ export async function askClinicalQuestion(
   question: string,
   context?: string
 ): Promise<string> {
-  if (!CLAUDE_API_KEY || !CLAUDE_API_KEY.startsWith('sk-ant')) {
+  if (!GEMINI_API_KEY) {
     return generateOfflineAnswer(question);
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 800,
-        system: `Eres una nutricionista clínica especialista en Chile. Respondes en español de forma clara, basada en evidencia y normativa MINSAL. Eres empática, profesional y directa. Si la pregunta es fuera de tu alcance clínico, lo indicas amablemente.${context ? `\n\nContexto del paciente: ${context}` : ''}`,
-        messages: [{ role: 'user', content: question }],
-      }),
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: `Eres una nutricionista clínica especialista en Chile. Respondes en español de forma clara, basada en evidencia y normativa MINSAL. Eres empática, profesional y directa. Si la pregunta es fuera de tu alcance clínico, lo indicas amablemente.${context ? `\n\nContexto del paciente: ${context}` : ''}`
     });
-    const data = await response.json();
-    return data.content?.[0]?.text || 'No pude procesar tu consulta. Intenta de nuevo.';
+
+    const result = await model.generateContent(question);
+    const response = await result.response;
+    return response.text() || 'No pude procesar tu consulta. Intenta de nuevo.';
   } catch {
     return generateOfflineAnswer(question);
   }
@@ -358,5 +334,5 @@ function generateOfflineAnswer(q: string): string {
     return 'La recomendación proteica según MINSAL es 10–20% del VCT. En adultos sanos: 0.8–1.0 g/kg/día. En adultos mayores: 1.0–1.2 g/kg/día. Con ERC sin diálisis se reduce. Con sarcopenia o trauma se aumenta a 1.2–1.5 g/kg/día.';
   if (ql.includes('diabetes') || ql.includes('glucosa'))
     return 'En diabetes mellitus tipo 2: restricción de azúcares simples, índice glucémico bajo, fraccionamiento en 5–6 tiempos, HCO de absorción lenta. Objetivo VCT según peso ideal. Meta HbA1c < 7% (individualizar según MINSAL GES Diabetes).';
-  return 'Para esta consulta, te recomiendo revisar las Guías Alimentarias MINSAL Chile 2023 o consultar directamente con un especialista. Puedo ayudarte mejor cuando configures la API key de Claude para análisis más profundos.';
+  return 'Para esta consulta, te recomiendo revisar las Guías Alimentarias MINSAL Chile 2023 o consultar directamente con un especialista. Puedo ayudarte mejor cuando configures la API key de Gemini para análisis más profundos.';
 }

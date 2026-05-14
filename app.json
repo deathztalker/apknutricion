@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#0b0d12"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.camila.nutricesfam"
@@ -35,6 +37,14 @@
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "nutricesfam"
+    "scheme": "nutricesfam",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0b324198-6ad4-4957-8ee6-cf4e90c6aeec"
+      }
+    }
   }
 }

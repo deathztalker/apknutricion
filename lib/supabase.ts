@@ -162,10 +162,39 @@ export const mealPlanService = {
   async update(id: string, data: Record<string, unknown>) {
     return supabase.from('meal_plans').update(data).eq('id', id);
   },
+async delete(id: string) {
+  return supabase.from('meal_plans').delete().eq('id', id);
+},
+};
 
-  async delete(id: string) {
-    return supabase.from('meal_plans').delete().eq('id', id);
-  },
+// ── Biochemical helpers ──────────────────────────────────
+export const biochemicalService = {
+async getByPatient(patientId: string) {
+  return supabase
+    .from('biochemical_records')
+    .select('*')
+    .eq('patient_id', patientId)
+    .order('exam_date', { ascending: false });
+},
+
+async create(data: Record<string, unknown>) {
+  return supabase.from('biochemical_records').insert(data).select().single();
+},
+};
+
+// ── Lifestyle helpers ────────────────────────────────────
+export const lifestyleService = {
+async getByPatient(patientId: string) {
+  return supabase
+    .from('lifestyle_records')
+    .select('*')
+    .eq('patient_id', patientId)
+    .order('record_date', { ascending: false });
+},
+
+async create(data: Record<string, unknown>) {
+  return supabase.from('lifestyle_records').insert(data).select().single();
+},
 };
 
 // ── AI Interaction log ─────────────────────────────────────

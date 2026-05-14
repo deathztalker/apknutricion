@@ -1,37 +1,37 @@
 // constants/theme.ts
 export const COLORS = {
   // Backgrounds
-  bg:     '#0b0d12',
-  bg1:    '#0f1219',
-  bg2:    '#141820',
-  bg3:    '#1a2030',
-  bg4:    '#1e2640',
+  bg:     '#050505', // Deep abyss black
+  bg1:    '#0f0a0a', // Dark blood undertone
+  bg2:    '#1a1111', // Slightly lighter dark red-black
+  bg3:    '#251515',
+  bg4:    '#301b1b',
 
-  // Brand
-  neon:   '#00ff88',
-  neon2:  '#00cc6a',
-  stg:    '#00693e',   // Santo Tomás Green
-  pink:   '#ff6eb4',
-  pink2:  '#e05090',
-  purple: '#9d4dff',
-  purple2:'#7a30dd',
+  // Brand (Horror Punk)
+  neon:   '#a3ff00', // Toxic Acid Green
+  neon2:  '#7acc00',
+  stg:    '#00693e', // Keep original STG just in case, or change to darker green
+  pink:   '#ff003c', // Blood Red / Neon Red
+  pink2:  '#cc0030', // Darker Blood Red
+  purple: '#8000ff', // Deep ultraviolet
+  purple2:'#5500aa',
 
   // Semantic
-  gold:   '#f5c842',
-  red:    '#ff3355',
-  sky:    '#00d0ff',
-  orange: '#ff6b2b',
+  gold:   '#ffaa00', // Warning orange-gold
+  red:    '#ff0000', // Pure bright red
+  sky:    '#00ffff', // Cyan for contrast
+  orange: '#ff5500',
 
   // Text
-  text:   '#eef2ff',
-  muted:  '#7a8a9a',
-  dim:    '#3a4a5a',
+  text:   '#e0e0e0',
+  muted:  '#807070', // Grey with red hue
+  dim:    '#504040',
   white:  '#ffffff',
 
   // Card
-  card:   'rgba(20,24,32,0.9)',
-  border: 'rgba(0,255,136,0.15)',
-  borderB:'rgba(0,255,136,0.4)',
+  card:   'rgba(26, 17, 17, 0.95)',
+  border: 'rgba(255, 0, 60, 0.3)', // Red border
+  borderB:'rgba(163, 255, 0, 0.4)', // Acid green border
 };
 
 export const FONTS = {
@@ -58,25 +58,25 @@ export const RADIUS = {
 
 export const SHADOWS = {
   neon: {
-    shadowColor: '#00ff88',
+    shadowColor: '#a3ff00',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 10,
   },
   pink: {
-    shadowColor: '#ff6eb4',
+    shadowColor: '#ff003c',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 8,
   },
   card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    elevation: 8,
   },
 };
 

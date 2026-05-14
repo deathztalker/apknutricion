@@ -189,6 +189,74 @@ export const LAB_RANGES = {
   albumin:      { low: 3.5, optLow: 3.5, optHigh: 5.0 },
 };
 
+// ── TMB — Cunningham (Para deportistas) ──────────────────
+export function calcCunningham(leanMassKg: number): number | null {
+  if (!leanMassKg || leanMassKg <= 0) return null;
+  return Math.round(500 + (22 * leanMassKg));
+}
+
+// ── Interpretación MNA (Mini Nutritional Assessment) ─────
+export function mnaStatus(score: number): { status: string; color: string } {
+  if (score >= 12) return { status: 'Estado Nutricional Normal', color: COLORS.neon };
+  if (score >= 8)  return { status: 'Riesgo de Desnutrición', color: COLORS.gold };
+  return { status: 'Desnutrición', color: COLORS.red };
+}
+
+// ── Interpretación VGS (Valoración Global Subjetiva) ──────
+export function vgsStatus(status: 'A' | 'B' | 'C'): { status: string; color: string } {
+  if (status === 'A') return { status: 'Bien Nutrido', color: COLORS.neon };
+  if (status === 'B') return { status: 'Desnutrición Moderada', color: COLORS.gold };
+  return { status: 'Desnutrición Severa', color: COLORS.red };
+}
+
+// ── Somatotipo — Heath-Carter 1990 ───────────────────────
+export function calcSomatotype(
+  folds: { tri: number; sub: number; sup: number; abd: number },
+  diameters: { humerus: number; femur: number },
+  perimeters: { arm: number; calf: number },
+  height_cm: number,
+  weight_kg: number
+) {
+  if (!folds.tri || !height_cm || !weight_kg) return null;
+
+  // 1. Endomorfia (corregida por talla)
+  const sumFolds = folds.tri + folds.sub + folds.sup;
+  const correctedSum = sumFolds * (170.18 / height_cm);
+  const endo = -0.7182 + (0.1451 * correctedSum) - (0.00068 * Math.pow(correctedSum, 2)) + (0.0000014 * Math.pow(correctedSum, 3));
+
+  // 2. Mesomorfia
+  // Requiere diámetros y corrección de perímetros por pliegues
+  const hum = diameters.humerus || 0;
+  const fem = diameters.femur || 0;
+  const armCorr = (perimeters.arm || 0) - (folds.tri / 10);
+  const calfCorr = (perimeters.calf || 0) - (folds.abd / 10); // Usando abdominal como proxy si no hay pantorrilla
+  
+  const meso = (0.858 * hum) + (0.601 * fem) + (0.188 * armCorr) + (0.161 * calfCorr) - (0.131 * height_cm) + 4.5;
+
+  // 3. Ectomorfia (HWR: Height Weight Ratio)
+  const hwr = height_cm / Math.pow(weight_kg, 1/3);
+  let ecto = 0;
+  if (hwr >= 40.75) {
+    ecto = 0.732 * hwr - 28.58;
+  } else if (hwr > 38.25) {
+    ecto = 0.463 * hwr - 17.63;
+  } else {
+    ecto = 0.1;
+  }
+
+  // Coordenadas X, Y
+  const x = ecto - endo;
+  const y = 2 * meso - (ecto + endo);
+
+  return {
+    endo: Math.round(endo * 10) / 10,
+    meso: Math.round(meso * 10) / 10,
+    ecto: Math.round(ecto * 10) / 10,
+    x: Math.round(x * 100) / 100,
+    y: Math.round(y * 100) / 100
+  };
+}
+
 // ── MASTER CALCULATOR ──────────────────────────────────────
 export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M' | 'F' | ''): CalculationResult {
   const w    = n(form.weight_kg);
@@ -210,16 +278,32 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
   const ideal  = calcIdealWeight(h, sex);
   const adj    = bmi && bmi >= 30 && ideal ? calcAdjustedWeight(w, ideal) : null;
   const bmr    = calcBMR(w, h, age, sex);
-  const tdee   = bmr ? calcTDEE(bmr, act) : null;
+  
+  // Faulkner para masa magra
+  const faulk  = calcFaulkner(n(form.fold_triceps), n(form.fold_subscapular), n(form.fold_supraspinal), n(form.fold_abdominal), w, sex);
+  const leanMass = faulk?.leanMass ?? n(form.muscle_mass_kg as any);
+  const bmrC   = calcCunningham(leanMass);
+
+  // Usar Cunningham si el paciente es deportista o tiene masa magra calculada
+  const finalBmr = bmrC && act >= 1.725 ? bmrC : bmr;
+  const tdee   = finalBmr ? calcTDEE(finalBmr, act) : null;
+
   const water  = calcWater(w, age);
   const cv     = calcCVRisk(waist, sex);
   const ict    = calcICT(waist, h);
   const bp     = pas && pad ? bpStatus(pas, pad) : null;
-  const faulk  = calcFaulkner(n(form.fold_triceps), n(form.fold_subscapular), n(form.fold_supraspinal), n(form.fold_abdominal), w, sex);
   const gfr    = calcGFR(crea, age, w, sex);
   const estH   = calcChumlea(knee, age, sex);
   const wLoss  = calcWeightLoss(uw, w, lwks);
   const macros = tdee ? calcMacros(tdee, pp, pc, pl, w) : null;
+
+  // Somatotipo
+  const somato = calcSomatotype(
+    { tri: n(form.fold_triceps), sub: n(form.fold_subscapular), sup: n(form.fold_supraspinal), abd: n(form.fold_abdominal) },
+    { humerus: n(form.diameter_humerus as any), femur: n(form.diameter_femur as any) },
+    { arm: n(form.perimeter_arm as any), calf: n(form.perimeter_calf as any) },
+    h, w
+  );
 
   return {
     bmi,
@@ -228,6 +312,7 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
     idealWeight: ideal ? Math.round(ideal * 10) / 10 : null,
     adjustedWeight: adj,
     bmr,
+    bmrCunningham: bmrC,
     tdee,
     waterLiters: water,
     cvRisk: cv?.risk ?? null,
@@ -236,7 +321,7 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
     bpColor: bp?.color ?? COLORS.muted,
     fatPercent: faulk?.fatPct ?? null,
     fatMassKg: faulk?.fatMass ?? null,
-    leanMassKg: faulk?.leanMass ?? null,
+    leanMassKg: leanMass,
     foldSum: faulk?.sigma ?? null,
     gfr: gfr?.gfr ?? null,
     kdigoStage: gfr?.stage ?? null,
@@ -244,6 +329,7 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
     weightLossPct: wLoss?.pct ?? null,
     weightLossRisk: wLoss?.risk ?? null,
     macros,
+    somatotype: somato,
   };
 }
 
