@@ -50,12 +50,21 @@ export default function Index() {
             <Text style={styles.secondaryButtonText}>GUEST ACCESS</Text>
           </TouchableOpacity>
         </View>
+
+        <Text style={styles.copyright}>© 2026 CAMILA. ALL RIGHTS RESERVED.</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  copyright: {
+    color: COLORS.dim,
+    fontSize: 10,
+    letterSpacing: 2,
+    marginTop: 40,
+    textTransform: 'uppercase',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.bg,

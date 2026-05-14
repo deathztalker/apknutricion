@@ -160,6 +160,11 @@ ANTROPOMETRÍA:
 COMPOSICIÓN CORPORAL (Faulkner):
 - % Grasa: ${calc.fatPercent || '—'}% | Masa grasa: ${calc.fatMassKg || '—'} kg | Masa magra: ${calc.leanMassKg || '—'} kg
 
+SARCOPENIA Y GERIATRÍA:
+- Fuerza de agarre: ${record.grip_strength_kg || '—'} kg | Riesgo EWGSOP2: ${calc.sarcopeniaRisk || '—'}
+- Perímetro pantorrilla: ${record.calf_circumference_cm || '—'} cm
+- Score MNA: ${record.mna_score || '—'} | VGS: ${record.vgs_status || '—'}
+
 SIGNOS VITALES:
 - PA: ${record.systolic_bp || '—'}/${record.diastolic_bp || '—'} mmHg (${calc.bpStatus || '—'})
 - FC: ${record.heart_rate || '—'} lpm | T°: ${record.temperature || '—'}°C | SatO2: ${record.oxygen_sat || '—'}%
