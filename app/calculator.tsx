@@ -27,7 +27,7 @@ export default function Calculator() {
   });
 
   const [patient, setPatient] = useState<Partial<Patient>>({
-    full_name: 'UNKNOWN SUBJECT',
+    full_name: 'SUJETO DESCONOCIDO',
     age: 0, sex: 'M', insurance: 'FONASA',
   });
 
@@ -57,7 +57,7 @@ export default function Calculator() {
     }
   }, [patientId]);
 
-  // Real-time calculation sync
+  // Real-time updates
   useEffect(() => {
     const calc = calculateAll(form, patient.age || 0, patient.sex as any);
     setResults(calc);
@@ -65,7 +65,7 @@ export default function Calculator() {
 
   const handleAINeuralDissection = async () => {
     if (!form.weight_kg || !form.height_cm) {
-      Alert.alert('DATA DEFICIENCY', 'Weight and Height are mandatory for neural dissection.');
+      Alert.alert('FALLO BIOMÉTRICO', 'Peso y Talla son obligatorios.');
       return;
     }
     setLoading(true);
@@ -75,7 +75,7 @@ export default function Calculator() {
       setActiveTab('ai');
     } catch (error) {
       console.error('AI Failure:', error);
-      Alert.alert('LINK FAILURE', 'Could not establish connection with Gemini core.');
+      Alert.alert('FALLO DE VÍNCULO', 'Núcleo Gemini fuera de línea.');
     } finally {
       setLoading(false);
     }
@@ -83,13 +83,13 @@ export default function Calculator() {
 
   const handleSave = async () => {
     if (!results || !patientId) {
-      Alert.alert('SYSTEM ERROR', 'No subject selected for persistence.');
+      Alert.alert('ERROR', 'Sujeto no identificado para guardado.');
       return;
     }
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) throw new Error('No autorizado');
       const { error } = await recordService.create({
         patient_id: patientId, user_id: user.id, record_date: new Date().toISOString(),
         weight_kg: parseFloat(form.weight_kg!), height_cm: parseFloat(form.height_cm!),
@@ -108,9 +108,9 @@ export default function Calculator() {
         mna_score: form.mna_score, vgs_status: form.vgs_status, somatotype: results.somatotype,
       } as any);
       if (error) throw error;
-      Alert.alert('SYNC COMPLETE', 'Biometric record persisted to database.');
+      Alert.alert('SINCRONIZACIÓN EXITOSA', 'Dossier biométrico persistido.');
     } catch (error: any) {
-      Alert.alert('SYNC FAILURE', error.message);
+      Alert.alert('FALLO DE RED', error.message);
     } finally {
       setSaving(false);
     }
@@ -134,56 +134,43 @@ export default function Calculator() {
   return (
     <TerminalBackground>
       <View style={styles.container}>
-        {/* Module Selector (Aligned with index.html order) */}
         <View style={styles.tabContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabScroll}>
-            <TabItem id="scanner" label="CESFAM" icon="scan" active={activeTab} onPress={setActiveTab} color={COLORS.crimson} />
-            <TabItem id="anamnesis" label="ANAMNESIS" icon="list" active={activeTab} onPress={setActiveTab} color={COLORS.purple} />
+            <TabItem id="scanner" label="SCANNER" icon="scan" active={activeTab} onPress={setActiveTab} color={COLORS.crimson} />
+            <TabItem id="anamnesis" label="HISTORIA" icon="list" active={activeTab} onPress={setActiveTab} color={COLORS.purple} />
             <TabItem id="macros" label="MACROS" icon="pie-chart" active={activeTab} onPress={setActiveTab} color={COLORS.pink} />
-            <TabItem id="sports" label="SPORTS" icon="fitness" active={activeTab} onPress={setActiveTab} color={COLORS.poison} />
-            <TabItem id="clinical" label="CLINICAL" icon="medkit" active={activeTab} onPress={setActiveTab} color={COLORS.purple} />
+            <TabItem id="sports" label="DEPORTIVA" icon="fitness" active={activeTab} onPress={setActiveTab} color={COLORS.poison} />
+            <TabItem id="clinical" label="CLÍNICA" icon="medkit" active={activeTab} onPress={setActiveTab} color={COLORS.purple} />
             <TabItem id="ai" label="NEURAL" icon="brain" active={activeTab} onPress={setActiveTab} color={COLORS.crimson} />
-            <TabItem id="tables" label="LIBRARY" icon="grid" active={activeTab} onPress={setActiveTab} color={COLORS.dim} />
+            <TabItem id="tables" label="BIBLIOTECA" icon="grid" active={activeTab} onPress={setActiveTab} color={COLORS.dim} />
           </ScrollView>
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
-          {/* TAB 1: CESFAM (SCANNER) */}
           {activeTab === 'scanner' && (
             <View style={styles.section}>
-              <SectionHeader title="PRIMARY BIOMETRICS" icon="skull" color={COLORS.crimson} />
+              <SectionHeader title="BIOMETRÍA DE CAMPO (CESFAM)" icon="skull" color={COLORS.crimson} />
               <View style={styles.row}>
-                {renderInput('WEIGHT (KG)', form.weight_kg, (v) => setForm({...form, weight_kg: v}), '0.0')}
-                {renderInput('HEIGHT (CM)', form.height_cm, (v) => setForm({...form, height_cm: v}), '0')}
+                {renderInput('PESO (KG)', form.weight_kg, (v) => setForm({...form, weight_kg: v}), '0.0')}
+                {renderInput('TALLA (CM)', form.height_cm, (v) => setForm({...form, height_cm: v}), '0')}
               </View>
               <View style={styles.row}>
-                {renderInput('WAIST (CM)', form.waist_cm, (v) => setForm({...form, waist_cm: v}), '0')}
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>ACTIVITY</Text>
-                  <View style={styles.selectBox}>
-                    <TextInput
-                      style={styles.selectInput}
-                      value={form.activity_factor}
-                      onChangeText={(v) => setForm({...form, activity_factor: v})}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
+                {renderInput('CINTURA (CM)', form.waist_cm, (v) => setForm({...form, waist_cm: v}), '0')}
+                {renderInput('ACT. FÍSICA', form.activity_factor, (v) => setForm({...form, activity_factor: v}), '1.2')}
               </View>
               <View style={styles.row}>
-                {renderInput('SYS BP', form.systolic_bp, (v) => setForm({...form, systolic_bp: v}), '120')}
-                {renderInput('DIA BP', form.diastolic_bp, (v) => setForm({...form, diastolic_bp: v}), '80')}
+                {renderInput('PA SIST.', form.systolic_bp, (v) => setForm({...form, systolic_bp: v}), '120')}
+                {renderInput('PA DIAST.', form.diastolic_bp, (v) => setForm({...form, diastolic_bp: v}), '80')}
               </View>
 
-              {/* Real-time Dashboard Results (Mirroring index.html) */}
               <View style={styles.dashboardGrid}>
-                <ResultBox label="IMC CLINIC" value={results?.bmi?.toFixed(1) || '--'} sub={results?.bmiStatus || 'WAITING...'} color={results?.bmiColor || COLORS.dim} />
-                <ResultBox label="IDEAL WEIGHT" value={`${results?.idealWeight?.toFixed(1) || '--'} KG`} sub={results?.adjustedWeight ? `ADJ: ${results.adjustedWeight.toFixed(1)}` : ''} color={COLORS.bone} />
-                <ResultBox label="CV RISK / ICT" value={results?.cvRisk || '--'} sub={`ICT: ${results?.ict?.toFixed(2) || '--'}`} color={COLORS.pink} />
-                <ResultBox label="PRESION ART." value={`${form.systolic_bp || '--'}/${form.diastolic_bp || '--'}`} sub={results?.bpStatus || '--'} color={results?.bpColor || COLORS.dim} />
-                <ResultBox label="WATER REQ." value={`${results?.waterLiters?.toFixed(1) || '--'} L`} color={COLORS.sky} />
-                <ResultBox label="TOTAL Kcal" value={`${results?.tdee?.toFixed(0) || '--'} Kcal`} color={COLORS.neon} />
+                <ResultBox label="IMC SISTEMA" value={results?.bmi?.toFixed(1) || '--'} sub={results?.bmiStatus || 'STANDBY'} color={results?.bmiColor || COLORS.dim} />
+                <ResultBox label="PESO IDEAL" value={`${results?.idealWeight?.toFixed(1) || '--'} KG`} sub={results?.adjustedWeight ? `ADJ: ${results.adjustedWeight.toFixed(1)}` : ''} color={COLORS.bone} />
+                <ResultBox label="RIESGO CV" value={results?.cvRisk || '--'} sub={`ICT: ${results?.ict?.toFixed(2) || '--'}`} color={COLORS.pink} />
+                <ResultBox label="P. ARTERIAL" value={`${form.systolic_bp || '--'}/${form.diastolic_bp || '--'}`} sub={results?.bpStatus || '--'} color={results?.bpColor || COLORS.dim} />
+                <ResultBox label="REQ. AGUA" value={`${results?.waterLiters?.toFixed(1) || '--'} L`} color={COLORS.sky} />
+                <ResultBox label="VCT DIARIO" value={`${results?.tdee?.toFixed(0) || '--'} Kcal`} color={COLORS.neon} />
               </View>
 
               <TouchableOpacity style={styles.mainActionBtn} onPress={handleAINeuralDissection} disabled={loading}>
@@ -197,130 +184,96 @@ export default function Calculator() {
             </View>
           )}
 
-          {/* TAB 2: ANAMNESIS */}
           {activeTab === 'anamnesis' && (
             <View style={styles.section}>
-              <SectionHeader title="NEURAL ANAMNESIS" icon="list" color={COLORS.purple} />
-              {renderInput('PATHOLOGIES', form.pathologies?.join(', '), (v) => setForm({...form, pathologies: v.split(',').map(s => s.trim())}), 'HTA, DM2...', 'default')}
-              {renderInput('ALLERGIES', form.allergies?.join(', '), (v) => setForm({...form, allergies: v.split(',').map(s => s.trim())}), 'Lactosa, Gluten...', 'default')}
+              <SectionHeader title="ANAMNESIS Y ESTILO DE VIDA" icon="list" color={COLORS.purple} />
+              {renderInput('PATOLOGÍAS', form.pathologies?.join(', '), (v) => setForm({...form, pathologies: v.split(',').map(s => s.trim())}), 'HTA, DM2...', 'default')}
+              {renderInput('ALERGIAS', form.allergies?.join(', '), (v) => setForm({...form, allergies: v.split(',').map(s => s.trim())}), 'Lactosa, Gluten...', 'default')}
               <View style={styles.row}>
-                {renderInput('DIET TYPE', form.diet_type, (v) => setForm({...form, diet_type: v}), 'Omnívora', 'default')}
-                {renderInput('LIQUIDS', form.liquid_intake, (v) => setForm({...form, liquid_intake: v}), '1-2L', 'default')}
+                {renderInput('DIETA', form.diet_type, (v) => setForm({...form, diet_type: v}), 'Omnívora', 'default')}
+                {renderInput('LÍQUIDOS', form.liquid_intake, (v) => setForm({...form, liquid_intake: v}), '1-2L', 'default')}
               </View>
-              {renderInput('DIGESTION', form.digestion_status, (v) => setForm({...form, digestion_status: v}), 'Normal', 'default')}
-              {renderInput('OBSERVATIONS', form.observations, (v) => setForm({...form, observations: v}), 'Clinical logs...', 'default', true)}
+              {renderInput('DIGESTIÓN', form.digestion_status, (v) => setForm({...form, digestion_status: v}), 'Normal', 'default')}
+              {renderInput('OBSERVACIONES', form.observations, (v) => setForm({...form, observations: v}), 'Notas...', 'default', true)}
             </View>
           )}
 
-          {/* TAB 3: MACROS */}
           {activeTab === 'macros' && (
             <View style={styles.section}>
-              <SectionHeader title="MACRO ALLOCATION" icon="pie-chart" color={COLORS.pink} />
+              <SectionHeader title="CONFIGURACIÓN DE NUTRIENTES" icon="pie-chart" color={COLORS.pink} />
               <View style={styles.row}>
                 {renderInput('% PROT', form.macro_prot_pct, (v) => setForm({...form, macro_prot_pct: v}), '20')}
                 {renderInput('% CARB', form.macro_cho_pct, (v) => setForm({...form, macro_cho_pct: v}), '50')}
-                {renderInput('% FAT', form.macro_fat_pct, (v) => setForm({...form, macro_fat_pct: v}), '30')}
+                {renderInput('% LÍP', form.macro_fat_pct, (v) => setForm({...form, macro_fat_pct: v}), '30')}
               </View>
               {results?.macros && (
                 <View style={styles.macroDashboard}>
-                  <MacroBox label="PROTEINS" grams={results.macros.protG} gkg={results.macros.protGkg} color={COLORS.crimson} />
-                  <MacroBox label="CARBS" grams={results.macros.choG} gkg={results.macros.choGkg} color={COLORS.purple} />
-                  <MacroBox label="LIPIDS" grams={results.macros.fatG} gkg={results.macros.fatGkg} color={COLORS.pink} />
+                  <MacroBox label="PROTEÍNAS" grams={results.macros.protG} gkg={results.macros.protGkg} color={COLORS.crimson} />
+                  <MacroBox label="CARBOHIDRATOS" grams={results.macros.choG} gkg={results.macros.choGkg} color={COLORS.purple} />
+                  <MacroBox label="LÍPIDOS" grams={results.macros.fatG} gkg={results.macros.fatGkg} color={COLORS.pink} />
                 </View>
               )}
             </View>
           )}
 
-          {/* TAB 4: SPORTS (DEPORTIVA) */}
           {activeTab === 'sports' && (
             <View style={styles.section}>
               <SectionHeader title="NEURAL KINANTHROPOMETRY" icon="fitness" color={COLORS.poison} />
-              
               {results?.somatotype && (
                 <View style={styles.vizContainer}>
                   <Somatocarta x={results.somatotype.x} y={results.somatotype.y} size={280} />
                 </View>
               )}
-
               <View style={styles.grid2}>
                 {renderInput('TRICEPS', form.fold_triceps, (v) => setForm({...form, fold_triceps: v}), '0')}
                 {renderInput('SUBSCAP.', form.fold_subscapular, (v) => setForm({...form, fold_subscapular: v}), '0')}
                 {renderInput('SUPRAESP.', form.fold_supraspinal, (v) => setForm({...form, fold_supraspinal: v}), '0')}
                 {renderInput('ABDOMINAL', form.fold_abdominal, (v) => setForm({...form, fold_abdominal: v}), '0')}
               </View>
-
               <View style={styles.row}>
-                {renderInput('ARM PER.', form.perimeter_arm, (v) => setForm({...form, perimeter_arm: v}), '0')}
-                {renderInput('CALF PER.', form.perimeter_calf, (v) => setForm({...form, perimeter_calf: v}), '0')}
+                {renderInput('PER. BRAZO', form.perimeter_arm, (v) => setForm({...form, perimeter_arm: v}), '0')}
+                {renderInput('PER. PANTOR.', form.perimeter_calf, (v) => setForm({...form, perimeter_calf: v}), '0')}
               </View>
-
               <View style={styles.dashboardGrid}>
                 <ResultBox label="FAT %" value={`${results?.fatPercent?.toFixed(1) || '--'} %`} color={COLORS.poison} />
                 <ResultBox label="FAT MASS" value={`${results?.fatMassKg?.toFixed(1) || '--'} KG`} color={COLORS.pink} />
                 <ResultBox label="LEAN MASS" value={`${results?.leanMassKg?.toFixed(1) || '--'} KG`} color={COLORS.sky} />
-                <ResultBox label="FOLD SUM" value={`${results?.foldSum?.toFixed(1) || '--'} MM`} color={COLORS.purple} />
+                <ResultBox label="SUM. PLIEGUES" value={`${results?.foldSum?.toFixed(1) || '--'} MM`} color={COLORS.purple} />
               </View>
             </View>
           )}
 
-          {/* TAB 5: CLINICAL (HOSPITALARIA) */}
           {activeTab === 'clinical' && (
             <View style={styles.section}>
               <SectionHeader title="CLINICAL OVERRIDE" icon="medkit" color={COLORS.purple} />
-              
-              {/* Renal Panel */}
               <View style={styles.miniCard}>
-                <Text style={styles.cardTitle}>RENAL FILTRATION (CG)</Text>
+                <Text style={styles.cardTitle}>FUNCIÓN RENAL (C-G)</Text>
                 <View style={styles.row}>
-                  {renderInput('CREATININE', form.creatinine, (v) => setForm({...form, creatinine: v}), 'mg/dL')}
+                  {renderInput('CREATININA', form.creatinine, (v) => setForm({...form, creatinine: v}), 'mg/dL')}
                   <View style={styles.displayOnly}>
-                    <Text style={styles.displayLabel}>GFR / KDIGO</Text>
+                    <Text style={styles.displayLabel}>TFG / KDIGO</Text>
                     <Text style={[styles.displayValue, { color: COLORS.poison }]}>{results?.gfr?.toFixed(1) || '--'} ({results?.kdigoStage || '--'})</Text>
                   </View>
                 </View>
               </View>
-
-              {/* Chumlea Panel */}
               <View style={styles.miniCard}>
-                <Text style={styles.cardTitle}>ESTIMATED HEIGHT (CHUMLEA)</Text>
+                <Text style={styles.cardTitle}>TALLA ESTIMADA (CHUMLEA)</Text>
                 <View style={styles.row}>
-                  {renderInput('KNEE HEIGHT', form.knee_height_cm, (v) => setForm({...form, knee_height_cm: v}), 'cm')}
+                  {renderInput('ALT. RODILLA', form.knee_height_cm, (v) => setForm({...form, knee_height_cm: v}), 'cm')}
                   <View style={styles.displayOnly}>
-                    <Text style={styles.displayLabel}>EST. HEIGHT</Text>
+                    <Text style={styles.displayLabel}>ESTIMACIÓN</Text>
                     <Text style={[styles.displayValue, { color: COLORS.neon }]}>{results?.estimatedHeight?.toFixed(1) || '--'} CM</Text>
                   </View>
                 </View>
-                <TouchableOpacity 
-                  style={styles.inlineBtn}
-                  onPress={() => setForm({...form, height_cm: results?.estimatedHeight?.toFixed(1) || ''})}
-                >
-                  <Text style={styles.inlineBtnText}>INJECT TO SCANNER</Text>
-                </TouchableOpacity>
               </View>
-
-              {/* Weight Loss Screening */}
-              <View style={styles.miniCard}>
-                <Text style={styles.cardTitle}>WEIGHT LOSS SCREENING</Text>
-                <View style={styles.row}>
-                  {renderInput('USUAL WEIGHT', form.usual_weight_kg, (v) => setForm({...form, usual_weight_kg: v}), 'kg')}
-                  <View style={styles.displayOnly}>
-                    <Text style={styles.displayLabel}>LOSS % / RISK</Text>
-                    <Text style={[styles.displayValue, { color: results?.weightLossRisk === 'Normal' ? COLORS.poison : COLORS.crimson }]}>
-                      {results?.weightLossPct?.toFixed(1) || '--'}% ({results?.weightLossRisk || '--'})
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Drug Dosing */}
               <View style={[styles.miniCard, { borderColor: COLORS.pink }]}>
-                <Text style={[styles.cardTitle, { color: COLORS.pink }]}>SYSTEM DOSING (mg/kg)</Text>
+                <Text style={[styles.cardTitle, { color: COLORS.pink }]}>DOSIFICACIÓN DE SISTEMA (mg/kg)</Text>
                 <View style={styles.row}>
-                  {renderInput('DOSE (mg/kg)', form.med_dose, (v) => setForm({...form, med_dose: v}), '15')}
-                  {renderInput('CONC (mg/ml)', form.med_conc, (v) => setForm({...form, med_conc: v}), '50')}
+                  {renderInput('DOSIS', form.med_dose, (v) => setForm({...form, med_dose: v}), '15')}
+                  {renderInput('CONC', form.med_conc, (v) => setForm({...form, med_conc: v}), '50')}
                 </View>
                 <View style={styles.dosageResult}>
-                  <Text style={styles.dosageLabel}>REQUIRED VOLUME</Text>
+                  <Text style={styles.dosageLabel}>VOLUMEN REQUERIDO</Text>
                   <Text style={styles.dosageValue}>
                     {results && form.med_dose && form.med_conc && form.weight_kg 
                       ? ((parseFloat(form.med_dose) * parseFloat(form.weight_kg)) / parseFloat(form.med_conc)).toFixed(1)
@@ -329,51 +282,25 @@ export default function Calculator() {
                   </Text>
                 </View>
               </View>
-
-              {/* Functional */}
-              <View style={styles.miniCard}>
-                <Text style={styles.cardTitle}>FUNCTIONAL MARKERS</Text>
-                <View style={styles.row}>
-                  {renderInput('GRIP (KG)', form.grip_strength_kg, (v) => setForm({...form, grip_strength_kg: v}), 'kg')}
-                  {renderInput('MNA SCORE', String(form.mna_score || ''), (v) => setForm({...form, mna_score: parseFloat(v) || undefined}), '0-14')}
-                </View>
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>VGS STATUS</Text>
-                    <View style={styles.miniBtnRow}>
-                      {['A', 'B', 'C'].map(v => (
-                        <TouchableOpacity 
-                          key={v}
-                          style={[styles.miniBtn, form.vgs_status === v && styles.activeMiniBtn]} 
-                          onPress={() => setForm({...form, vgs_status: v as any})}
-                        >
-                          <Text style={[styles.miniBtnText, form.vgs_status === v && styles.activeMiniBtnText]}>{v}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-              </View>
             </View>
           )}
 
-          {/* TAB 6: NEURAL AI */}
           {activeTab === 'ai' && aiAnalysis && (
             <View style={styles.section}>
-              <SectionHeader title="NEURAL DISSECTION" icon="brain" color={COLORS.crimson} />
+              <SectionHeader title="DISECCIÓN NEURAL (GEMINI)" icon="brain" color={COLORS.crimson} />
               <View style={styles.aiCard}>
                 <View style={styles.aiItem}>
-                  <Text style={styles.aiLabel}>SYSTEM DIAGNOSIS</Text>
+                  <Text style={styles.aiLabel}>DIAGNÓSTICO INTEGRAL</Text>
                   <Text style={styles.aiText}>{aiAnalysis.nutritional_diagnosis}</Text>
                 </View>
                 <View style={styles.aiDivider} />
                 <View style={styles.aiItem}>
-                  <Text style={[styles.aiLabel, { color: COLORS.purple }]}>ANALYSIS LOG</Text>
+                  <Text style={[styles.aiLabel, { color: COLORS.purple }]}>LOG DE ANÁLISIS</Text>
                   <Text style={styles.aiText}>{aiAnalysis.summary}</Text>
                 </View>
                 <View style={styles.aiDivider} />
                 <View style={styles.aiItem}>
-                  <Text style={[styles.aiLabel, { color: COLORS.poison }]}>PROTOCOL RECS</Text>
+                  <Text style={[styles.aiLabel, { color: COLORS.poison }]}>PROTOCOLOS RECOMENDADOS</Text>
                   {aiAnalysis.recommendations.map((r, i) => (
                     <Text key={i} style={styles.aiText}>• {r}</Text>
                   ))}
@@ -391,7 +318,7 @@ export default function Calculator() {
                     {saving ? <ActivityIndicator color={COLORS.white} /> : (
                       <>
                         <Ionicons name='cloud-upload' size={20} color={COLORS.white} />
-                        <Text style={styles.actionBtnText}>SYNC</Text>
+                        <Text style={styles.actionBtnText}>SINCRO</Text>
                       </>
                     )}
                   </TouchableOpacity>
@@ -400,31 +327,15 @@ export default function Calculator() {
             </View>
           )}
 
-          {/* TAB 7: TABLES (LIBRARY) */}
           {activeTab === 'tables' && (
             <View style={styles.section}>
-              <SectionHeader title="REFERENCE PROTOCOLS" icon="grid" color={COLORS.dim} />
-              
+              <SectionHeader title="PROTOCOLOS MINSAL" icon="grid" color={COLORS.dim} />
               <View style={styles.tableCard}>
                 <Text style={styles.tableTitle}>IMC ADULTO (18-64)</Text>
-                <TableRow label="UNDERWEIGHT" value="< 18.5" color={COLORS.gold} />
+                <TableRow label="ENFLAQUECIDO" value="< 18.5" color={COLORS.gold} />
                 <TableRow label="NORMAL" value="18.5 - 24.9" color={COLORS.poison} />
-                <TableRow label="OVERWEIGHT" value="25.0 - 29.9" color={COLORS.purple} />
-                <TableRow label="OBESITY" value="≥ 30.0" color={COLORS.crimson} />
-              </View>
-
-              <View style={styles.tableCard}>
-                <Text style={styles.tableTitle}>IMC ADULTO MAYOR (65+)</Text>
-                <TableRow label="UNDERWEIGHT" value="< 23.0" color={COLORS.gold} />
-                <TableRow label="NORMAL" value="23.0 - 27.9" color={COLORS.poison} />
-                <TableRow label="OVERWEIGHT" value="28.0 - 31.9" color={COLORS.purple} />
-                <TableRow label="OBESITY" value="≥ 32.0" color={COLORS.crimson} />
-              </View>
-
-              <View style={styles.tableCard}>
-                <Text style={styles.tableTitle}>CARDIOVASCULAR (CINTURA)</Text>
-                <TableRow label="LOW RISK (M/F)" value="< 94 / 80" color={COLORS.poison} />
-                <TableRow label="HIGH RISK (M/F)" value="≥ 102 / 88" color={COLORS.crimson} />
+                <TableRow label="SOBREPESO" value="25.0 - 29.9" color={COLORS.purple} />
+                <TableRow label="OBESIDAD" value="≥ 30.0" color={COLORS.crimson} />
               </View>
             </View>
           )}
@@ -435,7 +346,6 @@ export default function Calculator() {
   );
 }
 
-// Sub-components
 function TabItem({ id, label, icon, active, onPress, color }: any) {
   const isActive = active === id;
   return (
@@ -496,21 +406,19 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, paddingBottom: 50 },
   section: { gap: 25 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, borderLeftWidth: 3, paddingLeft: 12 },
-  sectionTitle: { fontSize: 20, fontFamily: FONTS.horror, letterSpacing: 1 },
-  row: { flexDirection: 'row', gap: 15 },
+  sectionTitle: { fontSize: 18, fontFamily: FONTS.horror, letterSpacing: 1 },
+  row: { flexDirection: 'row', gap: 12 },
   grid2: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
   inputGroup: { flex: 1, gap: 8 },
   inputLabel: { color: COLORS.dim, fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
   input: { backgroundColor: '#000', borderWidth: 1, borderColor: '#1a1a1f', padding: 15, color: COLORS.white, fontSize: 15, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
-  selectBox: { backgroundColor: '#000', borderWidth: 1, borderColor: '#1a1a1f' },
-  selectInput: { padding: 15, color: COLORS.white, fontSize: 15, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
   dashboardGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 10 },
   resBox: { width: '31%', backgroundColor: '#0a0a0d', padding: 12, borderBottomWidth: 3, gap: 4 },
   resLabel: { fontSize: 8, fontWeight: 'bold', color: COLORS.dim },
   resValue: { fontSize: 14, fontWeight: '900', fontFamily: FONTS.horror },
   resSub: { fontSize: 8, color: COLORS.muted, fontWeight: 'bold' },
   mainActionBtn: { backgroundColor: COLORS.crimson, height: 70, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15, marginTop: 20, ...SHADOWS.crimson },
-  mainActionText: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 22 },
+  mainActionText: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 20 },
   macroDashboard: { flexDirection: 'row', gap: 12 },
   macroBox: { flex: 1, backgroundColor: '#0a0a0d', padding: 15, borderLeftWidth: 4, gap: 5 },
   macroLabel: { fontSize: 9, fontWeight: 'bold', color: COLORS.dim },
@@ -522,16 +430,9 @@ const styles = StyleSheet.create({
   displayOnly: { flex: 1, justifyContent: 'center' },
   displayLabel: { fontSize: 8, fontWeight: 'bold', color: COLORS.dim, marginBottom: 5 },
   displayValue: { fontSize: 16, fontWeight: 'bold' },
-  inlineBtn: { alignSelf: 'flex-start', padding: 8, borderWidth: 1, borderColor: COLORS.purple },
-  inlineBtnText: { color: COLORS.purple, fontSize: 9, fontWeight: 'bold' },
   dosageResult: { backgroundColor: 'rgba(255, 0, 51, 0.05)', padding: 12, alignItems: 'center', borderRadius: 4 },
   dosageLabel: { fontSize: 9, color: COLORS.dim, fontWeight: 'bold' },
   dosageValue: { fontSize: 20, color: COLORS.pink, fontWeight: '900', marginTop: 5 },
-  miniBtnRow: { flexDirection: 'row', gap: 8 },
-  miniBtn: { flex: 1, height: 40, borderWidth: 1, borderColor: '#222', justifyContent: 'center', alignItems: 'center' },
-  activeMiniBtn: { borderColor: COLORS.purple, backgroundColor: 'rgba(102, 0, 204, 0.1)' },
-  miniBtnText: { color: COLORS.dim, fontSize: 11 },
-  activeMiniBtnText: { color: COLORS.white, fontWeight: 'bold' },
   aiCard: { backgroundColor: 'rgba(255, 255, 255, 0.01)', padding: 25, borderWidth: 1, borderColor: '#1a1a1f' },
   aiItem: { gap: 10 },
   aiLabel: { color: COLORS.crimson, fontSize: 11, fontWeight: 'bold', letterSpacing: 2 },
