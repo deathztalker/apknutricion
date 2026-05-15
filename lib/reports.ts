@@ -321,6 +321,23 @@ export async function generateClinicalReport(
             </div>
           </section>
 
+          ${record.professional_indications ? `
+          <section class="section">
+            <div class="section-tag" style="background: #222; color: #fff;">Indicaciones del Profesional</div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px dashed #444; padding: 25px;">
+              <p style="font-size: 13px; color: #eee; line-height: 1.8; white-space: pre-wrap; font-family: 'Space Mono', monospace;">${record.professional_indications}</p>
+            </div>
+          </section>
+          ` : ''}
+
+          <div style="margin-top: 60px; display: flex; justify-content: flex-end;">
+            <div style="text-align: center; border-top: 1px solid #444; padding-top: 10px; width: 250px;">
+              <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px;">CAMILA OLIVARES ARCE</div>
+              <div style="font-size: 9px; color: #888; letter-spacing: 1px;">NUTRICIONISTA CLÍNICA</div>
+              <div style="font-size: 9px; color: #888; letter-spacing: 1px;">REG. NACIONAL DE SALUD</div>
+            </div>
+          </div>
+
           <footer class="footer">
             <div class="footer-info">
               SISTEMA DE CONTROL BIOMÉTRICO - REPORTE DE USO EXCLUSIVO PROFESIONAL<br/>

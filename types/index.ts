@@ -139,6 +139,7 @@ export interface RecordFormData extends Omit<Partial<ClinicalRecord>,
   diameter_femur?: string;
   perimeter_arm?: string;
   perimeter_calf?: string;
+  professional_indications?: string;
 }
 
 export interface MacroResult {

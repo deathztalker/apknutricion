@@ -28,7 +28,7 @@ export default function Calculator() {
     med_dose: '', med_conc: '', observations: '',
     diet_type: 'Omnívora', liquid_intake: '1 a 2 Litros', digestion_status: 'Normal',
     pathologies: [], allergies: [], grip_strength_kg: '', calf_circumference_cm: '',
-    mna_score: undefined, vgs_status: undefined,
+    mna_score: undefined, vgs_status: undefined, professional_indications: '',
   });
 
   const [patient, setPatient] = useState<Partial<Patient>>({
@@ -45,6 +45,39 @@ export default function Calculator() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'scanner' | 'anamnesis' | 'macros' | 'sports' | 'clinical' | 'ai' | 'history' | 'tables'>('scanner');
+  const [libTab, setLibTab] = useState<'antro' | 'diet' | 'formulas'>('antro');
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > 50 && Math.abs(gestureState.dy) < 30; // Horizontal swipe
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        const currentIndex = TABS.indexOf(activeTab);
+        if (gestureState.dx > 50 && currentIndex > 0) {
+          // Swipe Right (Go Prev)
+          setActiveTab(TABS[currentIndex - 1]);
+        } else if (gestureState.dx < -50 && currentIndex < TABS.length - 1) {
+          // Swipe Left (Go Next)
+          setActiveTab(TABS[currentIndex + 1]);
+        }
+      },
+    })
+  ).current;
+
+  // Web Keyboard Shortcuts
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key >= '1' && e.key <= '8') {
+        e.preventDefault();
+        const index = parseInt(e.key) - 1;
+        if (index < TABS.length) setActiveTab(TABS[index]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (patientId) {
@@ -89,14 +122,17 @@ export default function Calculator() {
             age
           )
         `)
-        .eq('user_id', user.id)
-        .order('record_date', { ascending: false });
+        .eq('user_id', user.id);
+
+      if (patientId) {
+        query = query.eq('patient_id', patientId);
+      }
 
       if (searchHistory) {
         query = query.ilike('patients.full_name', `%${searchHistory}%`);
       }
 
-      const { data, error } = await query.limit(50);
+      const { data, error } = await query.order('record_date', { ascending: false }).limit(50);
       if (error) throw error;
       setGlobalHistory(data || []);
     } catch (error) {
@@ -360,7 +396,10 @@ export default function Calculator() {
                 <View style={styles.row}>
                   {renderInput('CREATININA SÉRICA', form.creatinine, (v) => setForm({...form, creatinine: v}), 'mg/dL')}
                   <View style={styles.displayOnly}>
-                    <Text style={styles.displayLabel}>TFG ESTIMADA / KDIGO</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+                      <Text style={[styles.displayLabel, {marginBottom: 0}]}>TFG ESTIMADA / KDIGO</Text>
+                      <TooltipIcon info="Tasa de Filtración Glomerular (Cockcroft-Gault) clasificada según los estadios de la fundación KDIGO (G1-G5)." />
+                    </View>
                     <Text style={[styles.displayValue, { color: COLORS.poison }]}>{results?.gfr?.toFixed(1) || '--'} ({results?.kdigoStage || '--'})</Text>
                   </View>
                 </View>
@@ -370,7 +409,10 @@ export default function Calculator() {
                 <View style={styles.row}>
                   {renderInput('ALTURA DE RODILLA', form.knee_height_cm, (v) => setForm({...form, knee_height_cm: v}), 'cm')}
                   <View style={styles.displayOnly}>
-                    <Text style={styles.displayLabel}>TALLA CALCULADA</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+                      <Text style={[styles.displayLabel, {marginBottom: 0}]}>TALLA CALCULADA</Text>
+                      <TooltipIcon info="Ecuación de Chumlea para predecir la estatura en base a la altura de rodilla. Especialmente útil en pacientes encamados o adultos mayores." />
+                    </View>
                     <Text style={[styles.displayValue, { color: COLORS.neon }]}>{results?.estimatedHeight?.toFixed(1) || '--'} CM</Text>
                   </View>
                 </View>
@@ -413,6 +455,10 @@ export default function Calculator() {
                     ))}
                   </View>
                   
+                  <View style={{ marginTop: 20 }}>
+                    {renderInput('INDICACIONES CLÍNICAS (OPCIONAL)', form.professional_indications, (v) => setForm({...form, professional_indications: v}), 'Agregue sus notas o prescripciones que irán firmadas en el PDF final...', 'default', true)}
+                  </View>
+
                   <View style={styles.actionRow}>
                     <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, aiAnalysis, globalHistory.filter(r => r.patient_id === patientId))}>
                       <Ionicons name='document-text' size={24} color={COLORS.white} />
@@ -482,14 +528,83 @@ export default function Calculator() {
 
           {activeTab === 'tables' && (
             <View style={styles.section}>
-              <SectionHeader title="PROTOCOLOS MINSAL" icon="grid" color={COLORS.dim} />
-              <View style={styles.tableCard}>
-                <Text style={styles.tableTitle}>ESTADO NUTRICIONAL ADULTO (18-64)</Text>
-                <TableRow label="ENFLAQUECIDO" value="< 18.5" color={COLORS.gold} />
-                <TableRow label="NORMAL" value="18.5 - 24.9" color={COLORS.poison} />
-                <TableRow label="SOBREPESO" value="25.0 - 29.9" color={COLORS.purple} />
-                <TableRow label="OBESIDAD" value="≥ 30.0" color={COLORS.crimson} />
+              <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15}}>
+                <SectionHeader title="CODEX CLÍNICO" icon="book" color={COLORS.bone} />
               </View>
+
+              <View style={styles.libTabs}>
+                <TouchableOpacity style={[styles.libTab, libTab === 'antro' && styles.activeLibTab]} onPress={() => setLibTab('antro')}>
+                  <Text style={[styles.libTabText, libTab === 'antro' && { color: COLORS.white }]}>ANTROPOMETRÍA</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.libTab, libTab === 'diet' && styles.activeLibTab]} onPress={() => setLibTab('diet')}>
+                  <Text style={[styles.libTabText, libTab === 'diet' && { color: COLORS.white }]}>DIETOTERAPIA</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.libTab, libTab === 'formulas' && styles.activeLibTab]} onPress={() => setLibTab('formulas')}>
+                  <Text style={[styles.libTabText, libTab === 'formulas' && { color: COLORS.white }]}>FÓRMULAS</Text>
+                </TouchableOpacity>
+              </View>
+
+              {libTab === 'antro' && (
+                <>
+                  <View style={styles.tableCard}>
+                    <Text style={styles.tableTitle}>IMC ADULTO (18-64) - MINSAL</Text>
+                    <TableRow label="ENFLAQUECIDO" value="< 18.5" color={COLORS.gold} />
+                    <TableRow label="NORMAL" value="18.5 - 24.9" color={COLORS.poison} />
+                    <TableRow label="SOBREPESO" value="25.0 - 29.9" color={COLORS.purple} />
+                    <TableRow label="OBESIDAD" value="≥ 30.0" color={COLORS.crimson} />
+                  </View>
+                  <View style={styles.tableCard}>
+                    <Text style={styles.tableTitle}>IMC ADULTO MAYOR (65+) - MINSAL</Text>
+                    <TableRow label="ENFLAQUECIDO" value="< 23.0" color={COLORS.gold} />
+                    <TableRow label="NORMAL" value="23.0 - 27.9" color={COLORS.poison} />
+                    <TableRow label="SOBREPESO" value="28.0 - 31.9" color={COLORS.purple} />
+                    <TableRow label="OBESIDAD" value="≥ 32.0" color={COLORS.crimson} />
+                  </View>
+                  <View style={styles.tableCard}>
+                    <Text style={styles.tableTitle}>RIESGO CARDIOVASCULAR (PERÍMETRO CINTURA)</Text>
+                    <TableRow label="RIESGO ALTO MUJERES" value="≥ 88 cm" color={COLORS.crimson} />
+                    <TableRow label="RIESGO ALTO HOMBRES" value="≥ 102 cm" color={COLORS.crimson} />
+                  </View>
+                </>
+              )}
+
+              {libTab === 'diet' && (
+                <>
+                  <View style={styles.tableCard}>
+                    <Text style={styles.tableTitle}>ENFERMEDAD RENAL CRÓNICA (PROTEÍNAS)</Text>
+                    <TableRow label="ERC G1-G3 (CON DM)" value="0.8 g/kg/día" color={COLORS.poison} />
+                    <TableRow label="ERC G4-G5 (SIN DIÁLISIS)" value="0.6 - 0.8 g/kg/día" color={COLORS.gold} />
+                    <TableRow label="HEMODIÁLISIS" value="1.2 - 1.4 g/kg/día" color={COLORS.crimson} />
+                  </View>
+                  <View style={styles.tableCard}>
+                    <Text style={styles.tableTitle}>ESTRATEGIAS HTA (DASH)</Text>
+                    <TableRow label="SODIO RECOMENDADO" value="< 1500 - 2300 mg/día" color={COLORS.sky} />
+                    <TableRow label="POTASIO RECOMENDADO" value="3500 - 5000 mg/día" color={COLORS.poison} />
+                  </View>
+                </>
+              )}
+
+              {libTab === 'formulas' && (
+                <>
+                  <View style={styles.tableCard}>
+                    <Text style={styles.tableTitle}>ECUACIONES ANALÍTICAS DEL NÚCLEO</Text>
+                    <View style={{ gap: 15, marginTop: 10 }}>
+                      <View>
+                        <Text style={{ color: COLORS.purple, fontWeight: 'bold', fontSize: 12 }}>TFG (COCKCROFT-GAULT)</Text>
+                        <Text style={{ color: COLORS.dim, fontSize: 11, marginTop: 5 }}>((140 - Edad) × Peso) / (72 × Creatinina). Mujeres × 0.85</Text>
+                      </View>
+                      <View>
+                        <Text style={{ color: COLORS.sky, fontWeight: 'bold', fontSize: 12 }}>TALLA ESTIMADA (CHUMLEA)</Text>
+                        <Text style={{ color: COLORS.dim, fontSize: 11, marginTop: 5 }}>Basado en altura de rodilla y edad. Diferente coeficiente por sexo biológico.</Text>
+                      </View>
+                      <View>
+                        <Text style={{ color: COLORS.pink, fontWeight: 'bold', fontSize: 12 }}>TASA METABÓLICA BASAL (MIFFLIN-ST JEOR)</Text>
+                        <Text style={{ color: COLORS.dim, fontSize: 11, marginTop: 5 }}>(10 × Peso) + (6.25 × Talla) - (5 × Edad) + S (S=5 hombres, S=-161 mujeres)</Text>
+                      </View>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
           )}
 
@@ -509,6 +624,14 @@ function TabItem({ id, label, icon, active, onPress, color }: any) {
     >
       <Ionicons name={icon as any} size={20} color={isActive ? color : COLORS.dim} />
       <Text style={[styles.tabText, isActive && { color, fontWeight: '900' }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function TooltipIcon({ info }: { info: string }) {
+  return (
+    <TouchableOpacity onPress={() => Alert.alert('REFERENCIA CLÍNICA', info)} style={{ marginLeft: 6 }}>
+      <Ionicons name="information-circle-outline" size={14} color={COLORS.sky} />
     </TouchableOpacity>
   );
 }
@@ -646,9 +769,14 @@ const styles = StyleSheet.create({
   emptyCard: { alignItems: 'center', justifyContent: 'center', padding: 60, borderWidth: 2, borderColor: '#333', borderStyle: 'dashed' },
   emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 24, marginTop: 20 },
   
-  tableCard: { backgroundColor: '#111', padding: 35, borderWidth: 2, borderColor: '#444' },
+  tableCard: { backgroundColor: '#111', padding: 35, borderWidth: 2, borderColor: '#444', marginBottom: 15 },
   tableTitle: { fontSize: 16, fontWeight: '900', color: COLORS.bone, marginBottom: 25, letterSpacing: 2 },
   tableRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: '#444' },
   tableLabel: { color: COLORS.muted, fontSize: 16, fontWeight: '900' },
   tableValue: { fontSize: 18, fontWeight: '900' },
+  
+  libTabs: { flexDirection: 'row', backgroundColor: '#000', borderWidth: 2, borderColor: '#333', marginBottom: 20 },
+  libTab: { flex: 1, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 3, borderBottomColor: 'transparent' },
+  activeLibTab: { borderBottomColor: COLORS.crimson, backgroundColor: 'rgba(255, 0, 60, 0.1)' },
+  libTabText: { color: COLORS.dim, fontSize: 12, fontWeight: '900', letterSpacing: 1 },
 });
