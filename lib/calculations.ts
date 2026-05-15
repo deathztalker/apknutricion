@@ -139,7 +139,7 @@ export function calcGFR(creatinine: number, age: number, weight: number, sex: 'M
   gfr = Math.round(gfr * 10) / 10;
 
   let stage = '';
-  let color = COLORS.neon;
+  let color: string = COLORS.neon;
   if (gfr >= 90)       { stage = 'G1 — Normal o Elevada'; color = COLORS.neon; }
   else if (gfr >= 60)  { stage = 'G2 — Descenso Leve'; color = COLORS.neon; }
   else if (gfr >= 45)  { stage = 'G3a — Descenso Leve-Moderado'; color = COLORS.gold; }
@@ -164,7 +164,7 @@ export function calcWeightLoss(usual: number, current: number, weeks: number) {
   const kgPerWeek = weeks > 0 ? Math.round(((usual - current) / weeks) * 100) / 100 : null;
 
   let risk = '';
-  let color = COLORS.neon;
+  let color: string = COLORS.neon;
   if (pct < 5)        { risk = 'Bajo'; color = COLORS.neon; }
   else if (pct < 10)  { risk = 'Moderado ⚠️'; color = COLORS.gold; }
   else                 { risk = 'Severo 🚨'; color = COLORS.red; }

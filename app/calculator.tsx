@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, FlatList } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, FlatList, PanResponder } from 'react-native';
 import { COLORS, SHADOWS, FONTS } from '../constants/theme';
 import { calculateAll } from '../lib/calculations';
 import { analyzeWithGemini } from '../lib/ai';
@@ -11,9 +11,13 @@ import { patientService, recordService, supabase } from '../lib/supabase';
 import Somatocarta from '../components/Somatocarta';
 import TerminalBackground from '../components/TerminalBackground';
 import { dataPortability } from '../lib/data';
+import { syncService } from '../lib/sync';
+
+const TABS = ['scanner', 'anamnesis', 'macros', 'sports', 'clinical', 'ai', 'history', 'tables'] as const;
 
 export default function Calculator() {
   const { patientId } = useLocalSearchParams<{ patientId: string }>();
+// ... (rest remains the same until activeTab)
   
   const [form, setForm] = useState<RecordFormData>({
     weight_kg: '', height_cm: '', waist_cm: '', systolic_bp: '', diastolic_bp: '',
@@ -403,7 +407,7 @@ export default function Calculator() {
                     <Text style={[styles.aiLabel, { color: COLORS.poison }]}>PROTOCOLOS DE INTERVENCIÓN</Text>
                     {aiAnalysis.recommendations.map((r, i) => (
                       <View key={i} style={styles.aiRecItem}>
-                        <Text style={styles.aiRecBullet}>></Text>
+                        <Text style={styles.aiRecBullet}>{'>'}</Text>
                         <Text style={styles.aiText}>{r}</Text>
                       </View>
                     ))}

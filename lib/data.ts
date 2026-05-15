@@ -1,6 +1,7 @@
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
+import { Platform } from 'react-native';
 import { Patient } from '../types';
 
 export const dataPortability = {
@@ -14,11 +15,23 @@ export const dataPortability = {
 
     const csvContent = header + rows;
     const fileName = `Pacientes_Export_${new Date().getTime()}.csv`;
-    const filePath = `${FileSystem.cacheDirectory}${fileName}`;
 
     try {
-      await FileSystem.writeAsStringAsync(filePath, csvContent, { encoding: FileSystem.EncodingType.UTF8 });
-      await Sharing.shareAsync(filePath, { mimeType: 'text/csv', dialogTitle: 'Exportar Pacientes' });
+      if (Platform.OS === 'web') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const filePath = `${FileSystem.documentDirectory}${fileName}`;
+        await FileSystem.writeAsStringAsync(filePath, csvContent, { encoding: 'utf8' });
+        await Sharing.shareAsync(filePath, { mimeType: 'text/csv', dialogTitle: 'Exportar Pacientes' });
+      }
     } catch (error) {
       console.error('Export Error:', error);
       throw error;
@@ -31,12 +44,21 @@ export const dataPortability = {
       if (result.canceled) return null;
 
       const fileUri = result.assets[0].uri;
-      const content = await FileSystem.readAsStringAsync(fileUri);
+      
+      let content = '';
+      if (Platform.OS === 'web') {
+         if (result.assets[0].file) {
+             content = await result.assets[0].file.text();
+         }
+      } else {
+         content = await FileSystem.readAsStringAsync(fileUri);
+      }
+      
+      if (!content) return null;
       
       const lines = content.split('\n');
       const patients: Partial<Patient>[] = [];
 
-      // Simple CSV parser (assuming standard format from export)
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
