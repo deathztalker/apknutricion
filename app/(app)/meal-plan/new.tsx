@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { COLORS, SHADOWS } from '../../../constants/theme';
+import { COLORS, SHADOWS, FONTS } from '../../../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { mealPlanService } from '../../../lib/supabase';
+import TerminalBackground from '../../../components/TerminalBackground';
 
-// Equivalentes Chilenos (Promedios aproximados por porción)
 const EQUIVALENTS = {
   dairy_low_fat:   { kcal: 70, prot: 7, fat: 0, cho: 10 },
   dairy_high_fat:  { kcal: 110, prot: 7, fat: 6, cho: 10 },
@@ -35,6 +36,7 @@ export default function MealPlanBuilder() {
   });
 
   const [totals, setTotals] = useState({ kcal: 0, prot: 0, cho: 0, fat: 0 });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let k = 0, p = 0, c = 0, f = 0;
@@ -54,182 +56,154 @@ export default function MealPlanBuilder() {
     setPortions({ ...portions, [key]: n });
   };
 
-  const renderPortionInput = (label: string, key: string) => (
-    <View style={styles.inputGroup}>
-      <Text style={styles.inputLabel}>{label.toUpperCase()}</Text>
-      <View style={styles.stepper}>
-        <TouchableOpacity 
-          style={styles.stepBtn} 
-          onPress={() => updatePortion(key, String(Math.max(0, (portions[key] || 0) - 0.5)))}
-        >
-          <Ionicons name="remove" size={20} color={COLORS.neon} />
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={String(portions[key] || '')}
-          onChangeText={(v) => updatePortion(key, v)}
-          placeholder="0"
-          placeholderTextColor={COLORS.dim}
-        />
-        <TouchableOpacity 
-          style={styles.stepBtn} 
-          onPress={() => updatePortion(key, String((portions[key] || 0) + 0.5))}
-        >
-          <Ionicons name="add" size={20} color={COLORS.neon} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  const handleSave = async () => {
+    if (!patientId) {
+      Alert.alert('SYSTEM ERROR', 'NO SUBJECT LINKED.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await mealPlanService.create({
+        patient_id: patientId,
+        kcal_target: totals.kcal,
+        protein_target: totals.prot,
+        cho_target: totals.cho,
+        fat_target: totals.fat,
+        portions: portions,
+      });
+
+      if (error) throw error;
+      Alert.alert('LINK ESTABLISHED', 'Meal plan synchronized with core.');
+      router.back();
+    } catch (error: any) {
+      Alert.alert('SYNC FAILURE', error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <LinearGradient colors={[COLORS.bg1, COLORS.bg]} style={StyleSheet.absoluteFill} />
-      
-      {/* Real-time Counter */}
-      <View style={styles.counterBoard}>
-        <View style={styles.counterRow}>
-          <CounterItem label="KCAL" current={totals.kcal} target={kcal} />
-          <CounterItem label="PROT" current={totals.prot} target={prot} unit="g" />
+    <TerminalBackground>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>RESOURCE ALLOCATION</Text>
+          <Text style={styles.headerSub}>MEAL PLAN PORTION DISTRIBUTION</Text>
         </View>
-        <View style={styles.counterRow}>
-          <CounterItem label="CHO" current={totals.cho} target={cho} unit="g" />
-          <CounterItem label="FAT" current={totals.fat} target={fat} unit="g" />
+
+        {/* Real-time Monitors */}
+        <View style={styles.monitors}>
+          <View style={styles.monitorRow}>
+            <MonitorItem label="KCAL" current={totals.kcal} target={kcal} />
+            <MonitorItem label="PROT" current={totals.prot} target={prot} unit="g" />
+          </View>
+          <View style={styles.monitorRow}>
+            <MonitorItem label="CHO" current={totals.cho} target={cho} unit="g" />
+            <MonitorItem label="FAT" current={totals.fat} target={fat} unit="g" />
+          </View>
         </View>
+
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.grid}>
+            <PortionInput label="Dairy L-Fat" k="dairy_low_fat" v={portions} onUpdate={updatePortion} color={COLORS.neon} />
+            <PortionInput label="Dairy H-Fat" k="dairy_high_fat" v={portions} onUpdate={updatePortion} color={COLORS.neon} />
+            <PortionInput label="Meat L-Fat" k="meat_low_fat" v={portions} onUpdate={updatePortion} color={COLORS.purple} />
+            <PortionInput label="Meat M-Fat" k="meat_med_fat" v={portions} onUpdate={updatePortion} color={COLORS.purple} />
+            <PortionInput label="Legumes" k="legumes" v={portions} onUpdate={updatePortion} color={COLORS.gold} />
+            <PortionInput label="Cereals" k="cereals_no_fat" v={portions} onUpdate={updatePortion} color={COLORS.gold} />
+            <PortionInput label="Veg Gen" k="vegetables_gen" v={portions} onUpdate={updatePortion} color={COLORS.neon} />
+            <PortionInput label="Veg Free" k="vegetables_free" v={portions} onUpdate={updatePortion} color={COLORS.neon} />
+            <PortionInput label="Fruits" k="fruits" v={portions} onUpdate={updatePortion} color={COLORS.pink} />
+            <PortionInput label="Oils/Fats" k="fats_no_cho" v={portions} onUpdate={updatePortion} color={COLORS.pink} />
+          </View>
+
+          <TouchableOpacity 
+            style={styles.saveBtn}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving ? <ActivityIndicator color={COLORS.bg} /> : (
+              <>
+                <Ionicons name="cloud-upload" size={24} color={COLORS.bg} />
+                <Text style={styles.saveBtnText}>SYNC MEAL PLAN</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
       </View>
+    </TerminalBackground>
+  );
+}
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.sectionTitle}>DISTRIBUCIÓN DE PORCIONES</Text>
-        
-        <View style={styles.grid}>
-          {renderPortionInput('Lácteos Bajos', 'dairy_low_fat')}
-          {renderPortionInput('Lácteos Altos', 'dairy_high_fat')}
-          {renderPortionInput('Carnes Bajas', 'meat_low_fat')}
-          {renderPortionInput('Carnes Medias', 'meat_med_fat')}
-          {renderPortionInput('Legumbres', 'legumes')}
-          {renderPortionInput('Cereales', 'cereals_no_fat')}
-          {renderPortionInput('Vegetales G.', 'vegetables_gen')}
-          {renderPortionInput('Vegetales L.', 'vegetables_free')}
-          {renderPortionInput('Frutas', 'fruits')}
-          {renderPortionInput('Aceites/Grasas', 'fats_no_cho')}
-        </View>
+function MonitorItem({ label, current, target, unit = '' }: any) {
+  const diff = target ? current - parseFloat(target) : 0;
+  const isOk = Math.abs(diff) < (parseFloat(target) * 0.1); 
+  const color = diff > (parseFloat(target) * 0.05) ? COLORS.pink : isOk ? COLORS.neon : COLORS.gold;
 
-        <TouchableOpacity 
-          style={styles.saveBtn}
-          onPress={() => Alert.alert('Éxito', 'Plan de porciones guardado en el sistema.')}
-        >
-          <Text style={styles.saveBtnText}>SAVE MEAL PLAN</Text>
-        </TouchableOpacity>
-      </ScrollView>
+  return (
+    <View style={[styles.monitor, { borderLeftColor: color }]}>
+      <Text style={styles.monitorLabel}>{label}</Text>
+      <Text style={[styles.monitorValue, { color }]}>
+        {Math.round(current)}{unit} / {target ? Math.round(parseFloat(target)) : '—'}{unit}
+      </Text>
+      <View style={styles.progressBar}>
+        <View style={[styles.progressFill, { width: `${Math.min(100, (current / (parseFloat(target) || 1)) * 100)}%`, backgroundColor: color }]} />
+      </View>
     </View>
   );
 }
 
-function CounterItem({ label, current, target, unit = '' }: any) {
-  const diff = target ? current - parseFloat(target) : 0;
-  const isOk = Math.abs(diff) < 50; // Tolerancia
-  const color = diff > 20 ? COLORS.pink : isOk ? COLORS.neon : COLORS.gold;
-
+function PortionInput({ label, k, v, onUpdate, color }: any) {
+  const val = v[k] || 0;
   return (
-    <View style={styles.counterItem}>
-      <Text style={styles.counterLabel}>{label}</Text>
-      <Text style={[styles.counterValue, { color }]}>
-        {Math.round(current)}{unit} / {target || '—'}{unit}
-      </Text>
+    <View style={[styles.portionCard, { borderBottomColor: color }]}>
+      <Text style={styles.portionLabel}>{label.toUpperCase()}</Text>
+      <View style={styles.stepper}>
+        <TouchableOpacity onPress={() => onUpdate(k, String(Math.max(0, val - 0.5)))} style={styles.stepBtn}>
+          <Ionicons name="remove" size={16} color={color} />
+        </TouchableOpacity>
+        <TextInput
+          style={[styles.input, { color }]}
+          keyboardType="numeric"
+          value={String(val)}
+          onChangeText={(newVal) => onUpdate(k, newVal)}
+        />
+        <TouchableOpacity onPress={() => onUpdate(k, String(val + 0.5))} style={styles.stepBtn}>
+          <Ionicons name="add" size={16} color={color} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  counterBoard: {
-    padding: 20,
-    backgroundColor: COLORS.bg1,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.bg4,
-    gap: 12,
-  },
-  counterRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  counterItem: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.bg4,
-  },
-  counterLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.muted,
-    marginBottom: 4,
-  },
-  counterValue: {
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: COLORS.pink,
-    letterSpacing: 2,
-    marginBottom: 20,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  inputGroup: {
-    width: '47%',
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.muted,
-  },
-  stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.bg2,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.bg4,
-  },
-  stepBtn: {
-    padding: 10,
-  },
-  input: {
-    flex: 1,
-    textAlign: 'center',
-    color: COLORS.text,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1 },
+  header: { padding: 25, backgroundColor: 'rgba(0,0,0,0.5)', borderBottomWidth: 1, borderBottomColor: '#222' },
+  headerTitle: { fontSize: 20, fontFamily: FONTS.horror, color: COLORS.white, letterSpacing: 2 },
+  headerSub: { fontSize: 9, color: COLORS.dim, letterSpacing: 1, fontWeight: 'bold' },
+  monitors: { padding: 20, gap: 15, backgroundColor: 'rgba(0,0,0,0.3)' },
+  monitorRow: { flexDirection: 'row', gap: 15 },
+  monitor: { flex: 1, backgroundColor: COLORS.bg1, padding: 12, borderLeftWidth: 3, borderWidth: 1, borderColor: '#222' },
+  monitorLabel: { fontSize: 9, fontWeight: 'bold', color: COLORS.muted, marginBottom: 5 },
+  monitorValue: { fontSize: 13, fontWeight: '900', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  progressBar: { height: 2, backgroundColor: 'rgba(255,255,255,0.05)', marginTop: 8 },
+  progressFill: { height: '100%' },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
+  portionCard: { width: '47%', backgroundColor: 'rgba(25, 25, 30, 0.8)', padding: 15, borderWidth: 1, borderColor: '#222', borderBottomWidth: 3 },
+  portionLabel: { fontSize: 9, fontWeight: 'bold', color: COLORS.muted, marginBottom: 10 },
+  stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  stepBtn: { padding: 5 },
+  input: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '900', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
   saveBtn: {
     backgroundColor: COLORS.neon,
-    height: 56,
-    borderRadius: 8,
+    height: 65,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 15,
     marginTop: 40,
     ...SHADOWS.neon,
   },
-  saveBtnText: {
-    color: COLORS.bg,
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
+  saveBtnText: { color: COLORS.bg, fontFamily: FONTS.horror, fontSize: 22 },
 });
