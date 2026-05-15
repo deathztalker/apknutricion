@@ -419,12 +419,11 @@ export default function Calculator() {
                   </View>
                   
                   <View style={styles.actionRow}>
-                    <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, aiAnalysis)}>
+                    <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, aiAnalysis, patientHistory)}>
                       <Ionicons name='document-text' size={24} color={COLORS.white} />
                       <Text style={styles.actionBtnText}>GENERAR REPORTE PDF</Text>
                     </TouchableOpacity>
-                  </View>
-                </>
+                  </View>                </>
               )}
             </View>
           )}

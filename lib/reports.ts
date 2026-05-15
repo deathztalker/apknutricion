@@ -1,5 +1,6 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { Platform } from 'react-native';
 import { Patient, ClinicalRecord, CalculationResult, AIAnalysis } from '../types';
 import { COLORS } from '../constants/theme';
 
@@ -320,8 +321,14 @@ export async function generateClinicalReport(
   `;
 
   try {
-    const { uri } = await Print.printToFileAsync({ html });
-    await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: `Reporte_${patient.full_name}.pdf` });
+    if (Platform.OS === 'web') {
+      await Print.printAsync({ html });
+    } else {
+      const result = await Print.printToFileAsync({ html });
+      if (result && result.uri) {
+        await Sharing.shareAsync(result.uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: `Reporte_${patient.full_name}.pdf` });
+      }
+    }
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw error;
