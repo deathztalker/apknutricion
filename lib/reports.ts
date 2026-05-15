@@ -293,6 +293,21 @@ export async function generateClinicalReport(
               
               <h3 class="ai-h3" style="color:var(--purple)">RESUMEN FISIOPATOLÓGICO</h3>
               <p class="ai-p">${ai.summary}</p>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div style="background: rgba(0,0,0,0.4); padding: 15px; border-left: 2px solid var(--crimson);">
+                  <h4 style="margin:0 0 8px 0; color:var(--crimson); font-size:9px; letter-spacing:1px;">RIESGO CARDIOMETABÓLICO</h4>
+                  <p style="margin:0; font-size:10px; color:#ccc; line-height: 1.4;">${ai.metabolic_syndrome_risk || 'Evaluación en curso.'}</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.4); padding: 15px; border-left: 2px solid var(--sky);">
+                  <h4 style="margin:0 0 8px 0; color:var(--sky); font-size:9px; letter-spacing:1px;">PERFIL RENAL / HEPÁTICO</h4>
+                  <p style="margin:0; font-size:10px; color:#ccc; line-height: 1.4;">${ai.renal_hepatic_profile || 'Evaluación en curso.'}</p>
+                </div>
+                <div style="grid-column: span 2; background: rgba(0,0,0,0.4); padding: 15px; border-left: 2px solid var(--gold);">
+                  <h4 style="margin:0 0 8px 0; color:#FFD700; font-size:9px; letter-spacing:1px;">INTERACCIONES FARMACOLÓGICAS Y SUPLEMENTACIÓN</h4>
+                  <p style="margin:0; font-size:10px; color:#ccc; line-height: 1.4;">${ai.pharmacological_interactions || 'No se detectan interacciones críticas primarias.'}</p>
+                </div>
+              </div>
               
               <h3 class="ai-h3" style="color:var(--poison)">PLAN DE INTERVENCIÓN CLÍNICA</h3>
               <div class="recs-grid">
@@ -322,7 +337,17 @@ export async function generateClinicalReport(
 
   try {
     if (Platform.OS === 'web') {
-      await Print.printAsync({ html });
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+        }, 500); // Give it a moment to render charts and fonts
+      } else {
+        console.error('El navegador bloqueó la ventana emergente para el reporte.');
+      }
     } else {
       const result = await Print.printToFileAsync({ html });
       if (result && result.uri) {

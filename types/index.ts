@@ -217,6 +217,9 @@ export interface AIAnalysis {
   alerts: ClinicalAlert[];
   recommendations: string[];
   nutritional_diagnosis: string;
+  metabolic_syndrome_risk?: string;
+  renal_hepatic_profile?: string;
+  pharmacological_interactions?: string;
   goals: string[];
   follow_up: string;
   raw_text: string;

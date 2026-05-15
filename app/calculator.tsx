@@ -35,7 +35,6 @@ export default function Calculator() {
   const [results, setResults] = useState<CalculationResult | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   
-  // History states
   const [globalHistory, setGlobalHistory] = useState<any[]>([]);
   const [searchHistory, setSearchHistory] = useState('');
 
@@ -63,7 +62,6 @@ export default function Calculator() {
     }
   }, [patientId]);
 
-  // Fetch global history when entering history tab
   useEffect(() => {
     if (activeTab === 'history') {
       fetchGlobalHistory();
@@ -102,7 +100,6 @@ export default function Calculator() {
     }
   };
 
-  // Sync calculations in real-time
   useEffect(() => {
     const calc = calculateAll(form, patient.age || 0, patient.sex as any);
     setResults(calc);
@@ -140,7 +137,6 @@ export default function Calculator() {
 
       let targetPatientId = patientId;
 
-      // If no patientId exists, we create the patient first (HTML style flow)
       if (!targetPatientId) {
         const { data: newPat, error: pError } = await supabase
           .from('patients')
@@ -156,7 +152,6 @@ export default function Calculator() {
         
         if (pError) throw pError;
         targetPatientId = newPat.id;
-        // Optionally update the URL params to attach to this new patient
         router.setParams({ patientId: newPat.id });
       }
 
@@ -191,12 +186,10 @@ export default function Calculator() {
 
   const handleExportData = async () => {
     try {
-      // Export just the records for portability
       if (globalHistory.length === 0) {
         Alert.alert("VACÍO", "No hay registros para exportar.");
         return;
       }
-      // Simple export mock for now
       Alert.alert("SISTEMA", "Extracción completada. Datos asegurados.");
     } catch (e: any) {
       Alert.alert("ERROR", e.message);
@@ -211,7 +204,7 @@ export default function Calculator() {
         value={String(value || '')}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor="#444"
+        placeholderTextColor="rgba(255, 255, 255, 0.4)"
         keyboardType={keyboard as any}
         multiline={multiline}
       />
@@ -224,13 +217,13 @@ export default function Calculator() {
         <View style={styles.tabContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabScroll}>
             <TabItem id="scanner" label="ESCANER" icon="scan" active={activeTab} onPress={setActiveTab} color={COLORS.crimson} />
-            <TabItem id="anamnesis" label="ANAMNESIS" icon="list" active={activeTab} onPress={setActiveTab} color={COLORS.purple} />
+            <TabItem id="anamnesis" label="ANAMNESIS" icon="list" active={activeTab} onPress={setActiveTab} color={COLORS.sky} />
             <TabItem id="macros" label="MACROS" icon="pie-chart" active={activeTab} onPress={setActiveTab} color={COLORS.pink} />
             <TabItem id="sports" label="DEPORTIVA" icon="fitness" active={activeTab} onPress={setActiveTab} color={COLORS.poison} />
             <TabItem id="clinical" label="CLÍNICA" icon="medkit" active={activeTab} onPress={setActiveTab} color={COLORS.purple} />
-            <TabItem id="tables" label="BIBLIOTECA" icon="grid" active={activeTab} onPress={setActiveTab} color={COLORS.dim} />
             <TabItem id="ai" label="NEURAL IA" icon="brain" active={activeTab} onPress={setActiveTab} color={COLORS.crimson} />
-            <TabItem id="history" label="HISTORIAL" icon="server" active={activeTab} onPress={setActiveTab} color={COLORS.sky} />
+            <TabItem id="history" label="HISTORIAL" icon="server" active={activeTab} onPress={setActiveTab} color={COLORS.gold} />
+            <TabItem id="tables" label="BIBLIOTECA" icon="grid" active={activeTab} onPress={setActiveTab} color={COLORS.bone} />
           </ScrollView>
         </View>
 
@@ -240,7 +233,6 @@ export default function Calculator() {
             <View style={styles.section}>
               <SectionHeader title="IDENTIDAD Y BIOMETRÍA" icon="skull" color={COLORS.crimson} />
               
-              {/* Identity Inputs - Brought back to match HTML flow */}
               <View style={styles.identityCard}>
                 <View style={styles.row}>
                   {renderInput('NOMBRE DEL SUJETO', patient.full_name, (v) => setPatient({...patient, full_name: v}), 'Ej. Juan Pérez', 'default')}
@@ -269,7 +261,7 @@ export default function Calculator() {
                 {renderInput('CINTURA (CM)', form.waist_cm, (v) => setForm({...form, waist_cm: v}), '0')}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>ACT. FÍSICA</Text>
-                  <TextInput style={styles.input} value={form.activity_factor} onChangeText={(v) => setForm({...form, activity_factor: v})} keyboardType="numeric" placeholder="1.2" />
+                  <TextInput style={styles.input} value={form.activity_factor} onChangeText={(v) => setForm({...form, activity_factor: v})} keyboardType="numeric" placeholder="1.2" placeholderTextColor="rgba(255, 255, 255, 0.4)" />
                 </View>
               </View>
               <View style={styles.row}>
@@ -287,9 +279,9 @@ export default function Calculator() {
               </View>
 
               <TouchableOpacity style={styles.mainActionBtn} onPress={handleSave} disabled={saving}>
-                {saving ? <ActivityIndicator color={COLORS.white} /> : (
+                {saving ? <ActivityIndicator color={COLORS.bg} /> : (
                   <>
-                    <Ionicons name="save" size={28} color={COLORS.white} />
+                    <Ionicons name="save" size={28} color={COLORS.bg} />
                     <Text style={styles.mainActionText}>GUARDAR EXPEDIENTE</Text>
                   </>
                 )}
@@ -297,10 +289,9 @@ export default function Calculator() {
             </View>
           )}
 
-          {/* ... ANAMNESIS, MACROS, SPORTS, CLINICAL, TABLES, AI TABS REMAIN SIMILAR ... */}
           {activeTab === 'anamnesis' && (
             <View style={styles.section}>
-              <SectionHeader title="ANAMNESIS DEL SUJETO" icon="list" color={COLORS.purple} />
+              <SectionHeader title="ANAMNESIS DEL SUJETO" icon="list" color={COLORS.sky} />
               {renderInput('PATOLOGÍAS DETECTADAS', form.pathologies?.join(', '), (v) => setForm({...form, pathologies: v.split(',').map(s => s.trim())}), 'HTA, DM2, Hipotiroidismo...', 'default')}
               {renderInput('ALERGIAS / INTOLERANCIAS', form.allergies?.join(', '), (v) => setForm({...form, allergies: v.split(',').map(s => s.trim())}), 'Lactosa, Gluten...', 'default')}
               <View style={styles.row}>
@@ -323,7 +314,7 @@ export default function Calculator() {
               {results?.macros && (
                 <View style={styles.macroDashboard}>
                   <MacroBox label="PROTEÍNAS" grams={results.macros.protG} gkg={results.macros.protGkg} color={COLORS.crimson} />
-                  <MacroBox label="CARBOHIDRATOS" grams={results.macros.choG} gkg={results.macros.choGkg} color={COLORS.purple} />
+                  <MacroBox label="CARBOHIDRATOS" grams={results.macros.choG} gkg={results.macros.choGkg} color={COLORS.sky} />
                   <MacroBox label="LÍPIDOS" grams={results.macros.fatG} gkg={results.macros.fatGkg} color={COLORS.pink} />
                 </View>
               )}
@@ -389,9 +380,9 @@ export default function Calculator() {
               
               {!aiAnalysis ? (
                  <TouchableOpacity style={styles.mainActionBtn} onPress={handleAINeuralDissection} disabled={loading}>
-                  {loading ? <ActivityIndicator color={COLORS.white} /> : (
+                  {loading ? <ActivityIndicator color={COLORS.bg} /> : (
                     <>
-                      <Ionicons name="flash" size={28} color={COLORS.white} />
+                      <Ionicons name="flash" size={28} color={COLORS.bg} />
                       <Text style={styles.mainActionText}>INICIAR ANÁLISIS</Text>
                     </>
                   )}
@@ -404,7 +395,7 @@ export default function Calculator() {
                     
                     <View style={styles.aiDivider} />
                     
-                    <Text style={[styles.aiLabel, { color: COLORS.purple }]}>ANÁLISIS FISIOPATOLÓGICO</Text>
+                    <Text style={[styles.aiLabel, { color: COLORS.sky }]}>ANÁLISIS FISIOPATOLÓGICO</Text>
                     <Text style={styles.aiText}>{aiAnalysis.summary}</Text>
                     
                     <View style={styles.aiDivider} />
@@ -419,11 +410,12 @@ export default function Calculator() {
                   </View>
                   
                   <View style={styles.actionRow}>
-                    <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, aiAnalysis, patientHistory)}>
+                    <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, aiAnalysis, globalHistory.filter(r => r.patient_id === patientId))}>
                       <Ionicons name='document-text' size={24} color={COLORS.white} />
                       <Text style={styles.actionBtnText}>GENERAR REPORTE PDF</Text>
                     </TouchableOpacity>
-                  </View>                </>
+                  </View>
+                </>
               )}
             </View>
           )}
@@ -431,7 +423,7 @@ export default function Calculator() {
           {activeTab === 'history' && (
             <View style={styles.section}>
               <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20}}>
-                <SectionHeader title="PACIENTES GUARDADOS" icon="server" color={COLORS.sky} />
+                <SectionHeader title="PACIENTES GUARDADOS" icon="server" color={COLORS.gold} />
                 <View style={{flexDirection: 'row', gap: 10}}>
                   <TouchableOpacity style={styles.iconBtn} onPress={fetchGlobalHistory}>
                      <Ionicons name="refresh" size={20} color={COLORS.bone} />
@@ -443,11 +435,11 @@ export default function Calculator() {
               </View>
 
               <View style={styles.searchBar}>
-                <Ionicons name="search" size={20} color={COLORS.sky} />
+                <Ionicons name="search" size={20} color={COLORS.gold} />
                 <TextInput
                   style={styles.searchInput}
                   placeholder="BUSCAR PACIENTE O FECHA..."
-                  placeholderTextColor="#555"
+                  placeholderTextColor="#666"
                   value={searchHistory}
                   onChangeText={setSearchHistory}
                 />
@@ -470,7 +462,7 @@ export default function Calculator() {
                         <Text style={styles.historyName}>{rec.patients?.full_name?.toUpperCase() || 'SUJETO ANÓNIMO'}</Text>
                         <Text style={styles.historyDate}>{new Date(rec.record_date!).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}</Text>
                       </View>
-                      <Ionicons name="chevron-forward" size={24} color={COLORS.sky} />
+                      <Ionicons name="chevron-forward" size={24} color={COLORS.gold} />
                     </View>
                     <View style={styles.historyGrid}>
                       <HStat label="EDAD" val={`${rec.patients?.age || '--'} Y`} color={COLORS.dim} />
@@ -508,7 +500,7 @@ function TabItem({ id, label, icon, active, onPress, color }: any) {
   const isActive = active === id;
   return (
     <TouchableOpacity 
-      style={[styles.tab, isActive && { borderBottomColor: color, backgroundColor: 'rgba(255,255,255,0.08)' }]} 
+      style={[styles.tab, isActive && { borderBottomColor: color, backgroundColor: 'rgba(255,255,255,0.1)' }]} 
       onPress={() => onPress(id)}
     >
       <Ionicons name={icon as any} size={20} color={isActive ? color : COLORS.dim} />
@@ -520,7 +512,7 @@ function TabItem({ id, label, icon, active, onPress, color }: any) {
 function SectionHeader({ title, icon, color }: any) {
   return (
     <View style={[styles.sectionHeader, { borderLeftColor: color }]}>
-      <Ionicons name={icon as any} size={26} color={color} />
+      <Ionicons name={icon as any} size={28} color={color} />
       <Text style={[styles.sectionTitle, { color }]}>{title}</Text>
     </View>
   );
@@ -566,75 +558,93 @@ function HStat({ label, val, color }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  tabContainer: { backgroundColor: 'rgba(0,0,0,0.6)', borderBottomWidth: 1, borderBottomColor: '#222' },
-  tabScroll: { paddingHorizontal: 10 },
-  tab: { paddingHorizontal: 18, paddingVertical: 15, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 4, borderBottomColor: 'transparent' },
-  tabText: { color: COLORS.dim, fontSize: 12, letterSpacing: 1 },
-  scrollContent: { padding: 20, paddingBottom: 50 },
+  tabContainer: { backgroundColor: 'rgba(0,0,0,0.8)', borderBottomWidth: 1, borderBottomColor: '#333' },
+  tabScroll: { paddingHorizontal: 5 },
+  tab: { paddingHorizontal: 16, paddingVertical: 18, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 4, borderBottomColor: 'transparent' },
+  tabText: { color: COLORS.dim, fontSize: 13, letterSpacing: 1.5, fontWeight: 'bold' },
+  scrollContent: { padding: 25, paddingBottom: 80 },
   section: { gap: 25 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, borderLeftWidth: 5, paddingLeft: 15 },
-  sectionTitle: { fontSize: 24, fontFamily: FONTS.horror, letterSpacing: 2 },
-  row: { flexDirection: 'row', gap: 15 },
-  grid2: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
-  inputGroup: { flex: 1, gap: 12 },
-  inputLabel: { color: COLORS.white, fontSize: 11, fontWeight: '900', letterSpacing: 2.5, textTransform: 'uppercase' },
-  input: { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: '#444', padding: 20, color: COLORS.white, fontSize: 18, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', ...SHADOWS.crimson },
-  dashboardGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 15 },
-  resBox: { width: '31%', backgroundColor: '#0f0f16', padding: 18, borderBottomWidth: 4, gap: 8, ...SHADOWS.crimson },
-  resLabel: { fontSize: 10, fontWeight: 'bold', color: COLORS.dim, letterSpacing: 1.5 },
-  resValue: { fontSize: 18, fontWeight: '900', fontFamily: FONTS.horror },
-  resSub: { fontSize: 10, color: COLORS.muted, fontWeight: 'bold' },
-  mainActionBtn: { backgroundColor: COLORS.crimson, height: 80, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15, marginTop: 30, ...SHADOWS.crimson },
-  mainActionText: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 26, letterSpacing: 2 },
-  macroDashboard: { flexDirection: 'row', gap: 12 },
-  macroBox: { flex: 1, backgroundColor: '#0f0f16', padding: 20, borderLeftWidth: 6, gap: 10 },
-  macroLabel: { fontSize: 11, fontWeight: 'bold', color: COLORS.dim },
-  macroGrams: { fontSize: 24, fontWeight: '900', fontFamily: FONTS.horror },
-  macroGkg: { fontSize: 11, color: COLORS.muted, fontWeight: 'bold' },
-  vizContainer: { alignItems: 'center', padding: 20, backgroundColor: 'rgba(255,255,255,0.03)', borderWidth: 1, borderColor: '#333' },
-  miniCard: { backgroundColor: 'rgba(255,255,255,0.04)', padding: 25, borderWidth: 1, borderColor: '#444', gap: 20 },
-  cardTitle: { fontSize: 13, fontWeight: '900', color: COLORS.muted, letterSpacing: 1.5 },
-  displayOnly: { flex: 1, justifyContent: 'center', backgroundColor: '#000', padding: 15, borderWidth: 1, borderColor: '#333' },
-  displayLabel: { fontSize: 10, fontWeight: 'bold', color: COLORS.dim, marginBottom: 8 },
-  displayValue: { fontSize: 20, fontWeight: '900' },
-  dosageResult: { backgroundColor: 'rgba(255, 0, 81, 0.12)', padding: 20, alignItems: 'center', borderRadius: 4, borderWidth: 1, borderColor: COLORS.pink },
-  dosageLabel: { fontSize: 11, color: COLORS.dim, fontWeight: 'bold' },
-  dosageValue: { fontSize: 28, color: COLORS.bone, fontWeight: '900', marginTop: 10 },
-  aiCard: { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 35, borderWidth: 1, borderColor: '#444', ...SHADOWS.purple },
-  aiLabel: { color: COLORS.crimson, fontSize: 14, fontWeight: '900', letterSpacing: 3, marginBottom: 8 },
-  aiText: { color: COLORS.bone, fontSize: 16, lineHeight: 26, textAlign: 'justify' },
-  aiRecItem: { flexDirection: 'row', gap: 12, marginBottom: 12 },
-  aiRecBullet: { color: COLORS.poison, fontWeight: '900', fontSize: 18 },
-  aiDivider: { height: 1, backgroundColor: '#444', marginVertical: 25 },
-  actionRow: { flexDirection: 'row', gap: 15, marginTop: 30 },
-  actionBtn: { height: 75, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15, backgroundColor: '#0a0a0d', borderWidth: 2, borderColor: '#444' },
-  actionBtnText: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 22 },
-  tableCard: { backgroundColor: '#0f0f16', padding: 30, borderWidth: 1, borderColor: '#444' },
-  tableTitle: { fontSize: 15, fontWeight: '900', color: COLORS.bone, marginBottom: 20, letterSpacing: 2 },
-  tableRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#333' },
-  tableLabel: { color: COLORS.muted, fontSize: 14, fontWeight: 'bold' },
-  tableValue: { fontSize: 16, fontWeight: '900' },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, borderLeftWidth: 6, paddingLeft: 18 },
+  sectionTitle: { fontSize: 26, fontFamily: FONTS.horror, letterSpacing: 2 },
+  row: { flexDirection: 'row', gap: 18 },
+  grid2: { flexDirection: 'row', flexWrap: 'wrap', gap: 18 },
+  inputGroup: { flex: 1, gap: 10 },
+  inputLabel: { color: COLORS.white, fontSize: 12, fontWeight: '900', letterSpacing: 2, textTransform: 'uppercase' },
   
-  // New Identity/History styles
-  identityCard: { backgroundColor: 'rgba(255, 255, 255, 0.02)', padding: 20, borderWidth: 1, borderColor: '#333', gap: 15, marginBottom: 10 },
-  miniBtnRow: { flexDirection: 'row', gap: 10 },
-  miniBtn: { flex: 1, height: 50, borderWidth: 1, borderColor: '#444', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
-  activeMiniBtn: { borderColor: COLORS.crimson, backgroundColor: 'rgba(255, 0, 60, 0.15)' },
-  miniBtnText: { color: COLORS.dim, fontSize: 13, fontWeight: 'bold' },
+  // HIGH LEGIBILITY INPUTS
+  input: { 
+    backgroundColor: 'rgba(255,255,255,0.12)', // Brighter input background
+    borderWidth: 2, 
+    borderColor: 'rgba(255, 255, 255, 0.4)', // Brighter border
+    padding: 22, 
+    color: '#FFFFFF', // Pure white text
+    fontSize: 22, 
+    fontWeight: '900',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', 
+  },
+  
+  dashboardGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15, marginTop: 20 },
+  resBox: { width: '31%', backgroundColor: 'rgba(20,20,30,0.9)', padding: 20, borderBottomWidth: 5, gap: 8, ...SHADOWS.crimson },
+  resLabel: { fontSize: 11, fontWeight: '900', color: COLORS.dim, letterSpacing: 1.5 },
+  resValue: { fontSize: 22, fontWeight: '900', fontFamily: FONTS.horror },
+  resSub: { fontSize: 11, color: COLORS.muted, fontWeight: '900' },
+  
+  mainActionBtn: { backgroundColor: COLORS.crimson, height: 85, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15, marginTop: 40, ...SHADOWS.crimson },
+  mainActionText: { color: COLORS.bg, fontFamily: FONTS.horror, fontSize: 28, letterSpacing: 3 },
+  
+  macroDashboard: { flexDirection: 'row', gap: 15 },
+  macroBox: { flex: 1, backgroundColor: 'rgba(20,20,30,0.9)', padding: 25, borderLeftWidth: 8, gap: 12 },
+  macroLabel: { fontSize: 13, fontWeight: '900', color: COLORS.dim },
+  macroGrams: { fontSize: 28, fontWeight: '900', fontFamily: FONTS.horror },
+  macroGkg: { fontSize: 13, color: COLORS.bone, fontWeight: 'bold' },
+  
+  vizContainer: { alignItems: 'center', padding: 25, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 2, borderColor: '#555' },
+  miniCard: { backgroundColor: 'rgba(255,255,255,0.06)', padding: 30, borderWidth: 2, borderColor: '#555', gap: 25 },
+  cardTitle: { fontSize: 15, fontWeight: '900', color: COLORS.bone, letterSpacing: 1.5 },
+  displayOnly: { flex: 1, justifyContent: 'center', backgroundColor: '#000', padding: 20, borderWidth: 2, borderColor: '#555' },
+  displayLabel: { fontSize: 11, fontWeight: '900', color: COLORS.dim, marginBottom: 10 },
+  displayValue: { fontSize: 24, fontWeight: '900', color: COLORS.bone },
+  
+  dosageResult: { backgroundColor: 'rgba(255, 0, 81, 0.2)', padding: 25, alignItems: 'center', borderRadius: 6, borderWidth: 2, borderColor: COLORS.pink },
+  dosageLabel: { fontSize: 12, color: COLORS.bone, fontWeight: '900', letterSpacing: 2 },
+  dosageValue: { fontSize: 36, color: COLORS.bone, fontWeight: '900', marginTop: 12 },
+  
+  aiCard: { backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 40, borderWidth: 2, borderColor: '#666', ...SHADOWS.purple },
+  aiLabel: { color: COLORS.crimson, fontSize: 16, fontWeight: '900', letterSpacing: 3, marginBottom: 12 },
+  aiText: { color: COLORS.bone, fontSize: 18, lineHeight: 28, textAlign: 'justify', fontWeight: 'bold' },
+  aiRecItem: { flexDirection: 'row', gap: 15, marginBottom: 15 },
+  aiRecBullet: { color: COLORS.poison, fontWeight: '900', fontSize: 22 },
+  aiDivider: { height: 2, backgroundColor: '#666', marginVertical: 35 },
+  
+  actionRow: { flexDirection: 'row', gap: 20, marginTop: 40 },
+  actionBtn: { height: 80, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15, backgroundColor: '#111', borderWidth: 2, borderColor: '#666' },
+  actionBtnText: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 24 },
+  
+  identityCard: { backgroundColor: 'rgba(255, 255, 255, 0.04)', padding: 25, borderWidth: 2, borderColor: '#444', gap: 20, marginBottom: 15 },
+  miniBtnRow: { flexDirection: 'row', gap: 12 },
+  miniBtn: { flex: 1, height: 60, borderWidth: 2, borderColor: '#555', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
+  activeMiniBtn: { borderColor: COLORS.crimson, backgroundColor: 'rgba(255, 0, 60, 0.25)' },
+  miniBtnText: { color: COLORS.dim, fontSize: 15, fontWeight: '900' },
   activeMiniBtnText: { color: COLORS.white },
   
-  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#000', borderWidth: 1, borderColor: COLORS.sky, paddingHorizontal: 15, height: 60, gap: 15, marginBottom: 20 },
-  searchInput: { flex: 1, color: COLORS.white, fontSize: 14, fontWeight: 'bold', letterSpacing: 1 },
-  iconBtn: { padding: 10, backgroundColor: '#000', borderWidth: 1, borderColor: '#333' },
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#000', borderWidth: 2, borderColor: COLORS.gold, paddingHorizontal: 20, height: 70, gap: 15, marginBottom: 25 },
+  searchInput: { flex: 1, color: COLORS.white, fontSize: 16, fontWeight: '900', letterSpacing: 1 },
+  iconBtn: { padding: 15, backgroundColor: '#000', borderWidth: 2, borderColor: '#444' },
   
-  historyCard: { backgroundColor: '#0f0f16', padding: 25, borderWidth: 1, borderColor: '#333', marginBottom: 15, borderLeftWidth: 5, borderLeftColor: COLORS.sky },
-  historyHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  historyName: { fontSize: 18, color: COLORS.white, fontWeight: '900', letterSpacing: 1, marginBottom: 5 },
-  historyDate: { fontSize: 12, color: COLORS.dim, fontWeight: 'bold' },
-  historyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
+  historyCard: { backgroundColor: '#111', padding: 30, borderWidth: 2, borderColor: '#444', marginBottom: 20, borderLeftWidth: 6, borderLeftColor: COLORS.gold },
+  historyHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  historyName: { fontSize: 20, color: COLORS.white, fontWeight: '900', letterSpacing: 1, marginBottom: 8 },
+  historyDate: { fontSize: 14, color: COLORS.dim, fontWeight: 'bold' },
+  historyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
   hStat: { flex: 1 },
-  hLabel: { fontSize: 10, color: COLORS.dim, fontWeight: 'bold', marginBottom: 4 },
-  hVal: { fontSize: 16, fontWeight: '900' },
-  emptyCard: { alignItems: 'center', justifyContent: 'center', padding: 50, borderWidth: 1, borderColor: '#222', borderStyle: 'dashed' },
-  emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 20, marginTop: 15 },
+  hLabel: { fontSize: 11, color: COLORS.dim, fontWeight: '900', marginBottom: 6 },
+  hVal: { fontSize: 18, fontWeight: '900' },
+  emptyCard: { alignItems: 'center', justifyContent: 'center', padding: 60, borderWidth: 2, borderColor: '#333', borderStyle: 'dashed' },
+  emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 24, marginTop: 20 },
+  
+  tableCard: { backgroundColor: '#111', padding: 35, borderWidth: 2, borderColor: '#444' },
+  tableTitle: { fontSize: 16, fontWeight: '900', color: COLORS.bone, marginBottom: 25, letterSpacing: 2 },
+  tableRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: '#444' },
+  tableLabel: { color: COLORS.muted, fontSize: 16, fontWeight: '900' },
+  tableValue: { fontSize: 18, fontWeight: '900' },
 });
