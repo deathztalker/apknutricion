@@ -474,7 +474,7 @@ function MacroBox({ label, grams, gkg, color }: any) {
       <Text style={styles.macroLabel}>{label}</Text>
       <Text style={[styles.macroGrams, { color }]}>{grams.toFixed(0)}G</Text>
       <Text style={styles.macroGkg}>{gkg.toFixed(1)} G/KG</Text>
-    </TouchableOpacity>
+    </View>
   );
 }
 
