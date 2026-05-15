@@ -1,4 +1,4 @@
-// lib/ai.ts — Motor de IA Clínica con Google Gemini + Reglas MINSAL
+// lib/ai.ts — Motor de Inteligencia Bioreactiva v8.0
 import { ClinicalRecord, Patient, AIAnalysis, ClinicalAlert, CalculationResult } from '@/types';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -15,28 +15,28 @@ export function generateRuleBasedAlerts(
 
   if (calc.bmi !== null) {
     if (calc.bmi < 18.5) {
-      alerts.push({ severity: 'warning', icon: '⚖️', title: 'Bajo Peso',
-        description: `IMC ${calc.bmi} — Riesgo de desnutrición. Evaluar albúmina y hemoglobina.` });
+      alerts.push({ severity: 'danger', icon: '💀', title: 'RIESGO DE CAQUEXIA',
+        description: `IMC crítico ${calc.bmi}. Prioridad absoluta en soporte proteico y micronutrientes.` });
     }
-    if (calc.bmi >= 30) {
-      alerts.push({ severity: 'danger', icon: '🚨', title: 'Obesidad Detectada',
-        description: `IMC ${calc.bmi} — Iniciar protocolo hipocalórico y evaluar riesgo metabólico.` });
+    if (calc.bmi >= 35) {
+      alerts.push({ severity: 'danger', icon: '🚨', title: 'ALERTA DE MORBILIDAD',
+        description: `Obesidad severa. Riesgo sistémico crítico. Iniciar protocolo de control metabólico.` });
     }
   }
 
   if (calc.cvRisk === 'Riesgo alto') {
-    alerts.push({ severity: 'danger', icon: '❤️', title: 'Riesgo CV Elevado',
-      description: `Perímetro de cintura crítico. Priorizar reducción de grasa visceral.` });
+    alerts.push({ severity: 'danger', icon: '💔', title: 'AMENAZA CARDIOVASCULAR',
+      description: `Perímetro de cintura en zona de peligro. Adiposidad visceral comprometida.` });
   }
 
   if (record.systolic_bp && record.systolic_bp >= 140) {
-    alerts.push({ severity: 'danger', icon: '💉', title: 'HTA Confirmada',
-      description: `PA ${record.systolic_bp}/${record.diastolic_bp} mmHg. Dieta DASH recomendada.` });
+    alerts.push({ severity: 'danger', icon: '💉', title: 'CRISIS HIPERTENSIVA',
+      description: `Protocolo DASH requerido de inmediato. Monitorear daño a órganos diana.` });
   }
 
-  if (calc.kdigoStage && !calc.kdigoStage.startsWith('G1')) {
-    alerts.push({ severity: 'danger', icon: '🫘', title: `ERC Estadio ${calc.kdigoStage}`,
-      description: `TFG ${calc.gfr} ml/min. Ajustar aporte proteico y fósforo.` });
+  if (calc.kdigoStage && calc.kdigoStage.includes('G3')) {
+    alerts.push({ severity: 'danger', icon: '🫘', title: 'FILTRACIÓN COMPROMETIDA',
+      description: `Estadio KDIGO avanzado. Ajustar farmacología y aporte renal.` });
   }
 
   return alerts;
@@ -48,48 +48,53 @@ function buildClinicalPrompt(
   calc: CalculationResult,
   ruleAlerts: ClinicalAlert[]
 ): string {
-  return `Eres una Nutricionista Clínica experta de Chile. Tu objetivo es realizar una DISECCIÓN NEURAL del estado del paciente.
-Utiliza un lenguaje técnico, preciso y profesional.
+  return `ESTÁS OPERANDO COMO EL NÚCLEO DE BIO-INTELIGENCIA NUTRICESFAM.
+TU MISIÓN ES REALIZAR UNA DISECCIÓN NEURAL EXHAUSTIVA DE LOS DATOS BIOMÉTRICOS SUMINISTRADOS.
 
-REGLAS:
-1. Idioma: Español.
-2. Formato: JSON puro.
-3. Detalle: Máxima profundidad clínica.
+REGLAS CRÍTICAS:
+1. IDIOMA: Español clínico de alta complejidad.
+2. TONO: Profesional, técnico, autoritario y preciso.
+3. PROHIBICIÓN: NO menciones que eres una IA, ni que procesas datos. Presenta los hallazgos como HECHOS CLÍNICOS.
+4. PROFUNDIDAD: Analiza la relación fisiopatológica entre el IMC, la función renal (TFG), la sarcopenia (Grip) y el riesgo CV.
 
-DATOS DEL PACIENTE:
-- Nombre: ${patient.full_name || 'Paciente'}
-- Edad: ${patient.age} años | Sexo: ${patient.sex} | Previsión: ${patient.insurance}
+DATOS DEL SUJETO:
+- IDENTIDAD: ${patient.full_name || 'DESCONOCIDO'} | EDAD: ${patient.age} | GENOTIPO: ${patient.sex} | PREVISIÓN: ${patient.insurance}
 
-BIOMETRÍA:
+BIOMETRÍA Y TELEMETRÍA:
 - IMC: ${calc.bmi} (${calc.bmiStatus})
-- Composición: ${calc.fatPercent}% grasa | ${calc.leanMassKg}kg masa magra
-- Riesgo CV: ${calc.cvRisk} | ICT: ${calc.ict}
-- Tensión Arterial: ${record.systolic_bp}/${record.diastolic_bp} (${calc.bpStatus})
+- COMPOSICIÓN: ${calc.fatPercent}% adiposidad | ${calc.leanMassKg}kg masa libre de grasa
+- RIESGO SISTÉMICO: CV: ${calc.cvRisk} | ICT: ${calc.ict}
+- HEMODINÁMICA: PA ${record.systolic_bp}/${record.diastolic_bp} (${calc.bpStatus})
 
-METABOLISMO:
+METABOLISMO DE DISECCIÓN:
 - TMB: ${calc.bmr} kcal | VCT: ${calc.tdee} kcal
-- Agua: ${calc.waterLiters} L/día
-- Macros Sugeridos: PRO ${record.macro_prot_pct}% | CHO ${record.macro_cho_pct}% | LIP ${record.macro_fat_pct}%
+- HIDRATACIÓN: ${calc.waterLiters} L/24h
+- MACRO-PROTOCOLO: PRO ${record.macro_prot_pct}% | CHO ${record.macro_cho_pct}% | LIP ${record.macro_fat_pct}%
 
-HALLAZGOS CLÍNICOS:
-- TFG Renal: ${calc.gfr} ml/min (${calc.kdigoStage})
-- Sarcopenia: ${calc.sarcopeniaRisk} | Grip: ${record.grip_strength_kg}kg
-- MNA: ${record.mna_score} | VGS: ${record.vgs_status}
+HALLAZGOS CLÍNICOS AVANZADOS:
+- FUNCIÓN RENAL: TFG ${calc.gfr} ml/min | ESTADIO: ${calc.kdigoStage}
+- CAPACIDAD FUNCIONAL: Sarcopenia: ${calc.sarcopeniaRisk} | Dinamometría: ${record.grip_strength_kg}kg
+- SCREENING GERIÁTRICO: MNA: ${record.mna_score} | VGS: ${record.vgs_status}
 
 ANAMNESIS:
-- Patologías: ${record.pathologies?.join(', ')}
-- Observaciones: ${record.observations}
+- PATOLOGÍAS: ${record.pathologies?.join(', ')}
+- OBSERVACIONES: ${record.observations}
 
-ALERTAS:
+ALERTAS ACTIVAS:
 ${ruleAlerts.map(a => `[${a.severity}] ${a.title}`).join('\n')}
 
-Responde con este JSON:
+ESTRUCTURA DE RESPUESTA (JSON PURO):
 {
-  "nutritional_diagnosis": "Diagnóstico técnico estructurado",
-  "summary": "Análisis fisiopatológico detallado de la relación entre datos",
-  "recommendations": ["Rec 1", "Rec 2", "Rec 3", "Rec 4"],
-  "goals": ["Meta SMART 1", "Meta SMART 2"],
-  "follow_up": "Plan de monitoreo"
+  "nutritional_diagnosis": "Diagnóstico clínico integral utilizando terminología médica avanzada.",
+  "summary": "Análisis profundo de la interacción entre los marcadores antropométricos, renales y hemodinámicos. Relaciona la composición corporal con el gasto energético y el riesgo metabólico detectado.",
+  "recommendations": [
+    "Intervención nutricional específica basada en guías clínicas internacionales.",
+    "Ajuste de micronutrientes crítico.",
+    "Protocolo de actividad física adaptado al riesgo sarcopénico.",
+    "Plan de monitoreo de indicadores bioquímicos."
+  ],
+  "goals": ["Objetivo SMART 1 (Bio-estabilización)", "Objetivo SMART 2 (Optimización Metabólica)"],
+  "follow_up": "Calendario de re-evaluación y metas de corto plazo."
 }`;
 }
 
@@ -102,11 +107,15 @@ export async function analyzeWithGemini(
 
   if (GEMINI_API_KEY) {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        generationConfig: { temperature: 0.2, topP: 0.9, maxOutputTokens: 2048 }
+      });
       const prompt = buildClinicalPrompt(patient, record, calc, ruleAlerts);
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const parsed = JSON.parse(response.text().replace(/```json|```/g, '').trim());
+      const text = response.text().replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(text);
 
       return {
         summary: parsed.summary,
@@ -118,17 +127,17 @@ export async function analyzeWithGemini(
         raw_text: response.text(),
       };
     } catch (err) {
-      console.warn('IA Gemini falló, usando fallback:', err);
+      console.error('DISECCIÓN FALLIDA:', err);
     }
   }
 
   return {
-    summary: 'Análisis basado en heurística de sistema. El estado antropométrico sugiere seguimiento periódico.',
+    summary: 'SISTEMA EN MODO OFFLINE. La interacción de datos sugiere un estado nutricional que requiere monitoreo continuo. Se recomienda validar parámetros renales y antropométricos en el próximo ciclo.',
     alerts: ruleAlerts,
-    recommendations: ['Mantener hidratación adecuada', 'Seguir distribución de macronutrientes prescrita'],
-    nutritional_diagnosis: `Paciente con ${calc.bmiStatus?.toLowerCase() || 'parámetros estables'}.`,
-    goals: ['Lograr estabilidad de peso', 'Optimizar ingesta de micronutrientes'],
-    follow_up: 'Control en 30 días.',
+    recommendations: ['Bio-estabilización mediante hidratación', 'Cumplimiento estricto de la distribución de macronutrientes'],
+    nutritional_diagnosis: `Diagnóstico basado en parámetros estándar: ${calc.bmiStatus || 'Estable'}.`,
+    goals: ['Lograr homeostasis ponderal', 'Prevenir degradación muscular'],
+    follow_up: 'Re-interrogación en 15 ciclos solares (días).',
     raw_text: 'OFFLINE_FALLBACK',
   };
 }

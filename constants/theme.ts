@@ -1,40 +1,39 @@
-// constants/theme.ts - MISFITS HORROR-PUNK EDITION
-
+// constants/theme.ts - MISFITS HORROR-PUNK EDITION (V8 ULTRA-CONTRAST)
 export const COLORS = {
-  // Pure Void
-  bg:      '#050505', 
-  bg1:     '#0a0a0d', 
-  bg2:     '#111116',
-  bg3:     '#18181f',
-  bg4:     '#22222b',
-  bgCard:  'rgba(10, 10, 13, 0.95)', 
+  // Deep Backgrounds
+  bg:      '#010103', 
+  bg1:     '#0f0f16', 
+  bg2:     '#1a1a24',
+  bg3:     '#242430',
+  bg4:     '#2e2e3d',
+  bgCard:  'rgba(15, 15, 22, 0.99)', 
 
-  // Misfits Identity
-  crimson: '#dc143c', // --misfits-red
-  bone:    '#f5f5f5', // --misfits-white
-  poison:  '#39ff14', // --toxic-green
+  // Misfits Identity - Neon Brightness
+  crimson: '#ff003c', // Electric Crimson
+  bone:    '#ffffff', // Pure White
+  poison:  '#39ff14', // Nuclear Green
   void:    '#000000',
   
   // Terminal Assets
-  neon:    '#dc143c', 
-  stg:     '#800000', 
-  pink:    '#ff0033', 
-  purple:  '#6600cc', 
+  neon:    '#ff003c', 
+  stg:     '#cc0033', 
+  pink:    '#ff4d88', 
+  purple:  '#b366ff', 
   
   // Semantic
-  gold:    '#ffd700', 
-  red:     '#ff0000', 
-  sky:     '#00ccff', 
+  gold:    '#ffcc00', 
+  red:     '#ff1a1a', 
+  sky:     '#00e5ff', 
 
-  // Text Hierarchy
-  text:    '#f5f5f5', 
-  muted:   '#8a8a8a', 
-  dim:     '#444444',
+  // Text Hierarchy - MAX LEGIBILITY
+  text:    '#ffffff', // Primary
+  muted:   '#e0e0e0', // High-contrast secondary
+  dim:     '#a0a0a0', // Labels
   white:   '#ffffff',
 
   // Borders
-  border:  'rgba(220, 20, 60, 0.4)', 
-  borderP: 'rgba(57, 255, 20, 0.3)', 
+  border:  'rgba(255, 0, 60, 0.8)', 
+  borderP: 'rgba(57, 255, 20, 0.7)', 
 } as const;
 
 export const FONTS = {
@@ -45,39 +44,39 @@ export const FONTS = {
 
 export const SHADOWS = {
   crimson: {
-    shadowColor: '#dc143c',
+    shadowColor: '#ff003c',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 15,
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 25,
   },
   poison: {
     shadowColor: '#39ff14',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 10,
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 15,
   },
   neon: {
-    shadowColor: '#dc143c',
+    shadowColor: '#ff003c',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 25,
+  },
+  pink: {
+    shadowColor: '#ff4d88',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
     elevation: 15,
   },
-  pink: {
-    shadowColor: '#ff0033',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 10,
-  },
   purple: {
-    shadowColor: '#6600cc',
+    shadowColor: '#b366ff',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 15,
-    elevation: 10,
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 15,
   },
 } as const;
 

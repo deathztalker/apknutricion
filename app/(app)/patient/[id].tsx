@@ -30,7 +30,7 @@ export default function PatientDossier() {
         setRecords(rRes.data || []);
       } catch (error) {
         console.error('Error fetching dossier:', error);
-        Alert.alert("ERROR DE ACCESO", "No se pudo recuperar el expediente del vacío.");
+        Alert.alert("ACCESO DENEGADO", "No se pudo recuperar el expediente del núcleo.");
       } finally {
         setLoading(false);
       }
@@ -42,7 +42,7 @@ export default function PatientDossier() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={COLORS.crimson} />
-        <Text style={styles.loadingText}>DESCRIPTANDO EXPEDIENTE...</Text>
+        <Text style={styles.loadingText}>DECRIPTANDO DOSSIER...</Text>
       </View>
     );
   }
@@ -58,7 +58,7 @@ export default function PatientDossier() {
         ? records.slice(0, 6).reverse().map(r => r.weight_kg || 0)
         : [0],
       color: () => COLORS.crimson,
-      strokeWidth: 3
+      strokeWidth: 4
     }]
   };
 
@@ -66,41 +66,41 @@ export default function PatientDossier() {
     <TerminalBackground>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
-        {/* DOSSIER HEADER */}
+        {/* DOSSIER HEADER - ULTRA HD CONTRAST */}
         <View style={styles.header}>
           <LinearGradient
-            colors={['rgba(220, 20, 60, 0.1)', 'transparent']}
+            colors={['rgba(255, 0, 60, 0.2)', 'transparent']}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
               <Text style={styles.avatarLetter}>{patient?.full_name[0].toUpperCase()}</Text>
             </View>
-            <View style={styles.skullBadge}>
-              <Ionicons name="skull" size={18} color={COLORS.bg} />
+            <View style={[styles.skullBadge, SHADOWS.crimson]}>
+              <Ionicons name="skull" size={24} color={COLORS.white} />
             </View>
           </View>
           
           <Text style={styles.subjectName}>{patient?.full_name.toUpperCase()}</Text>
           <View style={styles.idContainer}>
-            <Text style={styles.idText}>SUJETO ID: {id?.substring(0, 15).toUpperCase()}</Text>
+            <Text style={styles.idText}>EXPEDIENTE_ID: {id?.toUpperCase()}</Text>
           </View>
 
           <View style={styles.tagRow}>
-            <DossierTag label={patient?.insurance} icon="shield-checkmark" color={COLORS.purple} />
-            <DossierTag label={patient?.sex === 'M' ? 'XY' : 'XX'} icon="male-female" color={COLORS.pink} />
+            <DossierTag label={patient?.insurance} icon="shield-checkmark" color={COLORS.sky} />
+            <DossierTag label={patient?.sex === 'M' ? 'GENOTIPO XY' : 'GENOTIPO XX'} icon="male-female" color={COLORS.pink} />
             <DossierTag label={`${patient?.age} AÑOS`} icon="calendar" color={COLORS.poison} />
           </View>
         </View>
 
         <View style={styles.content}>
           
-          {/* PRIMARY DIAGNOSTIC CONSOLE */}
+          {/* PRIMARY DIAGNOSTIC HUD */}
           <View style={styles.consoleRow}>
             <ConsoleCard 
-              label="IMC ACTUAL" 
+              label="IMC SISTEMA" 
               value={latest?.bmi || '--'} 
-              status={latest?.bmi_status?.toUpperCase() || 'SIN DATOS'} 
+              status={latest?.bmi_status?.toUpperCase() || 'SIN ESCANEO'} 
               color={COLORS.crimson}
             />
             <ConsoleCard 
@@ -111,40 +111,44 @@ export default function PatientDossier() {
             />
           </View>
 
-          {/* TELEMETRY GRAPH */}
+          {/* EVOLUTION TELEMETRY */}
           <View style={styles.panel}>
             <View style={styles.panelHeader}>
-              <Ionicons name="stats-chart" size={16} color={COLORS.crimson} />
-              <Text style={styles.panelTitle}>EVOLUCIÓN PONDERAL (KG)</Text>
+              <Ionicons name="pulse" size={20} color={COLORS.crimson} />
+              <Text style={styles.panelTitle}>EVOLUCIÓN BIOMÉTRICA (KG)</Text>
             </View>
             {records.length > 1 ? (
               <LineChart
                 data={weightData}
                 width={SCREEN_WIDTH - 40}
-                height={180}
+                height={220}
                 chartConfig={chartConfig}
                 bezier
                 style={styles.chart}
-                withInnerLines={false}
+                withInnerLines={true}
+                segments={5}
               />
             ) : (
               <View style={styles.noData}>
-                <Text style={styles.noDataText}>DATOS INSUFICIENTES PARA TELEMETRÍA</Text>
+                <Ionicons name="alert-circle" size={50} color={COLORS.dim} />
+                <Text style={styles.noDataText}>SIN DATOS DE EVOLUCIÓN</Text>
               </View>
             )}
           </View>
 
-          {/* COMMAND ACTIONS */}
+          {/* HUD ACTION GRID */}
           <View style={styles.actionGrid}>
             <ActionButton 
-              label="NUEVA EVALUACIÓN" 
-              icon="scan-outline" 
+              label="NUEVO ESCANEO" 
+              sub="OVERRIDE BIOMÉTRICO"
+              icon="scan" 
               color={COLORS.crimson}
               onPress={() => router.push({ pathname: '/calculator', params: { patientId: id } })}
             />
             <ActionButton 
-              label="PLAN ALIMENTICIO" 
-              icon="restaurant-outline" 
+              label="PLAN DIETÉTICO" 
+              sub="ASIGNACIÓN RECURSOS"
+              icon="restaurant" 
               color={COLORS.pink}
               onPress={() => router.push({
                 pathname: '/(app)/meal-plan/new',
@@ -158,30 +162,32 @@ export default function PatientDossier() {
               })}
             />
             <ActionButton 
-              label="LABORATORIOS" 
-              icon="flask-outline" 
+              label="BIOQUÍMICA" 
+              sub="TERMINAL LABS"
+              icon="flask" 
               color={COLORS.purple}
               onPress={() => router.push(`/(app)/patient/${id}/labs`)}
             />
             <ActionButton 
-              label="BORRAR ARCHIVO" 
-              icon="trash-outline" 
-              color={COLORS.dim}
-              onPress={() => Alert.alert("AVISO", "Solo el administrador del núcleo puede purgar expedientes.")}
+              label="ARCHIVO PDF" 
+              sub="DOSS. EXPORTACIÓN"
+              icon="document-attach" 
+              color={COLORS.bone}
+              onPress={() => Alert.alert("SISTEMA", "Generando dossier técnico...")}
             />
           </View>
 
-          {/* CHRONOLOGICAL LOG */}
+          {/* TRANSMISSION HISTORY LOG */}
           <View style={styles.historySection}>
             <Text style={styles.sectionHeader}>LOG CRONOLÓGICO DE TRANSMISIONES</Text>
             {records.map((r, i) => (
               <TouchableOpacity key={r.id} style={styles.historyItem}>
-                <View style={[styles.historyIndicator, { backgroundColor: i === 0 ? COLORS.crimson : '#222' }]} />
+                <View style={[styles.historyIndicator, { backgroundColor: i === 0 ? COLORS.crimson : '#555' }]} />
                 <View style={styles.historyInfo}>
                   <Text style={styles.historyDate}>{new Date(r.record_date!).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}</Text>
-                  <Text style={styles.historySummary}>IMC: {r.bmi} | {r.weight_kg}KG | {r.bmi_status}</Text>
+                  <Text style={styles.historySummary}>NÚCLEO: {r.bmi} IMC | {r.weight_kg}KG | {r.bmi_status}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.dim} />
+                <Ionicons name="chevron-forward" size={24} color={COLORS.crimson} />
               </TouchableOpacity>
             ))}
           </View>
@@ -195,8 +201,8 @@ export default function PatientDossier() {
 function DossierTag({ label, icon, color }: any) {
   return (
     <View style={[styles.dTag, { borderColor: color }]}>
-      <Ionicons name={icon} size={12} color={color} />
-      <Text style={[styles.dTagText, { color }]}>{label}</Text>
+      <Ionicons name={icon} size={16} color={color} />
+      <Text style={[styles.dTagText, { color }]}>{label?.toUpperCase()}</Text>
     </View>
   );
 }
@@ -211,11 +217,14 @@ function ConsoleCard({ label, value, status, color }: any) {
   );
 }
 
-function ActionButton({ label, icon, color, onPress }: any) {
+function ActionButton({ label, sub, icon, color, onPress }: any) {
   return (
     <TouchableOpacity style={[styles.actBtn, { borderColor: color }]} onPress={onPress}>
-      <Ionicons name={icon} size={22} color={color} />
-      <Text style={[styles.actBtnText, { color }]}>{label}</Text>
+      <Ionicons name={icon} size={30} color={color} />
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.actBtnText, { color }]}>{label}</Text>
+        <Text style={styles.actBtnSub}>{sub}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -223,49 +232,51 @@ function ActionButton({ label, icon, color, onPress }: any) {
 const chartConfig = {
   backgroundColor: '#0a0a0d',
   backgroundGradientFrom: '#0a0a0d',
-  backgroundGradientTo: '#0a0a0d',
+  backgroundGradientTo: '#1a1a24',
   decimalPlaces: 1,
-  color: (opacity = 1) => `rgba(220, 20, 60, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(245, 245, 245, ${opacity * 0.5})`,
+  color: (opacity = 1) => `rgba(255, 0, 60, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity * 0.9})`,
   style: { borderRadius: 0 },
-  propsForDots: { r: "4", strokeWidth: "2", stroke: COLORS.bg }
+  propsForDots: { r: "6", strokeWidth: "3", stroke: COLORS.bg },
+  propsForBackgroundLines: { stroke: '#333', strokeDasharray: "" }
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bg, gap: 15 },
-  loadingText: { color: COLORS.crimson, fontSize: 10, fontWeight: 'bold', letterSpacing: 2 },
-  header: { padding: 30, paddingTop: Platform.OS === 'ios' ? 40 : 20, alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)', borderBottomWidth: 1, borderBottomColor: '#1a1a1f' },
-  avatarWrapper: { position: 'relative', marginBottom: 20 },
-  avatar: { width: 90, height: 90, borderRadius: 0, backgroundColor: '#0a0a0d', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: COLORS.crimson, ...SHADOWS.crimson },
-  avatarLetter: { fontSize: 44, fontFamily: FONTS.horror, color: COLORS.crimson },
-  skullBadge: { position: 'absolute', bottom: -5, right: -5, width: 24, height: 24, borderRadius: 12, backgroundColor: COLORS.crimson, justifyContent: 'center', alignItems: 'center' },
-  subjectName: { fontSize: 32, fontFamily: FONTS.horror, color: COLORS.white, textAlign: 'center', letterSpacing: 1 },
-  idContainer: { backgroundColor: 'rgba(255,255,255,0.03)', paddingHorizontal: 12, paddingVertical: 4, marginTop: 10, borderWidth: 1, borderColor: '#222' },
-  idText: { color: COLORS.dim, fontSize: 8, fontWeight: 'bold', letterSpacing: 1 },
-  tagRow: { flexDirection: 'row', gap: 10, marginTop: 25, flexWrap: 'wrap', justifyContent: 'center' },
-  dTag: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, backgroundColor: '#000' },
-  dTagText: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
-  content: { padding: 20, gap: 25 },
-  consoleRow: { flexDirection: 'row', gap: 15 },
-  consoleCard: { flex: 1, backgroundColor: '#0a0a0d', padding: 15, borderLeftWidth: 4, borderWidth: 1, borderColor: '#1a1a1f' },
-  consoleLabel: { fontSize: 8, fontWeight: 'bold', color: COLORS.dim, marginBottom: 10 },
-  consoleValue: { fontSize: 24, fontWeight: '900', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
-  consoleStatus: { fontSize: 9, color: COLORS.muted, fontWeight: 'bold', marginTop: 5 },
-  panel: { backgroundColor: '#0a0a0d', padding: 15, borderWidth: 1, borderColor: '#1a1a1f' },
-  panelHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 15 },
-  panelTitle: { fontSize: 10, fontWeight: 'bold', color: COLORS.muted, letterSpacing: 1 },
-  chart: { marginVertical: 10 },
-  noData: { height: 100, justifyContent: 'center', alignItems: 'center', borderStyle: 'dashed', borderWidth: 1, borderColor: '#222' },
-  noDataText: { color: COLORS.dim, fontSize: 9, fontWeight: 'bold' },
-  actionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  actBtn: { width: '48%', height: 70, backgroundColor: 'rgba(255,255,255,0.02)', borderWidth: 1, justifyContent: 'center', alignItems: 'center', gap: 8 },
-  actBtnText: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
-  historySection: { gap: 15, marginBottom: 40 },
-  sectionHeader: { fontSize: 11, fontWeight: 'bold', color: COLORS.dim, letterSpacing: 1 },
-  historyItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0a0a0d', padding: 15, borderWidth: 1, borderColor: '#1a1a1f', gap: 15 },
-  historyIndicator: { width: 3, height: '100%', borderRadius: 2 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bg, gap: 25 },
+  loadingText: { color: COLORS.crimson, fontSize: 16, fontWeight: '900', letterSpacing: 4 },
+  header: { padding: 40, paddingTop: Platform.OS === 'ios' ? 70 : 40, alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.85)', borderBottomWidth: 2, borderBottomColor: '#222' },
+  avatarWrapper: { position: 'relative', marginBottom: 30 },
+  avatar: { width: 120, height: 120, borderRadius: 0, backgroundColor: '#0f0f16', justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: COLORS.crimson, ...SHADOWS.crimson },
+  avatarLetter: { fontSize: 64, fontFamily: FONTS.horror, color: COLORS.crimson },
+  skullBadge: { position: 'absolute', bottom: -15, right: -15, width: 45, height: 45, borderRadius: 22.5, backgroundColor: COLORS.crimson, justifyContent: 'center', alignItems: 'center', ...SHADOWS.crimson },
+  subjectName: { fontSize: 42, fontFamily: FONTS.horror, color: COLORS.white, textAlign: 'center', letterSpacing: 3, textShadowColor: '#000', textShadowRadius: 10 },
+  idContainer: { backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 20, paddingVertical: 8, marginTop: 15, borderWidth: 1, borderColor: '#555' },
+  idText: { color: COLORS.bone, fontSize: 11, fontWeight: 'bold', letterSpacing: 2 },
+  tagRow: { flexDirection: 'row', gap: 15, marginTop: 40, flexWrap: 'wrap', justifyContent: 'center' },
+  dTag: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 15, paddingVertical: 10, borderWidth: 2, backgroundColor: '#000' },
+  dTagText: { fontSize: 13, fontWeight: '900', letterSpacing: 1.5 },
+  content: { padding: 25, gap: 40 },
+  consoleRow: { flexDirection: 'row', gap: 20 },
+  consoleCard: { flex: 1, backgroundColor: '#0f0f16', padding: 25, borderLeftWidth: 6, borderWidth: 1, borderColor: '#333', ...SHADOWS.crimson },
+  consoleLabel: { fontSize: 11, fontWeight: 'bold', color: COLORS.dim, marginBottom: 15, letterSpacing: 2 },
+  consoleValue: { fontSize: 34, fontWeight: '900', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', color: COLORS.bone },
+  consoleStatus: { fontSize: 13, color: COLORS.bone, fontWeight: '900', marginTop: 10 },
+  panel: { backgroundColor: '#0f0f16', padding: 25, borderWidth: 1, borderColor: '#333', borderRadius: 2 },
+  panelHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 25 },
+  panelTitle: { fontSize: 14, fontWeight: '900', color: COLORS.bone, letterSpacing: 3 },
+  chart: { marginVertical: 15, borderRadius: 0 },
+  noData: { height: 150, justifyContent: 'center', alignItems: 'center', borderStyle: 'dashed', borderWidth: 2, borderColor: '#444', gap: 15 },
+  noDataText: { color: COLORS.dim, fontSize: 12, fontWeight: '900', letterSpacing: 2 },
+  actionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
+  actBtn: { width: '47%', height: 100, backgroundColor: '#0f0f16', borderWidth: 2, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', gap: 15 },
+  actBtnText: { fontSize: 13, fontWeight: '900', letterSpacing: 1 },
+  actBtnSub: { fontSize: 9, color: COLORS.dim, fontWeight: 'bold', marginTop: 4 },
+  historySection: { gap: 20, marginBottom: 60 },
+  sectionHeader: { fontSize: 15, fontWeight: '900', color: COLORS.bone, letterSpacing: 3, borderBottomWidth: 1, borderBottomColor: '#333', paddingBottom: 10 },
+  historyItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0f0f16', padding: 25, borderWidth: 1, borderColor: '#333', gap: 20 },
+  historyIndicator: { width: 5, height: '100%', borderRadius: 0 },
   historyInfo: { flex: 1 },
-  historyDate: { fontSize: 10, color: COLORS.muted, fontWeight: 'bold' },
-  historySummary: { fontSize: 11, color: COLORS.dim, marginTop: 4 },
+  historyDate: { fontSize: 14, color: COLORS.white, fontWeight: '900', marginBottom: 8 },
+  historySummary: { fontSize: 14, color: COLORS.muted, fontWeight: 'bold' },
 });
