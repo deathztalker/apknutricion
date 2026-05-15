@@ -1,83 +1,91 @@
-// constants/theme.ts - MISFITS HORROR-PUNK EDITION (V8 ULTRA-CONTRAST)
+// constants/theme.ts - PREMIUM CLINICAL V9 (MAX LEGIBILITY & GLASSMORPHISM)
 export const COLORS = {
-  // Deep Backgrounds
-  bg:      '#010103', 
-  bg1:     '#0f0f16', 
-  bg2:     '#1a1a24',
-  bg3:     '#242430',
-  bg4:     '#2e2e3d',
-  bgCard:  'rgba(15, 15, 22, 0.99)', 
+  // Deep Backgrounds (Abyssal Blue/Grey instead of pure black)
+  bg:      '#07070A', 
+  bg1:     '#101018', 
+  bg2:     '#191925',
+  bg3:     '#232332',
+  bg4:     '#2D2D40',
+  bgCard:  'rgba(25, 25, 37, 0.85)', 
 
-  // Misfits Identity - Neon Brightness
-  crimson: '#ff003c', // Electric Crimson
-  bone:    '#ffffff', // Pure White
-  poison:  '#39ff14', // Nuclear Green
+  // Misfits Identity - Brightened for clinical screens
+  crimson: '#FF2A55', // Vibrant, legible Crimson
+  bone:    '#F8F9FA', // Off-white to reduce eye strain
+  poison:  '#00FF88', // Medical Neon Green
   void:    '#000000',
   
   // Terminal Assets
-  neon:    '#ff003c', 
-  stg:     '#cc0033', 
-  pink:    '#ff4d88', 
-  purple:  '#b366ff', 
+  neon:    '#FF2A55', 
+  stg:     '#D41133', 
+  pink:    '#FF4D88', 
+  purple:  '#B366FF', 
   
   // Semantic
-  gold:    '#ffcc00', 
-  red:     '#ff1a1a', 
-  sky:     '#00e5ff', 
+  gold:    '#FFCC00', 
+  red:     '#FF3333', 
+  sky:     '#00E5FF', 
 
-  // Text Hierarchy - MAX LEGIBILITY
-  text:    '#ffffff', // Primary
-  muted:   '#e0e0e0', // High-contrast secondary
-  dim:     '#a0a0a0', // Labels
-  white:   '#ffffff',
+  // Text Hierarchy - ULTRA LEGIBILITY
+  text:    '#FFFFFF', // Primary text
+  muted:   '#D0D0E0', // Secondary text
+  dim:     '#9595A5', // Tertiary / Labels
+  white:   '#FFFFFF',
 
-  // Borders
-  border:  'rgba(255, 0, 60, 0.8)', 
-  borderP: 'rgba(57, 255, 20, 0.7)', 
+  // Borders & Glass
+  border:  'rgba(255, 255, 255, 0.1)', 
+  borderP: 'rgba(255, 42, 85, 0.4)', 
+  glass:   'rgba(255, 255, 255, 0.05)',
 } as const;
 
 export const FONTS = {
-  horror:  'Creepster_400Regular',
+  horror:  'System', // Reverted to System bold for a more professional, clean clinical look
   outfit:  'System', 
   fredoka: 'System',
 } as const;
 
 export const SHADOWS = {
   crimson: {
-    shadowColor: '#ff003c',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 30,
-    elevation: 25,
+    shadowColor: '#FF2A55',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   poison: {
-    shadowColor: '#39ff14',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 15,
+    shadowColor: '#00FF88',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
   },
   neon: {
-    shadowColor: '#ff003c',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 30,
-    elevation: 25,
+    shadowColor: '#FF2A55',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   pink: {
-    shadowColor: '#ff4d88',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 15,
+    shadowColor: '#FF4D88',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   purple: {
-    shadowColor: '#b366ff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 15,
+    shadowColor: '#B366FF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
+  glass: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 10,
+  }
 } as const;
 
 export const ACTIVITY_FACTORS = [

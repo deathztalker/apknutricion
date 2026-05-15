@@ -1,4 +1,4 @@
-// lib/ai.ts — Motor de Inteligencia Bioreactiva v8.0
+// lib/ai.ts — Motor de Inteligencia Bioreactiva v9.0 (Premium Medical Output)
 import { ClinicalRecord, Patient, AIAnalysis, ClinicalAlert, CalculationResult } from '@/types';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -48,53 +48,38 @@ function buildClinicalPrompt(
   calc: CalculationResult,
   ruleAlerts: ClinicalAlert[]
 ): string {
-  return `ESTÁS OPERANDO COMO EL NÚCLEO DE BIO-INTELIGENCIA NUTRICESFAM.
-TU MISIÓN ES REALIZAR UNA DISECCIÓN NEURAL EXHAUSTIVA DE LOS DATOS BIOMÉTRICOS SUMINISTRADOS.
+  return `Actúa como un Especialista Clínico de Nutrición y Metabolismo de Alto Nivel.
+Tu tarea es analizar los datos biométricos de un paciente y redactar las conclusiones para un informe médico formal.
 
-REGLAS CRÍTICAS:
-1. IDIOMA: Español clínico de alta complejidad.
-2. TONO: Profesional, técnico, autoritario y preciso.
-3. PROHIBICIÓN: NO menciones que eres una IA, ni que procesas datos. Presenta los hallazgos como HECHOS CLÍNICOS.
-4. PROFUNDIDAD: Analiza la relación fisiopatológica entre el IMC, la función renal (TFG), la sarcopenia (Grip) y el riesgo CV.
+REGLAS ESTRICTAS:
+1. NO uses lenguaje de Inteligencia Artificial (nunca digas "como IA", "mi base de datos", etc.).
+2. Redacta en tercera persona clínica o impersonal (ej: "Se observa", "El paciente presenta").
+3. El tono debe ser sobrio, directo, médico y altamente profesional.
 
-DATOS DEL SUJETO:
-- IDENTIDAD: ${patient.full_name || 'DESCONOCIDO'} | EDAD: ${patient.age} | GENOTIPO: ${patient.sex} | PREVISIÓN: ${patient.insurance}
+DATOS DEL PACIENTE:
+- Nombre: ${patient.full_name || 'Desconocido'}
+- Edad: ${patient.age} años | Sexo biológico: ${patient.sex}
 
-BIOMETRÍA Y TELEMETRÍA:
+ANTROPOMETRÍA Y METABOLISMO:
 - IMC: ${calc.bmi} (${calc.bmiStatus})
-- COMPOSICIÓN: ${calc.fatPercent}% adiposidad | ${calc.leanMassKg}kg masa libre de grasa
-- RIESGO SISTÉMICO: CV: ${calc.cvRisk} | ICT: ${calc.ict}
-- HEMODINÁMICA: PA ${record.systolic_bp}/${record.diastolic_bp} (${calc.bpStatus})
+- Composición: Grasa corporal ${calc.fatPercent}% | Masa Magra ${calc.leanMassKg}kg
+- TMB Estimada: ${calc.bmr} kcal | Gasto Total: ${calc.tdee} kcal
+- Presión Arterial: ${record.systolic_bp}/${record.diastolic_bp} (${calc.bpStatus})
+- TFG (Filtración Renal): ${calc.gfr} ml/min | KDIGO: ${calc.kdigoStage}
+- Observaciones: ${record.observations || 'Sin observaciones adicionales'}
 
-METABOLISMO DE DISECCIÓN:
-- TMB: ${calc.bmr} kcal | VCT: ${calc.tdee} kcal
-- HIDRATACIÓN: ${calc.waterLiters} L/24h
-- MACRO-PROTOCOLO: PRO ${record.macro_prot_pct}% | CHO ${record.macro_cho_pct}% | LIP ${record.macro_fat_pct}%
-
-HALLAZGOS CLÍNICOS AVANZADOS:
-- FUNCIÓN RENAL: TFG ${calc.gfr} ml/min | ESTADIO: ${calc.kdigoStage}
-- CAPACIDAD FUNCIONAL: Sarcopenia: ${calc.sarcopeniaRisk} | Dinamometría: ${record.grip_strength_kg}kg
-- SCREENING GERIÁTRICO: MNA: ${record.mna_score} | VGS: ${record.vgs_status}
-
-ANAMNESIS:
-- PATOLOGÍAS: ${record.pathologies?.join(', ')}
-- OBSERVACIONES: ${record.observations}
-
-ALERTAS ACTIVAS:
-${ruleAlerts.map(a => `[${a.severity}] ${a.title}`).join('\n')}
-
-ESTRUCTURA DE RESPUESTA (JSON PURO):
+DEBES RESPONDER EXCLUSIVAMENTE CON EL SIGUIENTE FORMATO JSON:
 {
-  "nutritional_diagnosis": "Diagnóstico clínico integral utilizando terminología médica avanzada.",
-  "summary": "Análisis profundo de la interacción entre los marcadores antropométricos, renales y hemodinámicos. Relaciona la composición corporal con el gasto energético y el riesgo metabólico detectado.",
+  "nutritional_diagnosis": "[Escribe aquí el Diagnóstico Médico Nutricional Integrado. Máximo 2 líneas.]",
+  "summary": "[Escribe aquí un Análisis Fisiopatológico Detallado. Relaciona la composición corporal, el estado renal y cardiovascular. Máximo 5 líneas.]",
   "recommendations": [
-    "Intervención nutricional específica basada en guías clínicas internacionales.",
-    "Ajuste de micronutrientes crítico.",
-    "Protocolo de actividad física adaptado al riesgo sarcopénico.",
-    "Plan de monitoreo de indicadores bioquímicos."
+    "[Recomendación Dietoterapéutica 1]",
+    "[Recomendación Metabólica 2]",
+    "[Recomendación Clínica/Farmacológica 3]",
+    "[Recomendación de Monitoreo 4]"
   ],
-  "goals": ["Objetivo SMART 1 (Bio-estabilización)", "Objetivo SMART 2 (Optimización Metabólica)"],
-  "follow_up": "Calendario de re-evaluación y metas de corto plazo."
+  "goals": ["Objetivo Clínico 1", "Objetivo Clínico 2"],
+  "follow_up": "[Indicación de próximo control]"
 }`;
 }
 
@@ -109,35 +94,40 @@ export async function analyzeWithGemini(
     try {
       const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
-        generationConfig: { temperature: 0.2, topP: 0.9, maxOutputTokens: 2048 }
+        generationConfig: { temperature: 0.1, topP: 0.9, maxOutputTokens: 2048 } // Low temp for medical precision
       });
       const prompt = buildClinicalPrompt(patient, record, calc, ruleAlerts);
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text().replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(text);
-
-      return {
-        summary: parsed.summary,
-        alerts: ruleAlerts,
-        recommendations: parsed.recommendations,
-        nutritional_diagnosis: parsed.nutritional_diagnosis,
-        goals: parsed.goals,
-        follow_up: parsed.follow_up,
-        raw_text: response.text(),
-      };
+      let text = response.text().replace(/```json|```/g, '').trim();
+      
+      // Cleanup common markdown artifacts just in case
+      if (text.startsWith('{') && text.endsWith('}')) {
+          const parsed = JSON.parse(text);
+          return {
+            summary: parsed.summary,
+            alerts: ruleAlerts,
+            recommendations: parsed.recommendations,
+            nutritional_diagnosis: parsed.nutritional_diagnosis,
+            goals: parsed.goals || [],
+            follow_up: parsed.follow_up || 'Control según evolución',
+            raw_text: response.text(),
+          };
+      } else {
+          throw new Error("Respuesta no es un JSON válido.");
+      }
     } catch (err) {
-      console.error('DISECCIÓN FALLIDA:', err);
+      console.error('Error en Motor IA:', err);
     }
   }
 
   return {
-    summary: 'SISTEMA EN MODO OFFLINE. La interacción de datos sugiere un estado nutricional que requiere monitoreo continuo. Se recomienda validar parámetros renales y antropométricos en el próximo ciclo.',
+    summary: 'Evaluación técnica basada en parámetros antropométricos basales. Se sugiere correlación con exámenes de laboratorio en el próximo control clínico.',
     alerts: ruleAlerts,
-    recommendations: ['Bio-estabilización mediante hidratación', 'Cumplimiento estricto de la distribución de macronutrientes'],
-    nutritional_diagnosis: `Diagnóstico basado en parámetros estándar: ${calc.bmiStatus || 'Estable'}.`,
-    goals: ['Lograr homeostasis ponderal', 'Prevenir degradación muscular'],
-    follow_up: 'Re-interrogación en 15 ciclos solares (días).',
+    recommendations: ['Adecuar ingesta hídrica según requerimiento calculado.', 'Mantener distribución de macronutrientes propuesta.'],
+    nutritional_diagnosis: `Estado Nutricional: ${calc.bmiStatus || 'En evaluación'}.`,
+    goals: ['Lograr estabilidad metabólica', 'Prevenir pérdida de masa magra'],
+    follow_up: 'Control en 30 días.',
     raw_text: 'OFFLINE_FALLBACK',
   };
 }
