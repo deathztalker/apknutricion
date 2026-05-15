@@ -102,6 +102,7 @@ export interface ClinicalRecord {
   weight_loss_weeks?: number;
   med_dose_mg_kg?: number;
   med_conc_mg_ml?: number;
+  professional_indications?: string;
 }
 
 export interface RecordFormData extends Omit<Partial<ClinicalRecord>, 

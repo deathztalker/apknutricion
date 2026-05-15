@@ -100,10 +100,8 @@ export default function Calculator() {
   }, [patientId]);
 
   useEffect(() => {
-    if (activeTab === 'history') {
-      fetchGlobalHistory();
-    }
-  }, [activeTab, searchHistory]);
+    fetchGlobalHistory();
+  }, [patientId, searchHistory]);
 
   const fetchGlobalHistory = async () => {
     try {
