@@ -1,17 +1,29 @@
 import { useEffect, useState } from 'react';
 import { Stack, router } from 'expo-router';
-import { supabase } from '../../lib/supabase';
+import { supabase, authService } from '../../lib/supabase';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { COLORS } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 
 export default function AppLayout() {
-  const { session, setSession } = useAuthStore();
+  const { session, setSession, setProfile } = useAuthStore();
   const [loading, setLoading] = useState(true);
+
+  const loadProfile = async (userId: string) => {
+    try {
+      const { data } = await authService.getProfile(userId);
+      if (data) setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) {
+        loadProfile(session.user.id);
+      }
       setLoading(false);
       if (!session) {
         router.replace('/login');
@@ -20,7 +32,10 @@ export default function AppLayout() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (!session) {
+      if (session) {
+        loadProfile(session.user.id);
+      } else {
+        setProfile(null);
         router.replace('/login');
       }
     });

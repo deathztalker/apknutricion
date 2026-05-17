@@ -167,19 +167,21 @@ export default function Calculator() {
 
     setSaving(true);
     try {
-      if (!session?.user) throw new Error('No autorizado');
+      if (!session?.user) throw new Error('No autorizado: Sesión expirada o inválida.');
 
       let targetPatientId = patientId;
 
+      // Create patient if guest or not linked
       if (!targetPatientId) {
         const { data: newPat, error: pError } = await supabase
           .from('patients')
           .insert({
             user_id: session.user.id,
             full_name: patient.full_name,
-            age: patient.age,
-            sex: patient.sex,
-            insurance: patient.insurance,
+            age: parseInt(String(patient.age)) || 0,
+            sex: patient.sex || 'M',
+            insurance: patient.insurance || 'FONASA',
+            is_active: true
           })
           .select()
           .single();
@@ -189,30 +191,59 @@ export default function Calculator() {
         router.setParams({ patientId: newPat.id });
       }
 
+      // Helper to avoid NaN in DB
+      const val = (v: any) => {
+        const n = parseFloat(v);
+        return isNaN(n) ? null : n;
+      };
+
       const { error } = await recordService.create({
-        patient_id: targetPatientId, user_id: session.user.id, record_date: new Date().toISOString(),
-        weight_kg: parseFloat(form.weight_kg!), height_cm: parseFloat(form.height_cm!),
-        waist_cm: parseFloat(form.waist_cm || '0'), bmi: results.bmi, bmi_status: results.bmiStatus,
-        ideal_weight: results.idealWeight, fat_percent: results.fatPercent, fat_mass_kg: results.fatMassKg,
-        lean_mass_kg: results.leanMassKg, ict: results.ict, cv_risk: results.cvRisk,
-        systolic_bp: parseInt(form.systolic_bp || '0'), diastolic_bp: parseInt(form.diastolic_bp || '0'),
-        bp_status: results.bpStatus, activity_factor: parseFloat(form.activity_factor || '1.2'),
-        bmr_kcal: results.bmr, tdee_kcal: results.tdee, water_liters: results.waterLiters,
-        macro_prot_pct: parseInt(form.macro_prot_pct || '20'), macro_cho_pct: parseInt(form.macro_cho_pct || '50'),
-        macro_fat_pct: parseInt(form.macro_fat_pct || '30'), pathologies: form.pathologies,
-        allergies: form.allergies, diet_type: form.diet_type, liquid_intake: form.liquid_intake,
-        digestion_status: form.digestion_status, observations: form.observations,
-        ai_analysis: aiAnalysis?.summary, grip_strength_kg: parseFloat(form.grip_strength_kg || '0'),
-        calf_circumference_cm: parseFloat(form.calf_circumference_cm || '0'),
-        mna_score: form.mna_score, vgs_status: form.vgs_status, somatotype: results.somatotype,
+        patient_id: targetPatientId, 
+        user_id: session.user.id, 
+        record_date: new Date().toISOString(),
+        weight_kg: val(form.weight_kg), 
+        height_cm: val(form.height_cm),
+        waist_cm: val(form.waist_cm), 
+        bmi: results.bmi, 
+        bmi_status: results.bmiStatus,
+        ideal_weight: results.idealWeight, 
+        fat_percent: results.fatPercent, 
+        fat_mass_kg: results.fatMassKg,
+        lean_mass_kg: results.leanMassKg, 
+        ict: results.ict, 
+        cv_risk: results.cvRisk,
+        systolic_bp: parseInt(form.systolic_bp || '0') || null, 
+        diastolic_bp: parseInt(form.diastolic_bp || '0') || null,
+        bp_status: results.bpStatus, 
+        activity_factor: val(form.activity_factor),
+        bmr_kcal: Math.round(results.bmr || 0) || null, 
+        tdee_kcal: Math.round(results.tdee || 0) || null, 
+        water_liters: val(results.waterLiters),
+        macro_prot_pct: parseInt(form.macro_prot_pct || '0') || null, 
+        macro_cho_pct: parseInt(form.macro_cho_pct || '0') || null,
+        macro_fat_pct: parseInt(form.macro_fat_pct || '0') || null, 
+        pathologies: form.pathologies || [],
+        allergies: form.allergies || [], 
+        diet_type: form.diet_type || 'Omnívora', 
+        liquid_intake: form.liquid_intake || 'Normal',
+        digestion_status: form.digestion_status || 'Normal', 
+        observations: form.observations || '',
+        ai_analysis: aiAnalysis?.summary || null, 
+        grip_strength_kg: val(form.grip_strength_kg),
+        calf_circumference_cm: val(form.calf_circumference_cm),
+        mna_score: form.mna_score || null, 
+        vgs_status: form.vgs_status || null, 
+        somatotype: results.somatotype || null,
       } as any);
       
       if (error) throw error;
       
       Alert.alert('SINCRONIZACIÓN EXITOSA', 'Dossier biométrico persistido en el vacío.');
       setActiveTab('history');
+      fetchGlobalHistory(); // Refresh history list
     } catch (error: any) {
-      Alert.alert('FALLO DE RED', error.message);
+      console.error('Save Error:', error);
+      Alert.alert('FALLO DE RED / PERSISTENCIA', error.message || 'Error desconocido al guardar.');
     } finally {
       setSaving(false);
     }
