@@ -1,4 +1,4 @@
-import { Stack, router } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { COLORS } from '../constants/theme';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
@@ -12,7 +12,8 @@ import { useAuthStore } from '../store/authStore';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { setSession, setProfile } = useAuthStore();
+  const { setSession, setProfile, session } = useAuthStore();
+  const segments = useSegments();
   const [loaded, error] = useFonts({
     Creepster_400Regular,
   });
@@ -20,22 +21,29 @@ export default function RootLayout() {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // 1. Inicialización de Auth
+    console.log('ROOT: Iniciando inicialización de sistema...');
+    
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setSession(session);
-          // Sincronizar perfil con metadatos (avatar de Google, etc)
-          try {
-            const { data: profile } = await authService.syncProfile(session);
-            if (profile) setProfile(profile);
-          } catch (e) {
-            console.error('Initial profile sync failed:', e);
-          }
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (initialSession) {
+          console.log('ROOT: Sesión persistente detectada:', initialSession.user.id);
+          setSession(initialSession);
+          
+          // Sync profile en background
+          authService.syncProfile(initialSession)
+            .then(({ data }) => {
+              if (data) {
+                console.log('ROOT: Perfil sincronizado exitosamente.');
+                setProfile(data);
+              }
+            })
+            .catch(e => console.error('ROOT ERROR: Fallo en sync de perfil inicial:', e));
+        } else {
+          console.log('ROOT: No se detectó sesión inicial.');
         }
       } catch (e) {
-        console.error('Auth initialization failed:', e);
+        console.error('ROOT ERROR: Fallo crítico en initAuth:', e);
       } finally {
         setIsInitializing(false);
       }
@@ -43,17 +51,20 @@ export default function RootLayout() {
 
     initAuth();
 
-    // 2. Escuchar cambios globales (Login/Logout/OAuth)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Root Auth Event:', event);
-      setSession(session);
-      if (session) {
-        try {
-          const { data: profile } = await authService.syncProfile(session);
-          if (profile) setProfile(profile);
-        } catch (e) {
-          console.error('Auth state change profile sync failed:', e);
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log('ROOT AUTH EVENT:', event);
+      setSession(currentSession);
+      
+      if (currentSession) {
+        console.log('ROOT: Sincronizando perfil para evento:', event);
+        authService.syncProfile(currentSession)
+          .then(({ data }) => {
+            if (data) {
+              console.log('ROOT: Perfil actualizado tras evento auth.');
+              setProfile(data);
+            }
+          })
+          .catch(e => console.error('ROOT ERROR: Fallo en sync de perfil tras evento:', e));
       } else {
         setProfile(null);
       }
@@ -70,7 +81,6 @@ export default function RootLayout() {
 
   if (!loaded && !error) return null;
 
-  // Mostramos un spinner global mientras el alma se sincroniza con el núcleo
   if (isInitializing) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>

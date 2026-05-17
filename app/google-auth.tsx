@@ -1,38 +1,35 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { router } from 'expo-router';
-import { supabase, authService } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { COLORS, FONTS } from '../constants/theme';
 import TerminalBackground from '../components/TerminalBackground';
 import { useAuthStore } from '../store/authStore';
 
 export default function GoogleAuthCallback() {
-  const { setSession, setProfile } = useAuthStore();
+  const { setSession } = useAuthStore();
   const hasNavigated = useRef(false);
 
-  const syncSoul = async (session: any) => {
-    if (hasNavigated.current || !session) return;
-    console.log('Soul Synchronization Initiated...');
+  const teleportToCore = () => {
+    if (hasNavigated.current) return;
     hasNavigated.current = true;
+    console.log('TELEPORT: Iniciando secuencia de salto a la calculadora...');
     
-    setSession(session);
-    try {
-      const { data: profile } = await authService.syncProfile(session);
-      if (profile) setProfile(profile);
-    } catch (e) {
-      console.warn('Profile sync failed, but proceeding...');
-    }
-
-    // Teletransporte al terminal clínico
-    router.replace('/(app)/calculator');
+    // Pequeño delay para permitir que el estado de Zustand se propague
+    // y para limpiar el stack del router en web.
+    setTimeout(() => {
+      console.log('TELEPORT: Saltando ahora.');
+      router.replace('/calculator');
+    }, 100);
   };
 
   useEffect(() => {
-    const parseUrlAndSync = async () => {
+    const processAuth = async () => {
+      console.log('AUTH: Iniciando procesamiento de callback...');
+      
       if (Platform.OS === 'web' && window.location.hash) {
-        console.log('Soul Fragment Detected. Iniciando extracción manual...');
+        console.log('AUTH: Fragmento detectado. Extrayendo...');
         try {
-          // Extraemos el alma manualmente picando la cadena de texto
           const hash = window.location.hash.substring(1);
           const parts = hash.split('&').reduce((acc: any, part) => {
             const [key, value] = part.split('=');
@@ -44,48 +41,55 @@ export default function GoogleAuthCallback() {
           const refreshToken = parts.refresh_token;
 
           if (accessToken) {
-            console.log('Soul Fragment Captured. Inyectando en el Núcleo...');
+            console.log('AUTH: Inyectando sesión manual...');
             const { data, error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken || '',
             });
             
             if (data.session) {
-              console.log('Manual Injection Successful.');
-              return syncSoul(data.session);
+              console.log('AUTH: Inyección exitosa.');
+              setSession(data.session);
+              
+              // Limpiar el hash de la URL para evitar re-procesamiento
+              if (window.history.pushState) {
+                window.history.pushState('', '/', window.location.pathname);
+              }
+              
+              return teleportToCore();
             }
-            if (error) console.error('Injection Error:', error);
+            if (error) throw error;
           }
         } catch (e) {
-          console.error('Extraction Failure:', e);
+          console.error('AUTH ERROR: Fallo en captura manual:', e);
         }
       }
 
-      // Verificación de respaldo si el hash ya fue procesado
+      // Verificación de respaldo (sesión ya existente)
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log('Session active in nucleus.');
-        syncSoul(session);
+        console.log('AUTH: Sesión activa encontrada.');
+        setSession(session);
+        teleportToCore();
       }
     };
 
-    parseUrlAndSync();
+    processAuth();
 
-    // 3. Escuchador de respaldo
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Core Auth Event:', event);
-      if (session && !hasNavigated.current) {
-        syncSoul(session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('AUTH EVENT:', event);
+      if (session) {
+        setSession(session);
+        teleportToCore();
       }
     });
 
-    // 4. Temporizador de expiración por fallo crítico
     const timer = setTimeout(() => {
       if (!hasNavigated.current) {
-        console.error('CRITICAL: Soul Link Timeout. Returning to entry point.');
+        console.error('CRITICAL: Soul Link Timeout. Abortando...');
         router.replace('/login');
       }
-    }, 12000);
+    }, 20000);
 
     return () => {
       subscription.unsubscribe();
