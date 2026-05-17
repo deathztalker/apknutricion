@@ -1,13 +1,41 @@
 import { useEffect, useState } from 'react';
 import { Stack, router, Redirect } from 'expo-router';
 import { supabase, authService } from '../../lib/supabase';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { COLORS } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AppLayout() {
-  const { session, setSession, setProfile } = useAuthStore();
+  const { session, setSession, setProfile, profile } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error(error);
+  };
+
+  const ProfileHeader = () => (
+    <TouchableOpacity 
+      onPress={() => Alert.alert(
+        "NÚCLEO DE IDENTIDAD",
+        `Sujeto: ${profile?.full_name || 'Desconocido'}\nRol: ${profile?.role || 'Nutricionista'}\nEstatus: Activo`,
+        [
+          { text: "CERRAR SESIÓN", onPress: handleLogout, style: 'destructive' },
+          { text: "VOLVER", style: 'cancel' }
+        ]
+      )}
+      style={{ marginRight: 15, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+    >
+      <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.bg3, borderWidth: 1, borderColor: COLORS.neon, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
+        {profile?.avatar_url ? (
+          <Image source={{ uri: profile.avatar_url }} style={{ width: '100%', height: '100%' }} />
+        ) : (
+          <Ionicons name="person" size={20} color={COLORS.neon} />
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 
   const loadProfile = async (userId: string) => {
     try {
@@ -56,7 +84,6 @@ export default function AppLayout() {
     );
   }
 
-  // Si después de inicializar no hay sesión, mandamos al login
   if (!session) {
     return <Redirect href="/login" />;
   }
@@ -68,6 +95,7 @@ export default function AppLayout() {
         headerTintColor: COLORS.crimson,
         headerTitleStyle: { fontWeight: '900', letterSpacing: 2 },
         contentStyle: { backgroundColor: COLORS.bg },
+        headerRight: () => <ProfileHeader />,
       }}
     >
       <Stack.Screen name="dashboard" options={{ title: 'SYSTEM DASHBOARD' }} />
