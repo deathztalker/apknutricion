@@ -196,6 +196,7 @@ export interface CalculationResult {
   tdee: number | null;
   waterLiters: number | null;
   cvRisk: string | null;
+  cvColor: string;
   ict: number | null;
   bpStatus: string | null;
   bpColor: string;

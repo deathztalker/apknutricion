@@ -405,7 +405,7 @@ export default function Calculator() {
               <View style={styles.dashboardGrid}>
                 <ResultBox label="IMC CLÍNICO" value={results?.bmi?.toFixed(1) || '--'} sub={results?.bmiStatus || 'STANDBY'} color={results?.bmiColor || COLORS.bone} />
                 <ResultBox label="PESO IDEAL" value={`${results?.idealWeight?.toFixed(1) || '--'} KG`} sub={results?.adjustedWeight ? `ADJ: ${results.adjustedWeight.toFixed(1)}` : 'PESO LORENZ'} color={COLORS.bone} />
-                <ResultBox label="RIESGO CV" value={results?.cvRisk || '--'} sub={`ICT: ${results?.ict?.toFixed(2) || '--'}`} color={COLORS.pink} />
+                <ResultBox label="RIESGO CV" value={results?.cvRisk || '--'} sub={`ICT: ${results?.ict?.toFixed(2) || '--'}`} color={results?.cvColor || COLORS.pink} />
                 <ResultBox label="P. ARTERIAL" value={`${form.systolic_bp || '--'}/${form.diastolic_bp || '--'}`} sub={results?.bpStatus || '--'} color={results?.bpColor || COLORS.bone} />
                 <ResultBox label="REQ. AGUA" value={`${results?.waterLiters?.toFixed(1) || '--'} L`} color={COLORS.sky} />
                 <ResultBox label="VCT DIARIO" value={`${results?.tdee?.toFixed(0) || '--'} Kcal`} color={COLORS.neon} />

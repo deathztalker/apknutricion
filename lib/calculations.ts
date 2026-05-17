@@ -328,6 +328,7 @@ export function calculateAll(form: Partial<RecordFormData>, age: number, sex: 'M
     tdee,
     waterLiters: water,
     cvRisk: cv?.risk ?? null,
+    cvColor: cv?.color ?? COLORS.muted,
     ict,
     bpStatus: bp?.status ?? null,
     bpColor: bp?.color ?? COLORS.muted,

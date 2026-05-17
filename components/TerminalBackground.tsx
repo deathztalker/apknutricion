@@ -49,16 +49,16 @@ export default function TerminalBackground({ children }: { children: React.React
 
   return (
     <View style={styles.container}>
-      {/* Base de Abismo Púrpura/Negro (Halloween Style) */}
+      {/* Base de Halloween (Púrpura Profundo a Verde Tóxico) */}
       <LinearGradient
-        colors={['#0a0510', '#050505', '#10050a']}
+        colors={['#0f051a', '#050a05', '#1a050f']}
         style={StyleSheet.absoluteFill}
       />
       
-      {/* Resplandor Tóxico/Sangriento Pulsante */}
+      {/* Resplandor Pulsante Verde/Púrpura */}
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: pulseAnim }]} pointerEvents="none">
         <LinearGradient
-          colors={['rgba(157, 0, 255, 0.15)', 'transparent', 'rgba(255, 0, 60, 0.1)']}
+          colors={['rgba(57, 255, 20, 0.1)', 'transparent', 'rgba(157, 0, 255, 0.1)']}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>

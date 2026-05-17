@@ -11,6 +11,7 @@ export const COLORS = {
   poison: '#39ff14',   // Biohazard Green
   crimson:'#ff003c',   // Blood Red
   purple: '#9d00ff',   // Haunted Purple
+  pink:   '#ff00ff',   // Magenta / Shocking Pink
   orange: '#ff6b00',   // Halloween Pumpkin
   sky:    '#00d0ff',   // Electric Blue
   gold:   '#f5c842',   // Necronomicon Gold
@@ -23,10 +24,10 @@ export const COLORS = {
 
   // Text - High contrast
   text:   '#ffffff',
-  muted:  '#a0a0b0',
-  dim:    '#8a8a9a',
+  muted:  '#b0b0c0',
+  dim:    '#808090',
   white:  '#ffffff',
-  bone:   '#e5e5e5',
+  bone:   '#f0f0f0',
 
   // Card / Glassmorphism
   card:   'rgba(13,13,18,0.92)',
