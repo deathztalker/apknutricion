@@ -26,16 +26,19 @@ export default function GoogleAuthCallback() {
     // 2. Verificación de seguridad por si la sesión ya estaba lista
     const timer = setTimeout(async () => {
       if (!hasNavigated.current) {
+        console.log('Auth Callback Timeout - Checking Session manually...');
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
+          console.log('Session Found via getSession - Syncing...');
           hasNavigated.current = true;
           setSession(session);
-          router.replace('/(app)/calculator');
+          router.replace('/calculator');
         } else {
+          console.log('No Session Found after 10s - Returning to login');
           router.replace('/login');
         }
       }
-    }, 5000);
+    }, 10000); // Aumentado a 10s para dar margen en conexiones lentas
 
     return () => {
       subscription.unsubscribe();

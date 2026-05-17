@@ -46,10 +46,18 @@ export default function AppLayout() {
     </TouchableOpacity>
   );
 
-  // Lógica de navegación estable
+  // Lógica de navegación estable: Solo redirigimos si NO estamos inicializando 
+  // y realmente no hay sesión.
   useEffect(() => {
     if (!session && !isCalculator) {
-      router.replace('/login');
+      console.log('Protected Layout: No session detected, redirecting to login...');
+      const t = setTimeout(() => {
+        // Doble check para evitar parpadeos
+        if (!useAuthStore.getState().session) {
+          router.replace('/login');
+        }
+      }, 500); 
+      return () => clearTimeout(t);
     }
   }, [session, isCalculator]);
 
