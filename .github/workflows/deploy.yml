@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: 🔍 EXTRACCION DE SHA-1
+        run: keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA1
+
       - name: 🏗 Setup Expo
         uses: expo/expo-github-action@v8
         with:

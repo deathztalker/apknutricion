@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView, 
-  ActivityIndicator, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
   Alert,
   Animated,
   Dimensions
@@ -20,6 +20,7 @@ import { supabase } from '../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import TerminalBackground from '../components/TerminalBackground';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as WebBrowser from 'expo-web-browser';
 
 const { width } = Dimensions.get('window');
 
@@ -59,18 +60,34 @@ export default function Login() {
     setGoogleLoading(true);
     try {
       const redirectTo = Linking.createURL('google-auth');
-      const { error } = await supabase.auth.signInWithOAuth({
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo, 
+          redirectTo,
+          // Evita que Supabase intente redirigir automáticamente usando 'window.location' en nativo
+          skipBrowserRedirect: Platform.OS !== 'web',
         },
       });
+
       if (error) throw error;
+
+      // SI ESTAMOS EN LA APK: Abrimos el navegador nativo de forma manual
+      if (Platform.OS !== 'web' && data?.url) {
+        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+        // Si el usuario cierra el navegador a la fuerza sin logearse
+        if (result.type === 'cancel') {
+          setGoogleLoading(false);
+        }
+      }
+
     } catch (error: any) {
       Alert.alert('GHOST ERROR', error.message);
-    } finally {
       setGoogleLoading(false);
     }
+    // Nota: Quitamos el 'finally' directo porque en Web la redirección es inmediata, 
+    // y en Nativo manejamos el fin del loading cuando el flujo termina.
   }
 
   async function handleAuth() {
@@ -98,13 +115,13 @@ export default function Login() {
 
   return (
     <TerminalBackground>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <Animated.View style={[styles.loginBox, { opacity: fadeAnim }]}>
-            
+
             {/* The Crimson Ghost / Misfits Centerpiece */}
             <View style={styles.header}>
               <Animated.View style={{ transform: [{ scale: skullScale }], opacity: skullOpacity }}>
@@ -116,10 +133,10 @@ export default function Login() {
             </View>
 
             <View style={styles.form}>
-              
+
               {/* Google Auth - Premium HD Button */}
-              <TouchableOpacity 
-                style={styles.googleButton} 
+              <TouchableOpacity
+                style={styles.googleButton}
                 onPress={handleGoogleLogin}
                 disabled={googleLoading}
               >
@@ -172,8 +189,8 @@ export default function Login() {
                 </View>
               </View>
 
-              <TouchableOpacity 
-                style={styles.authButton} 
+              <TouchableOpacity
+                style={styles.authButton}
                 onPress={handleAuth}
                 disabled={loading}
               >
@@ -186,8 +203,8 @@ export default function Login() {
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={styles.switchButton} 
+              <TouchableOpacity
+                style={styles.switchButton}
                 onPress={() => setIsSignUp(!isSignUp)}
               >
                 <Text style={styles.switchButtonText}>
