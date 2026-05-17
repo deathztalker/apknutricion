@@ -13,6 +13,7 @@ import TerminalBackground from '../../components/TerminalBackground';
 import { dataPortability } from '../../lib/data';
 import { syncService } from '../../lib/sync';
 import { useAuthStore } from '../../store/authStore';
+import { usePatientStore } from '../../store/patientStore';
 
 const TABS = ['scanner', 'anamnesis', 'macros', 'sports', 'clinical', 'ai', 'history', 'tables'] as const;
 
@@ -198,6 +199,35 @@ export default function Calculator() {
       grip_strength_kg: val(form.grip_strength_kg),
       calf_circumference_cm: val(form.calf_circumference_cm),
       somatotype: results.somatotype || null,
+      
+      // Additional fields from form/results
+      creatinine: val(form.creatinine),
+      gfr: results.gfr,
+      kdigo_stage: results.kdigoStage,
+      glucose_mg: parseInt(form.glucose_mg || '0') || null,
+      hba1c: val(form.hba1c),
+      total_chol: parseInt(form.total_chol || '0') || null,
+      hdl: parseInt(form.hdl || '0') || null,
+      ldl: parseInt(form.ldl || '0') || null,
+      triglycerides: parseInt(form.triglycerides || '0') || null,
+      hemoglobin: val(form.hemoglobin),
+      ferritin: val(form.ferritin),
+      albumin: val(form.albumin),
+      heart_rate: parseInt(form.heart_rate || '0') || null,
+      temperature: val(form.temperature),
+      oxygen_sat: parseInt(form.oxygen_sat || '0') || null,
+      mna_score: form.mna_score,
+      vgs_status: form.vgs_status,
+      knee_height_cm: val(form.knee_height_cm),
+      usual_weight_kg: val(form.usual_weight_kg),
+      weight_loss_weeks: parseInt(form.weight_loss_weeks || '0') || null,
+      professional_indications: form.professional_indications,
+      
+      // Pliegues
+      fold_triceps: val(form.fold_triceps),
+      fold_subscapular: val(form.fold_subscapular),
+      fold_supraspinal: val(form.fold_supraspinal),
+      fold_abdominal: val(form.fold_abdominal),
     };
 
     // --- MODO INVITADO ---

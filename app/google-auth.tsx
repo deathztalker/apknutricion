@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { router } from 'expo-router';
-import { supabase } from '../lib/supabase';
+import { supabase, authService } from '../lib/supabase';
 import { COLORS, FONTS } from '../constants/theme';
 import TerminalBackground from '../components/TerminalBackground';
 import { useAuthStore } from '../store/authStore';
