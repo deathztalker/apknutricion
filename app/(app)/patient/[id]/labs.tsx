@@ -65,9 +65,9 @@ export default function LabsTerminal() {
         uric_acid: '', tsh: '', vitamin_d: '',
       });
       fetchLabs();
-      Alert.alert('SYNC COMPLETE', 'Biochemical telemetry synchronized.');
+      Alert.alert('SINCRONIZACIÓN EXITOSA', 'Telemetría bioquímica inyectada en el núcleo.');
     } catch (error: any) {
-      Alert.alert('SYNC FAILURE', error.message);
+      Alert.alert('FALLO DE VÍNCULO', error.message);
     } finally {
       setSaving(false);
     }
@@ -100,15 +100,15 @@ export default function LabsTerminal() {
         <View style={styles.header}>
           <Ionicons name="flask" size={32} color={COLORS.neon} />
           <View>
-            <Text style={styles.headerTitle}>BIOCHEMICAL TERMINAL</Text>
-            <Text style={styles.headerSub}>SUBJECT HISTORY ANALYSIS</Text>
+            <Text style={styles.headerTitle}>TERMINAL BIOQUÍMICO</Text>
+            <Text style={styles.headerSub}>ANÁLISIS HISTÓRICO DEL SUJETO</Text>
           </View>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Glucose Trend */}
           <View style={styles.panel}>
-            <Text style={styles.panelTitle}>GLUCOSE TREND (mg/dL)</Text>
+            <Text style={styles.panelTitle}>TENDENCIA DE GLUCOSA (mg/dL)</Text>
             {records.length > 1 ? (
               <LineChart
                 data={glucoseData}
@@ -120,14 +120,14 @@ export default function LabsTerminal() {
               />
             ) : (
               <View style={styles.noDataCard}>
-                <Text style={styles.noDataText}>MINIMUM 2 RECORDS REQUIRED FOR TELEMETRY</Text>
+                <Text style={styles.noDataText}>MÍNIMO 2 REGISTROS REQUERIDOS PARA TELEMETRÍA</Text>
               </View>
             )}
           </View>
 
           {/* Latest Results Table */}
           <View style={styles.logSection}>
-            <Text style={styles.sectionTitle}>LATEST LABORATORY REVIEWS</Text>
+            <Text style={styles.sectionTitle}>ÚLTIMAS REVISIONES DE LABORATORIO</Text>
             {records.map((r) => (
               <View key={r.id} style={styles.labCard}>
                 <View style={styles.labHeader}>
@@ -135,11 +135,11 @@ export default function LabsTerminal() {
                   <Ionicons name="shield-checkmark" size={14} color={COLORS.neon} />
                 </View>
                 <View style={styles.labGrid}>
-                  <LabItem label="GLUCOSE" value={r.glucose_mg} unit="mg/dL" />
+                  <LabItem label="GLUCOSA" value={r.glucose_mg} unit="mg/dL" />
                   <LabItem label="HbA1c" value={r.hba1c} unit="%" />
-                  <LabItem label="CHOL" value={r.total_chol} unit="mg/dL" />
-                  <LabItem label="TRIGL" value={r.triglycerides} unit="mg/dL" />
-                  <LabItem label="URIC" value={r.uric_acid} unit="mg/dL" />
+                  <LabItem label="COLESTEROL" value={r.total_chol} unit="mg/dL" />
+                  <LabItem label="TRIGLICÉRIDOS" value={r.triglycerides} unit="mg/dL" />
+                  <LabItem label="ÁC. ÚRICO" value={r.uric_acid} unit="mg/dL" />
                   <LabItem label="TSH" value={r.tsh} unit="uUI/mL" />
                 </View>
               </View>
@@ -162,14 +162,14 @@ export default function LabsTerminal() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalView}>
-              <Text style={styles.modalTitle}>INPUT LAB DATA</Text>
+              <Text style={styles.modalTitle}>INGRESAR DATOS LAB</Text>
               
               <ScrollView contentContainerStyle={{ gap: 15 }} showsVerticalScrollIndicator={false}>
-                <LabInput label="GLUCOSE (mg/dL)" value={newLab.glucose_mg} onChange={(v: string) => setNewLab({...newLab, glucose_mg: v})} />
+                <LabInput label="GLUCOSA (mg/dL)" value={newLab.glucose_mg} onChange={(v: string) => setNewLab({...newLab, glucose_mg: v})} />
                 <LabInput label="HbA1c (%)" value={newLab.hba1c} onChange={(v: string) => setNewLab({...newLab, hba1c: v})} />
                 <LabInput label="COL. TOTAL (mg/dL)" value={newLab.total_chol} onChange={(v: string) => setNewLab({...newLab, total_chol: v})} />
-                <LabInput label="TRIGLYCERIDES (mg/dL)" value={newLab.triglycerides} onChange={(v: string) => setNewLab({...newLab, triglycerides: v})} />
-                <LabInput label="URIC ACID (mg/dL)" value={newLab.uric_acid} onChange={(v: string) => setNewLab({...newLab, uric_acid: v})} />
+                <LabInput label="TRIGLICÉRIDOS (mg/dL)" value={newLab.triglycerides} onChange={(v: string) => setNewLab({...newLab, triglycerides: v})} />
+                <LabInput label="ÁCIDO ÚRICO (mg/dL)" value={newLab.uric_acid} onChange={(v: string) => setNewLab({...newLab, uric_acid: v})} />
                 <LabInput label="TSH (uUI/mL)" value={newLab.tsh} onChange={(v: string) => setNewLab({...newLab, tsh: v})} />
               </ScrollView>
 
@@ -178,14 +178,14 @@ export default function LabsTerminal() {
                   style={[styles.modalButton, styles.cancelButton]} 
                   onPress={() => setModalVisible(false)}
                 >
-                  <Text style={styles.cancelButtonText}>ABORT</Text>
+                  <Text style={styles.cancelButtonText}>ABORTAR</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.modalButton, styles.saveButton]} 
                   onPress={handleAddLab}
                   disabled={saving}
                 >
-                  {saving ? <ActivityIndicator color={COLORS.bg} /> : <Text style={styles.saveButtonText}>SYNC</Text>}
+                  {saving ? <ActivityIndicator color={COLORS.bg} /> : <Text style={styles.saveButtonText}>SINCRONIZAR</Text>}
                 </TouchableOpacity>
               </View>
             </View>

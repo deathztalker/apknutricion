@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions, Platform, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions, Platform, Alert, Modal } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../../../constants/theme';
-import { patientService, recordService } from '../../../lib/supabase';
+import { patientService, recordService, mealPlanService } from '../../../lib/supabase';
 import { Patient, ClinicalRecord, CalculationResult, AIAnalysis } from '../../../types';
 import { LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,19 +17,25 @@ export default function PatientDossier() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [records, setRecords] = useState<ClinicalRecord[]>([]);
+  const [mealPlans, setMealPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pRes, rRes] = await Promise.all([
+        const [pRes, rRes, mRes] = await Promise.all([
           patientService.getById(id),
-          recordService.getByPatient(id, 20)
+          recordService.getByPatient(id, 20),
+          mealPlanService.getByPatient(id)
         ]);
         if (pRes.error) throw pRes.error;
         if (rRes.error) throw rRes.error;
+        if (mRes.error) throw mRes.error;
+
         setPatient(pRes.data);
         setRecords(rRes.data || []);
+        setMealPlans(mRes.data || []);
       } catch (error) {
         console.error('Error fetching dossier:', error);
         Alert.alert("ACCESO DENEGADO", "No se pudo recuperar el expediente del núcleo.");
@@ -205,6 +211,39 @@ export default function PatientDossier() {
             />
           </View>
 
+          {/* MEAL PLANS SECTION */}
+          <View style={styles.panel}>
+            <View style={styles.panelHeader}>
+              <Ionicons name="restaurant" size={20} color={COLORS.pink} />
+              <Text style={[styles.panelTitle, { color: COLORS.pink }]}>PROTOCOLOS DIETÉTICOS ACTIVOS</Text>
+            </View>
+            {mealPlans.length > 0 ? (
+              <View style={{ gap: 15 }}>
+                {mealPlans.map((plan) => (
+                  <TouchableOpacity 
+                    key={plan.id} 
+                    style={styles.planItem}
+                    onPress={() => setSelectedPlan(plan)}
+                  >
+                    <View style={styles.planInfo}>
+                      <Text style={styles.planTitle}>{plan.title?.toUpperCase() || 'PLAN SIN TÍTULO'}</Text>
+                      <Text style={styles.planDate}>{new Date(plan.created_at).toLocaleDateString('es-CL')}</Text>
+                    </View>
+                    <View style={styles.planStats}>
+                      <Text style={styles.planKcal}>{plan.total_kcal || plan.kcal_target} KCAL</Text>
+                      <Ionicons name="chevron-forward" size={20} color={COLORS.pink} />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.noData}>
+                <Ionicons name="nutrition" size={50} color={COLORS.dim} />
+                <Text style={styles.noDataText}>SIN PLANES ASIGNADOS</Text>
+              </View>
+            )}
+          </View>
+
           {/* TRANSMISSION HISTORY LOG */}
           <View style={styles.historySection}>
             <Text style={styles.sectionHeader}>LOG CRONOLÓGICO DE TRANSMISIONES</Text>
@@ -221,8 +260,61 @@ export default function PatientDossier() {
           </View>
 
         </View>
+
+        {/* MODAL PARA DETALLE DEL PLAN */}
+        <Modal
+          visible={!!selectedPlan}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedPlan(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>DETALLE DEL PROTOCOLO</Text>
+                <TouchableOpacity onPress={() => setSelectedPlan(null)}>
+                  <Ionicons name="close" size={28} color={COLORS.white} />
+                </TouchableOpacity>
+              </View>
+              
+              {selectedPlan && (
+                <ScrollView style={{ padding: 20 }}>
+                  <Text style={styles.detailLabel}>PLAN: {selectedPlan.title?.toUpperCase()}</Text>
+                  <View style={styles.detailStats}>
+                    <DetailStat label="KCAL" val={selectedPlan.total_kcal || selectedPlan.kcal_target} color={COLORS.neon} />
+                    <DetailStat label="PROT" val={`${selectedPlan.prot_g || selectedPlan.protein_target}g`} color={COLORS.pink} />
+                    <DetailStat label="CHO" val={`${selectedPlan.cho_g || selectedPlan.cho_target}g`} color={COLORS.sky} />
+                    <DetailStat label="FAT" val={`${selectedPlan.fat_g || selectedPlan.fat_target}g`} color={COLORS.gold} />
+                  </View>
+
+                  <Text style={[styles.detailLabel, { marginTop: 25 }]}>DISTRIBUCIÓN DE PORCIONES:</Text>
+                  <View style={styles.portionsGrid}>
+                    {selectedPlan.portions && Object.entries(selectedPlan.portions).map(([k, v]: any) => (
+                      v > 0 && (
+                        <View key={k} style={styles.portionRow}>
+                          <Text style={styles.portionName}>{k.replace(/_/g, ' ').toUpperCase()}</Text>
+                          <Text style={styles.portionVal}>{v}</Text>
+                        </View>
+                      )
+                    ))}
+                  </View>
+                </ScrollView>
+              )}
+            </View>
+          </View>
+        </Modal>
+
       </ScrollView>
     </TerminalBackground>
+  );
+}
+
+function DetailStat({ label, val, color }: any) {
+  return (
+    <View style={styles.detailBox}>
+      <Text style={styles.detailBoxLabel}>{label}</Text>
+      <Text style={[styles.detailBoxVal, { color }]}>{val}</Text>
+    </View>
   );
 }
 
@@ -425,4 +517,37 @@ const styles = StyleSheet.create({
   historyInfo: { flex: 1 },
   historyDate: { fontSize: 15, color: COLORS.white, fontWeight: '900', marginBottom: 10, letterSpacing: 1 },
   historySummary: { fontSize: 14, color: COLORS.muted, fontWeight: '800' },
+
+  // Estilos para Planes Dietéticos
+  planItem: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    backgroundColor: '#000', 
+    padding: 20, 
+    borderWidth: 1, 
+    borderColor: COLORS.dim,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.pink
+  },
+  planInfo: { flex: 1 },
+  planTitle: { color: COLORS.white, fontSize: 14, fontWeight: '900', letterSpacing: 1 },
+  planDate: { color: COLORS.muted, fontSize: 11, marginTop: 5 },
+  planStats: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  planKcal: { color: COLORS.pink, fontSize: 16, fontWeight: '900', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+
+  // Estilos Modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 },
+  modalContent: { backgroundColor: COLORS.bg2, borderWidth: 3, borderColor: COLORS.purple, maxHeight: '80%' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, backgroundColor: COLORS.bg1, borderBottomWidth: 2, borderBottomColor: COLORS.purple },
+  modalTitle: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 20, letterSpacing: 2 },
+  detailLabel: { color: COLORS.purple, fontWeight: '900', fontSize: 12, letterSpacing: 2, marginBottom: 15 },
+  detailStats: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+  detailBox: { flex: 1, backgroundColor: '#000', padding: 10, alignItems: 'center', borderWidth: 1, borderColor: COLORS.dim },
+  detailBoxLabel: { color: COLORS.muted, fontSize: 9, fontWeight: '900', marginBottom: 5 },
+  detailBoxVal: { fontSize: 14, fontWeight: 'bold' },
+  portionsGrid: { gap: 10 },
+  portionRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  portionName: { color: COLORS.bone, fontSize: 11, fontWeight: '800' },
+  portionVal: { color: COLORS.neon, fontSize: 13, fontWeight: '900' },
 });

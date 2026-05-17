@@ -71,12 +71,12 @@ export default function AppLayout() {
         headerRight: () => <ProfileHeader />,
       }}
     >
-      <Stack.Screen name="dashboard" options={{ title: 'SYSTEM DASHBOARD' }} />
-      <Stack.Screen name="patient/[id]" options={{ title: 'PATIENT DOSSIER' }} />
+      <Stack.Screen name="dashboard" options={{ title: 'TABLERO DE SISTEMA' }} />
+      <Stack.Screen name="patient/[id]" options={{ title: 'EXPEDIENTE DEL SUJETO' }} />
       <Stack.Screen name="patient/new" options={{ title: 'INICIALIZAR SUJETO', presentation: 'modal' }} />
-      <Stack.Screen name="calculator" options={{ title: 'OVERRIDE BIOMÉTRICO' }} />
-      <Stack.Screen name="patient/[id]/labs" options={{ title: 'BIOCHEMICAL TERMINAL' }} />
-      <Stack.Screen name="meal-plan/new" options={{ title: 'PORTION BUILDER' }} />
+      <Stack.Screen name="calculator" options={{ title: 'SOBREESCRITURA BIOMÉTRICA' }} />
+      <Stack.Screen name="patient/[id]/labs" options={{ title: 'TERMINAL BIOQUÍMICO' }} />
+      <Stack.Screen name="meal-plan/new" options={{ title: 'CONSTRUCTOR DE PORCIONES' }} />
       <Stack.Screen name="ai-chat" options={{ title: 'NUTRIBOT IA', presentation: 'modal' }} />
     </Stack>
   );

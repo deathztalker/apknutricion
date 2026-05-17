@@ -143,7 +143,7 @@ export async function analyzeWithGemini(
   if (GEMINI_KEY) {
     try {
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
       const result = await model.generateContent(buildPrompt(patient, record, calc, ruleAlerts));
       const rawText = result.response.text();
       const clean = rawText.replace(/```json|```/g, '').trim();
