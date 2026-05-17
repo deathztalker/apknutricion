@@ -105,20 +105,30 @@ export default function Login() {
   }
 
   async function handleAuth() {
-    if (!email || !password) {
-      Alert.alert('SYSTEM ERROR', 'IDENTITY DATA REQUIRED');
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      Alert.alert('ERROR DE SISTEMA', 'ADN DIGITAL Y CÓDIGO GENÉTICO REQUERIDOS');
       return;
     }
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email: cleanEmail, password });
         if (error) throw error;
         Alert.alert('VÍNCULO INICIADO', 'Verifica tu identidad en el plano espectral (Revisa tu Email).');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        router.replace('/(app)/dashboard');
+        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+        if (error) {
+          // Manejo específico de errores de Supabase
+          if (error.message.includes('Invalid login credentials')) {
+            throw new Error('Código genético o ADN digital incorrecto.');
+          }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Vínculo no verificado. Revisa tu bandeja de entrada.');
+          }
+          throw error;
+        }
+        // El RootLayout detectará el cambio de sesión y redirigirá automáticamente.
       }
     } catch (error: any) {
       Alert.alert('ACCESO DENEGADO', `ERROR DE NÚCLEO: ${error.message}`);
@@ -141,7 +151,9 @@ export default function Login() {
               <Animated.View style={{ transform: [{ scale: skullScale }], opacity: skullOpacity }}>
                 <Ionicons name="skull" size={100} color={COLORS.crimson} style={styles.skullShadow} />
               </Animated.View>
-              <Text style={styles.title}>NÚCLEO NUTRICIONAL</Text>
+              <Animated.Text style={[styles.title, { textShadowRadius: glowRadius, opacity: flickerAnim }]}>
+                NÚCLEO NUTRICIONAL
+              </Animated.Text>
               <Text style={styles.subtitle}>AUTORIZACIÓN DE ACCESO CELULAR</Text>
               <View style={styles.line} />
             </View>
