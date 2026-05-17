@@ -29,31 +29,42 @@ export default function GoogleAuthCallback() {
 
   useEffect(() => {
     const parseUrlAndSync = async () => {
-      // 1. INTENTO DE EXTRACCIÓN MANUAL (HACK PARA GITHUB PAGES)
-      // Supabase a veces falla en subdirectorios, así que extraemos el alma manualmente
       if (Platform.OS === 'web' && window.location.hash) {
-        console.log('Soul Fragment Detected in URL. Extracting...');
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
+        console.log('Soul Fragment Detected. Iniciando extracción manual...');
+        try {
+          // Extraemos el alma manualmente picando la cadena de texto
+          const hash = window.location.hash.substring(1);
+          const parts = hash.split('&').reduce((acc: any, part) => {
+            const [key, value] = part.split('=');
+            acc[key] = value;
+            return acc;
+          }, {});
 
-        if (accessToken && refreshToken) {
-          console.log('Soul Fragment Captured. Establishing Link...');
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          if (data.session) {
-            return syncSoul(data.session);
+          const accessToken = parts.access_token;
+          const refreshToken = parts.refresh_token;
+
+          if (accessToken) {
+            console.log('Soul Fragment Captured. Inyectando en el Núcleo...');
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken || '',
+            });
+            
+            if (data.session) {
+              console.log('Manual Injection Successful.');
+              return syncSoul(data.session);
+            }
+            if (error) console.error('Injection Error:', error);
           }
+        } catch (e) {
+          console.error('Extraction Failure:', e);
         }
       }
 
-      // 2. Verificación estándar por si ya se procesó
+      // Verificación de respaldo si el hash ya fue procesado
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log('Session already active in nucleus.');
+        console.log('Session active in nucleus.');
         syncSoul(session);
       }
     };
