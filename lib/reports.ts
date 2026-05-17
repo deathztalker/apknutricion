@@ -135,12 +135,24 @@ export async function generateClinicalReport(
           .hud-viz { flex: 1; background: var(--glass); border: 1px solid #222; padding: 15px; border-top: 3px solid var(--poison); }
           .hud-title { font-size: 9px; color: #aaa; font-weight: 900; margin-bottom: 12px; letter-spacing: 1px; }
 
-          /* Macros Table */
-          .macro-container { display: flex; gap: 20px; align-items: center; background: rgba(0,0,0,0.5); padding: 20px; border: 1px solid #222; }
-          .macro-table { flex: 1; border-collapse: collapse; }
-          .macro-table th { font-size: 8px; color: #666; text-align: left; padding: 10px; border-bottom: 1px solid #333; }
-          .macro-table td { font-size: 11px; padding: 10px; border-bottom: 1px solid #1a1a1f; color: #ddd; font-weight: bold;}
-          .macro-name { letter-spacing: 1px; }
+          /* Improved Macros Section */
+          .macro-display {
+            background: #000; border: 2px solid #333; padding: 25px; margin-top: 15px;
+          }
+          .macro-bar {
+            height: 25px; display: flex; width: 100%; margin-bottom: 25px;
+            border: 1px solid #444; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5);
+          }
+          .bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: #fff; }
+          .seg-p { background-color: var(--crimson); }
+          .seg-c { background-color: var(--purple); }
+          .seg-f { background-color: #ff6eb4; } /* Pink */
+
+          .macro-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+          .legend-item { padding: 10px; border-left: 4px solid #333; background: rgba(255,255,255,0.02); }
+          .leg-label { font-size: 8px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+          .leg-val { font-size: 13px; font-weight: 900; }
+
 
           /* Neural Analysis Box */
           .neural-interrogation {
@@ -244,44 +256,28 @@ export async function generateClinicalReport(
                   <div><span class="label">Hidratación 24h</span><div class="value" style="color:var(--sky)">${calc.waterLiters} LITROS</div></div>
                </div>
             </div>
-            <div class="macro-container">
-              <!-- Visual Pie Chart Representation -->
-              <div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(
-                var(--crimson) 0% ${pPct}%, 
-                var(--purple) ${pPct}% ${pPct + cPct}%, 
-                var(--pink) ${pPct + cPct}% 100%
-              ); border: 2px solid #333; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>
+            <div class="macro-display">
+              <div class="hud-title" style="margin-bottom:15px; color:var(--crimson)">VINCULACIÓN DE RECURSOS (DISTRIBUCIÓN ENERGÉTICA)</div>
+              <div class="macro-bar">
+                <div class="bar-segment seg-p" style="width: ${pPct}%">PRO</div>
+                <div class="bar-segment seg-c" style="width: ${cPct}%">CHO</div>
+                <div class="bar-segment seg-f" style="width: ${fPct}%">LIP</div>
+              </div>
               
-              <table class="macro-table">
-                <thead>
-                  <tr>
-                    <th>Macronutriente</th>
-                    <th>Distribución %</th>
-                    <th>Carga (Gramos)</th>
-                    <th>Ratio de Peso</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="macro-name" style="color:var(--crimson)">● PROTEÍNAS</td>
-                    <td>${record.macro_prot_pct}%</td>
-                    <td class="value">${calc.macros?.protG}G</td>
-                    <td style="color:#aaa;">${calc.macros?.protGkg} g/kg</td>
-                  </tr>
-                  <tr>
-                    <td class="macro-name" style="color:var(--purple)">● CARBOHIDRATOS</td>
-                    <td>${record.macro_cho_pct}%</td>
-                    <td class="value">${calc.macros?.choG}G</td>
-                    <td style="color:#aaa;">${calc.macros?.choGkg} g/kg</td>
-                  </tr>
-                  <tr>
-                    <td class="macro-name" style="color:var(--pink)">● LÍPIDOS</td>
-                    <td>${record.macro_fat_pct}%</td>
-                    <td class="value">${calc.macros?.fatG}G</td>
-                    <td style="color:#aaa;">${calc.macros?.fatGkg} g/kg</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="macro-legend">
+                <div class="legend-item" style="border-left-color: var(--crimson)">
+                  <div class="leg-label">Proteínas</div>
+                  <div class="leg-val">${calc.macros?.protG}g <span style="color:#666; font-size:9px;">(${record.macro_prot_pct}%)</span></div>
+                </div>
+                <div class="legend-item" style="border-left-color: var(--purple)">
+                  <div class="leg-label">Carbohidratos</div>
+                  <div class="leg-val">${calc.macros?.choG}g <span style="color:#666; font-size:9px;">(${record.macro_cho_pct}%)</span></div>
+                </div>
+                <div class="legend-item" style="border-left-color: #ff6eb4">
+                  <div class="leg-label">Lípidos</div>
+                  <div class="leg-val">${calc.macros?.fatG}g <span style="color:#666; font-size:9px;">(${record.macro_fat_pct}%)</span></div>
+                </div>
+              </div>
             </div>
           </section>
 

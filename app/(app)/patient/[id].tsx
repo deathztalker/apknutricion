@@ -3,11 +3,13 @@ import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity
 import { useLocalSearchParams, router } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../../../constants/theme';
 import { patientService, recordService } from '../../../lib/supabase';
-import { Patient, ClinicalRecord } from '../../../types';
+import { Patient, ClinicalRecord, CalculationResult, AIAnalysis } from '../../../types';
 import { LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import TerminalBackground from '../../../components/TerminalBackground';
+import { generateClinicalReport } from '../../../lib/reports';
+import { calculateAll } from '../../../lib/calculations';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -37,6 +39,32 @@ export default function PatientDossier() {
     };
     fetchData();
   }, [id]);
+
+  const handleGeneratePDF = async () => {
+    if (!patient || records.length === 0) return;
+    
+    try {
+      const latest = records[0];
+      // Re-calculate results for PDF to ensure all calculated fields are present
+      const calc = calculateAll(latest as any, patient.age, patient.sex as any);
+      
+      // Re-parse AI analysis if it exists as string
+      let ai: AIAnalysis = {
+        summary: latest.ai_analysis || 'No se registra análisis previo.',
+        alerts: [],
+        recommendations: [],
+        nutritional_diagnosis: 'Evaluación de rutina.',
+        goals: [],
+        follow_up: '',
+        raw_text: ''
+      };
+
+      await generateClinicalReport(patient, latest, calc, ai, records);
+    } catch (error) {
+      console.error('PDF Error:', error);
+      Alert.alert('FALLO DE EXTRACCIÓN', 'No se pudo generar el dossier PDF.');
+    }
+  };
 
   if (loading) {
     return (
@@ -130,7 +158,7 @@ export default function PatientDossier() {
               />
             ) : (
               <View style={styles.noData}>
-                <Ionicons name="alert-circle" size={50} color={COLORS.dim} />
+                <Ionicons name="alert-circle" size={50} color={COLORS.muted} />
                 <Text style={styles.noDataText}>SIN DATOS DE EVOLUCIÓN</Text>
               </View>
             )}
@@ -369,36 +397,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10
   },
   actBtnText: { fontSize: 14, fontWeight: '900', letterSpacing: 1.5, fontFamily: FONTS.horror },
-  actBtnSub: { fontSize: 9, color: COLORS.muted, fontWeight: '900', marginTop: 5, textTransform: 'uppercase' },
-  historySection: { gap: 25, marginBottom: 80 },
-  sectionHeader: { 
-    fontSize: 18, 
-    fontWeight: '900', 
-    color: COLORS.white, 
-    letterSpacing: 3, 
-    borderBottomWidth: 3, 
-    borderBottomColor: COLORS.purple, 
-    paddingBottom: 15,
-    fontFamily: FONTS.horror
-  },
-  historyItem: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: COLORS.bg2, 
-    padding: 30, 
-    borderWidth: 2, 
-    borderColor: COLORS.dim, 
-    gap: 25,
-    shadowColor: '#000',
-    shadowOpacity: 0.4,
-    shadowRadius: 10
-  },
-  historyIndicator: { width: 8, height: '100%', borderRadius: 0 },
-  historyInfo: { flex: 1 },
-  historyDate: { fontSize: 15, color: COLORS.white, fontWeight: '900', marginBottom: 10, letterSpacing: 1 },
-  historySummary: { fontSize: 14, color: COLORS.muted, fontWeight: '800' },
-});
- fontSize: 14, fontWeight: '900', letterSpacing: 1.5, fontFamily: FONTS.horror },
   actBtnSub: { fontSize: 9, color: COLORS.muted, fontWeight: '900', marginTop: 5, textTransform: 'uppercase' },
   historySection: { gap: 25, marginBottom: 80 },
   sectionHeader: { 
