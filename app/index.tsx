@@ -19,11 +19,11 @@ export default function Index() {
       } else {
         setChecking(false);
         Animated.parallel([
-          Animated.timing(fadeAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+          Animated.timing(fadeAnim, { toValue: 1, duration: 1500, useNativeDriver: Platform.OS !== 'web' }),
           Animated.loop(
             Animated.sequence([
-              Animated.timing(skullAnim, { toValue: 1, duration: 2500, useNativeDriver: true }),
-              Animated.timing(skullAnim, { toValue: 0, duration: 2500, useNativeDriver: true }),
+              Animated.timing(skullAnim, { toValue: 1, duration: 2500, useNativeDriver: Platform.OS !== 'web' }),
+              Animated.timing(skullAnim, { toValue: 0, duration: 2500, useNativeDriver: Platform.OS !== 'web' }),
             ])
           )
         ]).start();

@@ -36,11 +36,11 @@ export default function Login() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 1500, useNativeDriver: Platform.OS !== 'web' }),
       Animated.loop(
         Animated.sequence([
-          Animated.timing(skullAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
-          Animated.timing(skullAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
+          Animated.timing(skullAnim, { toValue: 1, duration: 2000, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.timing(skullAnim, { toValue: 0, duration: 2000, useNativeDriver: Platform.OS !== 'web' }),
         ])
       )
     ]).start();
