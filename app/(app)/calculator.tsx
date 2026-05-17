@@ -158,33 +158,73 @@ export default function Calculator() {
     }
   };
 
+  const { patients, guestRecords, addGuestRecord } = usePatientStore();
+  
   const handleSave = async () => {
     if (!results) return;
     if (!patient.full_name || !patient.age) {
-      Alert.alert('IDENTIDAD REQUERIDA', 'Debe ingresar Nombre y Edad del paciente para procesar el expediente.');
+      Alert.alert('IDENTIDAD REQUERIDA', 'Debe ingresar Nombre y Edad para procesar el expediente.');
       return;
     }
 
-    // FLUJO DE INVITADO: Solo permite generar PDF, no guarda en DB
+    const val = (v: any) => {
+      const n = parseFloat(v);
+      return isNaN(n) ? null : n;
+    };
+
+    const recordData: Partial<ClinicalRecord> = {
+      record_date: new Date().toISOString(),
+      weight_kg: val(form.weight_kg), height_cm: val(form.height_cm),
+      waist_cm: val(form.waist_cm), hip_cm: val(form.hip_cm),
+      bmi: results.bmi, bmi_status: results.bmiStatus,
+      ideal_weight: results.idealWeight, fat_percent: results.fatPercent, 
+      fat_mass_kg: results.fatMassKg, lean_mass_kg: results.leanMassKg, 
+      ict: results.ict, cv_risk: results.cvRisk,
+      systolic_bp: parseInt(form.systolic_bp || '0') || null, 
+      diastolic_bp: parseInt(form.diastolic_bp || '0') || null,
+      bp_status: results.bpStatus, activity_factor: val(form.activity_factor),
+      bmr_kcal: Math.round(results.bmr || 0) || null, 
+      tdee_kcal: Math.round(results.tdee || 0) || null, 
+      water_liters: val(results.waterLiters),
+      macro_prot_pct: parseInt(form.macro_prot_pct || '0') || null, 
+      macro_cho_pct: parseInt(form.macro_cho_pct || '0') || null,
+      macro_fat_pct: parseInt(form.macro_fat_pct || '0') || null, 
+      pathologies: form.pathologies || [],
+      allergies: form.allergies || [], diet_type: form.diet_type || 'Omnívora', 
+      liquid_intake: form.liquid_intake || 'Normal',
+      digestion_status: form.digestion_status || 'Normal', 
+      observations: form.observations || '',
+      ai_analysis: aiAnalysis?.summary || null, 
+      grip_strength_kg: val(form.grip_strength_kg),
+      calf_circumference_cm: val(form.calf_circumference_cm),
+      somatotype: results.somatotype || null,
+    };
+
+    // --- MODO INVITADO ---
     if (!session?.user) {
+      addGuestRecord({
+        ...recordData,
+        id: Date.now().toString(),
+        patient_id: 'guest',
+      } as any);
+      
       Alert.alert(
         'ACCESO INVITADO',
-        'Estás en modo GUEST. Los datos no se guardarán en el núcleo, pero puedes exportar el dossier técnico ahora.',
+        'Expediente persistido LOCALMENTE. Para guardarlo en el núcleo permanente, inicia sesión.',
         [
           { text: 'GENERAR PDF', onPress: () => generateClinicalReport(patient as any, form as any, results, aiAnalysis || undefined, []) },
-          { text: 'ENTENDIDO', style: 'cancel' }
+          { text: 'ENTENDIDO' }
         ]
       );
+      setActiveTab('history');
       return;
     }
 
+    // --- MODO REGISTRADO ---
     setSaving(true);
     try {
-      if (!session?.user) throw new Error('No autorizado: Sesión expirada o inválida.');
-
       let targetPatientId = patientId;
 
-      // Create patient if guest or not linked
       if (!targetPatientId) {
         const { data: newPat, error: pError } = await supabase
           .from('patients')
@@ -194,117 +234,28 @@ export default function Calculator() {
             age: parseInt(String(patient.age)) || 0,
             sex: patient.sex || 'M',
             insurance: patient.insurance || 'FONASA',
-            is_active: true
           })
-          .select()
-          .single();
+          .select().single();
         
         if (pError) throw pError;
         targetPatientId = newPat.id;
         router.setParams({ patientId: newPat.id });
       }
 
-      // Helper to avoid NaN in DB
-      const val = (v: any) => {
-        const n = parseFloat(v);
-        return isNaN(n) ? null : n;
-      };
-
       const { error } = await recordService.create({
-        patient_id: targetPatientId, 
-        user_id: session.user.id, 
-        record_date: new Date().toISOString(),
-        
-        // Antropometría Base
-        weight_kg: val(form.weight_kg), 
-        height_cm: val(form.height_cm),
-        waist_cm: val(form.waist_cm), 
-        hip_cm: val(form.hip_cm),
-
-        // Pliegues
-        fold_triceps: val(form.fold_triceps),
-        fold_subscapular: val(form.fold_subscapular),
-        fold_supraspinal: val(form.fold_supraspinal),
-        fold_abdominal: val(form.fold_abdominal),
-
-        // Perímetros y Diámetros
-        diameter_humerus: val(form.diameter_humerus),
-        diameter_femur: val(form.diameter_femur),
-        perimeter_arm: val(form.perimeter_arm),
-        perimeter_calf: val(form.perimeter_calf),
-
-        // Calculados
-        bmi: results.bmi, 
-        bmi_status: results.bmiStatus,
-        ideal_weight: results.idealWeight, 
-        fat_percent: results.fatPercent, 
-        fat_mass_kg: results.fatMassKg,
-        lean_mass_kg: results.leanMassKg, 
-        ict: results.ict, 
-        cv_risk: results.cvRisk,
-        
-        // Signos Vitales
-        systolic_bp: parseInt(form.systolic_bp || '0') || null, 
-        diastolic_bp: parseInt(form.diastolic_bp || '0') || null,
-        bp_status: results.bpStatus, 
-        heart_rate: val(form.heart_rate),
-        temperature: val(form.temperature),
-        oxygen_sat: val(form.oxygen_sat),
-
-        // Metabólico
-        activity_factor: val(form.activity_factor),
-        bmr_kcal: Math.round(results.bmr || 0) || null, 
-        tdee_kcal: Math.round(results.tdee || 0) || null, 
-        water_liters: val(results.waterLiters),
-        
-        // Laboratorio
-        creatinine: val(form.creatinine),
-        glucose_mg: val(form.glucose_mg),
-        hba1c: val(form.hba1c),
-        total_chol: val(form.total_chol),
-        hdl: val(form.hdl),
-        ldl: val(form.ldl),
-        triglycerides: val(form.triglycerides),
-        hemoglobin: val(form.hemoglobin),
-        ferritin: val(form.ferritin),
-        albumin: val(form.albumin),
-
-        // Macros
-        macro_prot_pct: parseInt(form.macro_prot_pct || '0') || null, 
-        macro_cho_pct: parseInt(form.macro_cho_pct || '0') || null,
-        macro_fat_pct: parseInt(form.macro_fat_pct || '0') || null, 
-        
-        // Anamnesis
-        pathologies: form.pathologies || [],
-        allergies: form.allergies || [], 
-        diet_type: form.diet_type || 'Omnívora', 
-        liquid_intake: form.liquid_intake || 'Normal',
-        digestion_status: form.digestion_status || 'Normal', 
-        observations: form.observations || '',
-        
-        // IA
-        ai_analysis: aiAnalysis?.summary || null, 
-        
-        // Sarcopenia y Otros (V3)
-        grip_strength_kg: val(form.grip_strength_kg),
-        calf_circumference_cm: val(form.calf_circumference_cm),
-        knee_height_cm: val(form.knee_height_cm),
-        usual_weight_kg: val(form.usual_weight_kg),
-        weight_loss_weeks: val(form.weight_loss_weeks),
-        mna_score: form.mna_score || null, 
-        vgs_status: form.vgs_status || null, 
-        somatotype: results.somatotype || null,
-        professional_indications: form.professional_indications || '',
+        ...recordData,
+        patient_id: targetPatientId,
+        user_id: session.user.id,
       } as any);
       
       if (error) throw error;
       
-      Alert.alert('SINCRONIZACIÓN EXITOSA', 'Dossier biométrico persistido en el vacío.');
+      Alert.alert('SINCRONIZACIÓN EXITOSA', 'Dossier biométrico persistido en el núcleo.');
       setActiveTab('history');
-      fetchGlobalHistory(); // Refresh history list
+      fetchGlobalHistory();
     } catch (error: any) {
       console.error('Save Error:', error);
-      Alert.alert('FALLO DE RED / PERSISTENCIA', error.message || 'Error desconocido al guardar.');
+      Alert.alert('FALLO DE NÚCLEO', error.message);
     } finally {
       setSaving(false);
     }
@@ -570,49 +521,62 @@ export default function Calculator() {
           {activeTab === 'history' && (
             <View style={styles.section}>
               <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20}}>
-                <SectionHeader title="PACIENTES GUARDADOS" icon="server" color={COLORS.gold} />
-                <View style={{flexDirection: 'row', gap: 10}}>
-                  <TouchableOpacity style={styles.iconBtn} onPress={fetchGlobalHistory}>
-                     <Ionicons name="refresh" size={20} color={COLORS.bone} />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.iconBtn} onPress={handleExportData}>
-                     <Ionicons name="download" size={20} color={COLORS.sky} />
-                  </TouchableOpacity>
+                <SectionHeader title={session ? "PACIENTES GUARDADOS" : "HISTORIAL LOCAL (INVITADO)"} icon="server" color={COLORS.gold} />
+                {session && (
+                  <View style={{flexDirection: 'row', gap: 10}}>
+                    <TouchableOpacity style={styles.iconBtn} onPress={fetchGlobalHistory}>
+                      <Ionicons name="refresh" size={20} color={COLORS.bone} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.iconBtn} onPress={handleExportData}>
+                      <Ionicons name="download" size={20} color={COLORS.sky} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+
+              {session && (
+                <View style={styles.searchBar}>
+                  <Ionicons name="search" size={20} color={COLORS.gold} />
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="BUSCAR PACIENTE O FECHA..."
+                    placeholderTextColor={COLORS.muted}
+                    value={searchHistory}
+                    onChangeText={setSearchHistory}
+                  />
                 </View>
-              </View>
+              )}
 
-              <View style={styles.searchBar}>
-                <Ionicons name="search" size={20} color={COLORS.gold} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="BUSCAR PACIENTE O FECHA..."
-                  placeholderTextColor="#666"
-                  value={searchHistory}
-                  onChangeText={setSearchHistory}
-                />
-              </View>
-
-              {globalHistory.length === 0 ? (
+              {/* Lógica Dual: Supabase vs Guest Storage */}
+              {(session ? globalHistory : guestRecords).length === 0 ? (
                 <View style={styles.emptyCard}>
-                  <Ionicons name="skull" size={60} color="#222" />
+                  <Ionicons name="skull" size={60} color={COLORS.dim} />
                   <Text style={styles.emptyText}>SIN TRANSMISIONES PREVIAS</Text>
                 </View>
               ) : (
-                globalHistory.map((rec) => (
+                (session ? globalHistory : guestRecords).map((rec) => (
                   <TouchableOpacity 
                     key={rec.id} 
                     style={styles.historyCard}
-                    onPress={() => router.push(`/(app)/patient/${rec.patient_id}`)}
+                    onPress={() => {
+                      if (session) {
+                        router.push(`/(app)/patient/${rec.patient_id}`);
+                      } else {
+                        // Cargar datos locales al formulario
+                        setForm(rec as any);
+                        Alert.alert("MODO INVITADO", "Datos cargados desde el almacenamiento local.");
+                        setActiveTab('scanner');
+                      }
+                    }}
                   >
                     <View style={styles.historyHead}>
                       <View>
-                        <Text style={styles.historyName}>{rec.patients?.full_name?.toUpperCase() || 'SUJETO ANÓNIMO'}</Text>
+                        <Text style={styles.historyName}>{rec.patients?.full_name?.toUpperCase() || (session ? 'SUJETO ANÓNIMO' : 'INVITADO LOCAL')}</Text>
                         <Text style={styles.historyDate}>{new Date(rec.record_date!).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}</Text>
                       </View>
                       <Ionicons name="chevron-forward" size={24} color={COLORS.gold} />
                     </View>
                     <View style={styles.historyGrid}>
-                      <HStat label="EDAD" val={`${rec.patients?.age || '--'} Y`} color={COLORS.dim} />
                       <HStat label="IMC" val={rec.bmi} color={COLORS.bone} />
                       <HStat label="PESO" val={`${rec.weight_kg} KG`} color={COLORS.bone} />
                       <HStat label="STATUS" val={rec.bmi_status} color={COLORS.crimson} />

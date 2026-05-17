@@ -25,7 +25,8 @@ export default function RootLayout() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSession(session);
-        const { data: profile } = await authService.getProfile(session.user.id);
+        // Sincronizar perfil con metadatos (avatar de Google, etc)
+        const { data: profile } = await authService.syncProfile(session);
         if (profile) setProfile(profile);
       }
       setIsInitializing(false);
@@ -38,7 +39,7 @@ export default function RootLayout() {
       console.log('Root Auth Event:', event);
       setSession(session);
       if (session) {
-        const { data: profile } = await authService.getProfile(session.user.id);
+        const { data: profile } = await authService.syncProfile(session);
         if (profile) setProfile(profile);
       } else {
         setProfile(null);

@@ -58,6 +58,23 @@ export const authService = {
     return supabase.from('profiles').select('*').eq('id', userId).single();
   },
 
+  async syncProfile(session: any) {
+    const { user } = session;
+    const metadata = user.user_metadata;
+    
+    const profileData = {
+      id: user.id,
+      email: user.email!,
+      full_name: metadata?.full_name || metadata?.name || 'Nuevo Sujeto',
+      avatar_url: metadata?.avatar_url || metadata?.picture || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Upsert profile
+    const { data, error } = await supabase.from('profiles').upsert(profileData).select().single();
+    return { data, error };
+  },
+
   async updateProfile(userId: string, updates: Record<string, unknown>) {
     return supabase.from('profiles').update(updates).eq('id', userId);
   },

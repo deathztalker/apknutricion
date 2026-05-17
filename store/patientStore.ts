@@ -5,9 +5,12 @@ import { Patient, ClinicalRecord } from '@/types';
 
 interface PatientState {
   patients: Patient[];
+  guestRecords: ClinicalRecord[];
   selectedPatient: Patient | null;
   selectedRecord: ClinicalRecord | null;
   setPatients: (p: Patient[]) => void;
+  setGuestRecords: (r: ClinicalRecord[]) => void;
+  addGuestRecord: (r: ClinicalRecord) => void;
   setSelectedPatient: (p: Patient | null) => void;
   setSelectedRecord: (r: ClinicalRecord | null) => void;
   addPatient: (p: Patient) => void;
@@ -19,9 +22,12 @@ export const usePatientStore = create<PatientState>()(
   persist(
     (set) => ({
       patients: [],
+      guestRecords: [],
       selectedPatient: null,
       selectedRecord: null,
       setPatients: (patients) => set({ patients }),
+      setGuestRecords: (guestRecords) => set({ guestRecords }),
+      addGuestRecord: (r) => set(state => ({ guestRecords: [r, ...state.guestRecords].slice(0, 10) })), // Mantener últimos 10
       setSelectedPatient: (p) => set({ selectedPatient: p }),
       setSelectedRecord: (r) => set({ selectedRecord: r }),
       addPatient: (p) => set(state => ({ patients: [p, ...state.patients] })),

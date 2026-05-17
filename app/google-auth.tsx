@@ -17,10 +17,10 @@ export default function GoogleAuthCallback() {
     
     setSession(session);
     try {
-      const { data: profile } = await authService.getProfile(session.user.id);
+      const { data: profile } = await authService.syncProfile(session);
       if (profile) setProfile(profile);
     } catch (e) {
-      console.warn('Profile sync lag, proceeding with session...');
+      console.warn('Profile sync failed, but proceeding...');
     }
 
     // Teletransporte al terminal clínico
