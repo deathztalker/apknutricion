@@ -125,7 +125,7 @@ Evita redundancias genéricas y tecnicismos básicos. Tu objetivo es entregar va
 DATOS DEL SUJETO:
 - Identidad: ${patient.full_name || 'Anónimo'} (${patient.sex === 'F' ? 'XX' : 'XY'}) | Edad: ${patient.age} años.
 - Biometría: IMC ${calc.bmi} (${calc.bmiStatus}) | Cintura ${record.waist_cm}cm | ICT ${calc.ict} | Riesgo CV: ${calc.cvRisk}.
-- Composición: %Grasa ${calc.fatPercent}% (Faulkner) | Masa Magra ${calc.leanMassKg}kg | Somatotipo: ${calc.somatotype ? \`Endo:\${calc.somatotype.endo} Meso:\${calc.somatotype.meso} Ecto:\${calc.somatotype.ecto}\` : 'No medido'}.
+- Composición: %Grasa ${calc.fatPercent}% (Faulkner) | Masa Magra ${calc.leanMassKg}kg | Somatotipo: ${calc.somatotype ? `Endo:${calc.somatotype.endo} Meso:${calc.somatotype.meso} Ecto:${calc.somatotype.ecto}` : 'No medido'}.
 - Metabolismo: TMB ${calc.bmr} kcal | VCT ${calc.tdee} kcal | Agua ${calc.waterLiters}L.
 - Objetivos Macro: PRO ${calc.macros?.protG}g (${calc.macros?.protGkg}g/kg) | CHO ${calc.macros?.choG}g | LIP ${calc.macros?.fatG}g.
 - Bioquímica/Labs: Glucosa ${record.glucose_mg} | HbA1c ${record.hba1c}% | CT ${record.total_chol} | LDL ${record.ldl} | TG ${record.triglycerides} | TFG ${calc.gfr} (${calc.kdigoStage}).
