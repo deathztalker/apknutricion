@@ -119,22 +119,29 @@ function buildPrompt(
   calc: CalculationResult,
   alerts: ClinicalAlert[]
 ): string {
-  return `Eres una nutricionista clínica chilena experta. Analiza este caso y responde SOLO con JSON válido sin markdown.
+  return `Actúa como una Nutricionista Clínica de Élite. Realiza una DISECCIÓN NEURAL del siguiente caso biométrico.
+Evita redundancias genéricas y tecnicismos básicos. Tu objetivo es entregar valor clínico de alta densidad, estratégico y personalizado.
 
-PACIENTE: ${patient.full_name || 'Paciente'} | ${patient.sex === 'F' ? 'Femenino' : 'Masculino'} | Previsión: ${patient.insurance || 'FONASA'}
-IMC: ${calc.bmi || '—'} (${calc.bmiStatus || '—'}) | Peso: ${record.weight_kg || '—'} kg | Talla: ${record.height_cm || '—'} cm
-Cintura: ${record.waist_cm || '—'} cm | ICT: ${calc.ict || '—'} | Riesgo CV: ${calc.cvRisk || '—'}
-% Grasa: ${calc.fatPercent || '—'}% | Masa magra: ${calc.leanMassKg || '—'} kg
-TMB: ${calc.bmr || '—'} kcal | VCT: ${calc.tdee || '—'} kcal | Agua: ${calc.waterLiters || '—'} L/día
-PRO: ${calc.macros?.protG || '—'}g | CHO: ${calc.macros?.choG || '—'}g | LIP: ${calc.macros?.fatG || '—'}g
-PA: ${record.systolic_bp || '—'}/${record.diastolic_bp || '—'} mmHg (${calc.bpStatus || '—'})
-Glucosa: ${record.glucose_mg || '—'} | HbA1c: ${record.hba1c || '—'}% | CT: ${record.total_chol || '—'} | LDL: ${record.ldl || '—'} | TG: ${record.triglycerides || '—'}
-Hb: ${record.hemoglobin || '—'} | Albúmina: ${record.albumin || '—'} | TFG: ${calc.gfr || '—'} (${calc.kdigoStage || '—'})
-Patologías: ${record.pathologies?.join(', ') || '—'} | Dieta: ${record.diet_type || '—'}
-Alertas: ${alerts.map(a => `[${a.severity}] ${a.title}`).join(' | ')}
+DATOS DEL SUJETO:
+- Identidad: ${patient.full_name || 'Anónimo'} (${patient.sex === 'F' ? 'XX' : 'XY'}) | Edad: ${patient.age} años.
+- Biometría: IMC ${calc.bmi} (${calc.bmiStatus}) | Cintura ${record.waist_cm}cm | ICT ${calc.ict} | Riesgo CV: ${calc.cvRisk}.
+- Composición: %Grasa ${calc.fatPercent}% (Faulkner) | Masa Magra ${calc.leanMassKg}kg | Somatotipo: ${calc.somatotype ? \`Endo:\${calc.somatotype.endo} Meso:\${calc.somatotype.meso} Ecto:\${calc.somatotype.ecto}\` : 'No medido'}.
+- Metabolismo: TMB ${calc.bmr} kcal | VCT ${calc.tdee} kcal | Agua ${calc.waterLiters}L.
+- Objetivos Macro: PRO ${calc.macros?.protG}g (${calc.macros?.protGkg}g/kg) | CHO ${calc.macros?.choG}g | LIP ${calc.macros?.fatG}g.
+- Bioquímica/Labs: Glucosa ${record.glucose_mg} | HbA1c ${record.hba1c}% | CT ${record.total_chol} | LDL ${record.ldl} | TG ${record.triglycerides} | TFG ${calc.gfr} (${calc.kdigoStage}).
+- Clínicos: PA ${record.systolic_bp}/${record.diastolic_bp} (${calc.bpStatus}) | Patologías: ${record.pathologies?.join(', ') || 'Ninguna'}.
+- Alertas Activas: ${alerts.map(a => a.title).join(', ')}.
 
-JSON exacto requerido:
-{"nutritional_diagnosis":"string","summary":"string 3-4 oraciones","recommendations":["r1","r2","r3","r4","r5"],"goals":["meta SMART 1","meta 2","meta 3"],"meal_plan_hints":"string","follow_up":"string","education_topics":["t1","t2","t3"]}`;
+INSTRUCCIONES DE DISECCIÓN:
+1. nutritional_diagnosis: Redacta un diagnóstico técnico formal, integrando estado nutricional, riesgo cardiometabólico y perfil bioquímico.
+2. summary: Análisis fisiopatológico crítico. Explica la interconexión entre los datos (ej: relación cintura/resistencia insulínica o impacto de composición en VCT).
+3. recommendations: Entrega 5 protocolos de intervención nutricional ESPECÍFICOS. No digas "coma sano", di "priorizar ácidos grasos monoinsaturados y fibra soluble para optimizar perfil lipídico".
+4. goals: Define 3 metas SMART ultra-específicas para este paciente.
+5. meal_plan_hints: Sugerencias tácticas para la estructura de las comidas (ej: carga glucémica, tiempos de comida, suplementación específica).
+6. follow_up: Justificación técnica del próximo control.
+
+Responde ÚNICAMENTE con este JSON (sin markdown):
+{"nutritional_diagnosis":"string","summary":"string","recommendations":["r1","r2","r3","r4","r5"],"goals":["g1","g2","g3"],"meal_plan_hints":"string","follow_up":"string","education_topics":["t1","t2","t3"]}`;
 }
 
 export async function analyzeWithGemini(
