@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Stack, router, Redirect, useSegments } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import { supabase, authService } from '../../lib/supabase';
 import { ActivityIndicator, View, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { COLORS } from '../../constants/theme';
@@ -46,12 +46,12 @@ export default function AppLayout() {
     </TouchableOpacity>
   );
 
-  // La protección de rutas ahora es más sencilla:
-  // Si no hay sesión y NO es la calculadora, redirigimos al login.
-  // Pero lo hacemos solo después de que el RootLayout haya terminado de inicializar.
-  if (!session && !isCalculator) {
-    return <Redirect href="/login" />;
-  }
+  // Lógica de navegación estable
+  useEffect(() => {
+    if (!session && !isCalculator) {
+      router.replace('/login');
+    }
+  }, [session, isCalculator]);
 
   return (
     <Stack

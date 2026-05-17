@@ -35,8 +35,8 @@ export async function generateClinicalReport(
 
     chartSVG = `
       <div class="chart-container">
-        <div class="hud-title" style="color:${COLORS.bone};">EVOLUCIÓN PONDERAL HISTÓRICA</div>
-        <svg width="100%" height="120" viewBox="0 0 400 120" style="background:#000; border:1px solid #333;">
+        <div class="hud-title" style="color:${COLORS.bone}; margin-bottom:10px;">EVOLUCIÓN PONDERAL HISTÓRICA</div>
+        <svg width="100%" height="120" viewBox="0 0 400 120" style="background:#000; border:1px solid #333; display:block;">
           <line x1="0" y1="20" x2="400" y2="20" stroke="#222" stroke-width="1" />
           <line x1="0" y1="60" x2="400" y2="60" stroke="#222" stroke-width="1" />
           <line x1="0" y1="100" x2="400" y2="100" stroke="#222" stroke-width="1" />
@@ -67,15 +67,6 @@ export async function generateClinicalReport(
           /* Forzar colores en impresión */
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-          :root {
-            --crimson: ${COLORS.crimson};
-            --poison: ${COLORS.poison};
-            --purple: ${COLORS.purple};
-            --pink: ${COLORS.pink};
-            --orange: ${COLORS.orange};
-            --sky: ${COLORS.sky};
-          }
-
           body { 
             font-family: 'Space Mono', monospace; 
             padding: 0; margin: 0;
@@ -89,27 +80,27 @@ export async function generateClinicalReport(
             border: 3px solid #333; padding: 30px; 
             display: flex; justify-content: space-between; align-items: center;
             background-color: #0d0d12 !important; margin-bottom: 40px;
-            border-left: 15px solid var(--crimson);
+            border-left: 15px solid ${COLORS.crimson};
           }
 
           .title-area h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 36px; 
+            font-family: 'Orbitron', sans-serif; font-size: 32px; 
             color: #ffffff !important; margin: 0; text-transform: uppercase;
-            letter-spacing: 5px; line-height: 1;
+            letter-spacing: 4px; line-height: 1;
           }
-          .title-area span { color: var(--crimson) !important; }
+          .title-area span { color: ${COLORS.crimson} !important; }
           .transmission-id { font-size: 10px; color: #888; margin-top: 10px; letter-spacing: 3px; font-weight: 700; }
 
           .status-box {
             text-align: right; border-left: 2px solid #333; padding-left: 30px;
           }
-          .status-val { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--poison) !important; font-weight: 900; }
+          .status-val { font-family: 'Orbitron', sans-serif; font-size: 28px; color: ${COLORS.poison} !important; font-weight: 900; }
           .status-lab { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 2px; }
 
           /* Contenedores de Datos */
           .section { margin-bottom: 40px; }
           .tag { 
-            display: inline-block; background-color: var(--crimson) !important; color: #fff !important;
+            display: inline-block; background-color: ${COLORS.crimson} !important; color: #fff !important;
             font-size: 10px; font-weight: 900; padding: 8px 20px; 
             text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px;
           }
@@ -122,7 +113,7 @@ export async function generateClinicalReport(
 
           /* HUD de Visualización */
           .hud-container { display: flex; gap: 20px; margin-top: 20px; }
-          .hud-card { flex: 1; background-color: #0d0d12 !important; border: 2px solid #333; padding: 20px; border-top: 5px solid var(--sky); }
+          .hud-card { flex: 1; background-color: #0d0d12 !important; border: 2px solid #333; padding: 20px; border-top: 5px solid ${COLORS.sky}; }
           .hud-title { font-size: 11px; color: #aaa; font-weight: 900; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
 
           /* Barra de Macros Segmentada */
@@ -137,9 +128,9 @@ export async function generateClinicalReport(
             height: 100%; display: flex; align-items: center; justify-content: center; 
             font-size: 12px; font-weight: 900; color: #fff !important; text-shadow: 0 0 5px #000;
           }
-          .seg-p { background-color: var(--crimson) !important; }
-          .seg-c { background-color: var(--purple) !important; }
-          .seg-f { background-color: var(--pink) !important; }
+          .seg-p { background-color: ${COLORS.crimson} !important; }
+          .seg-c { background-color: ${COLORS.purple} !important; }
+          .seg-f { background-color: ${COLORS.pink} !important; }
 
           .legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
           .leg-card { padding: 15px; border-left: 6px solid #333; background-color: #0d0d12 !important; }
@@ -148,15 +139,15 @@ export async function generateClinicalReport(
           /* Caja de Análisis IA */
           .ai-box {
             background-color: #0d0d12 !important;
-            border: 3px solid #333; border-left: 10px solid var(--purple);
+            border: 3px solid #333; border-left: 10px solid ${COLORS.purple};
             padding: 40px; position: relative;
           }
-          .ai-title { font-family: 'Orbitron', sans-serif; font-size: 16px; color: var(--sky) !important; margin-bottom: 20px; letter-spacing: 3px; border-bottom: 1px solid #444; padding-bottom: 10px;}
+          .ai-title { font-family: 'Orbitron', sans-serif; font-size: 16px; color: ${COLORS.sky} !important; margin-bottom: 20px; letter-spacing: 3px; border-bottom: 1px solid #444; padding-bottom: 10px;}
           .ai-diag { font-size: 15px; line-height: 1.8; color: #ffffff !important; font-weight: 700; margin-bottom: 30px; text-align: justify; }
           .ai-text { font-size: 13px; line-height: 1.8; color: #bbbbbb !important; text-align: justify; margin-bottom: 30px; }
 
           .rec-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
-          .rec-item { background-color: #151520 !important; padding: 20px; border-left: 4px solid var(--poison); display: flex; align-items: center; gap: 20px;}
+          .rec-item { background-color: #151520 !important; padding: 20px; border-left: 4px solid ${COLORS.poison}; display: flex; align-items: center; gap: 20px;}
           .rec-val { font-size: 14px; color: #eeeeee !important; line-height: 1.6; font-weight: 600; }
 
           /* Footer y Firma */
@@ -209,12 +200,12 @@ export async function generateClinicalReport(
             <div class="grid">
               <div class="cell"><span class="label">Masa Total</span><span class="value">${record.weight_kg} <span class="unit">KG</span></span></div>
               <div class="cell"><span class="label">Estatura</span><span class="value">${record.height_cm} <span class="unit">CM</span></span></div>
-              <div class="cell"><span class="label">Índice IMC</span><span class="value" style="color:var(--crimson)">${calc.bmi}</span></div>
+              <div class="cell"><span class="label">Índice IMC</span><span class="value" style="color:${COLORS.crimson}">${calc.bmi}</span></div>
               <div class="cell"><span class="label">Peso Ideal</span><span class="value">${calc.idealWeight} <span class="unit">KG</span></span></div>
               <div class="cell"><span class="label">Adiposidad %</span><span class="value">${calc.fatPercent}%</span></div>
               <div class="cell"><span class="label">Tejido Graso</span><span class="value">${calc.fatMassKg} <span class="unit">KG</span></span></div>
               <div class="cell"><span class="label">Tejido Magro</span><span class="value">${calc.leanMassKg} <span class="unit">KG</span></span></div>
-              <div class="cell"><span class="label">Riesgo CV</span><span class="value" style="color:var(--crimson)">${calc.cvRisk}</span></div>
+              <div class="cell"><span class="label">Riesgo CV</span><span class="value" style="color:${COLORS.crimson}">${calc.cvRisk}</span></div>
             </div>
             
             ${chartSVG}
@@ -223,17 +214,17 @@ export async function generateClinicalReport(
               <div class="hud-card">
                 <div class="hud-title">Hemodinámica</div>
                 <div class="value">${record.systolic_bp || '--'}/${record.diastolic_bp || '--'} <span class="unit">mmHg</span></div>
-                <div class="label" style="color:var(--sky); margin-top:5px;">${calc.bpStatus || 'Sin Registro'}</div>
+                <div class="label" style="color:${COLORS.sky}; margin-top:5px;">${calc.bpStatus || 'Sin Registro'}</div>
               </div>
-              <div class="hud-card" style="border-top-color: var(--crimson)">
+              <div class="hud-card" style="border-top-color: ${COLORS.crimson}">
                 <div class="hud-title">Filtración Renal</div>
                 <div class="value">${calc.gfr || 'N/A'} <span class="unit">ml/min</span></div>
-                <div class="label" style="color:var(--crimson); margin-top:5px;">KDIGO: ${calc.kdigoStage || '--'}</div>
+                <div class="label" style="color:${COLORS.crimson}; margin-top:5px;">KDIGO: ${calc.kdigoStage || '--'}</div>
               </div>
-              <div class="hud-card" style="border-top-color: var(--purple)">
+              <div class="hud-card" style="border-top-color: ${COLORS.purple}">
                 <div class="hud-title">Capacidad Funcional</div>
                 <div class="value">${record.grip_strength_kg || '0'} <span class="unit">KG (GRIP)</span></div>
-                <div class="label" style="color:var(--purple); margin-top:5px;">Sarcopenia: ${calc.sarcopeniaRisk || 'Estable'}</div>
+                <div class="label" style="color:${COLORS.purple}; margin-top:5px;">Sarcopenia: ${calc.sarcopeniaRisk || 'Estable'}</div>
               </div>
             </div>
           </section>
@@ -241,7 +232,7 @@ export async function generateClinicalReport(
           <section class="section">
             <div class="tag">Asignación de Recursos Metabólicos</div>
             <div class="macro-display">
-              <div class="hud-title" style="margin-bottom:20px; color:var(--crimson)">VINCULACIÓN DE RECURSOS (DISTRIBUCIÓN ENERGÉTICA)</div>
+              <div class="hud-title" style="margin-bottom:20px; color:${COLORS.crimson}">VINCULACIÓN DE RECURSOS (DISTRIBUCIÓN ENERGÉTICA)</div>
               <div class="macro-bar">
                 <div class="segment seg-p" style="width: ${pPct}%">PRO</div>
                 <div class="segment seg-c" style="width: ${cPct}%">CHO</div>
@@ -249,17 +240,17 @@ export async function generateClinicalReport(
               </div>
               
               <div class="legend">
-                <div class="leg-card" style="border-left-color: var(--crimson)">
+                <div class="leg-card" style="border-left-color: ${COLORS.crimson}">
                   <div class="label">Proteínas</div>
                   <div class="leg-val">${calc.macros?.protG}g <span style="font-size:10px; color:#888;">(${record.macro_prot_pct}%)</span></div>
                   <div class="label" style="margin-top:5px;">${calc.macros?.protGkg} g/kg</div>
                 </div>
-                <div class="leg-card" style="border-left-color: var(--purple)">
+                <div class="leg-card" style="border-left-color: ${COLORS.purple}">
                   <div class="label">Carbohidratos</div>
                   <div class="leg-val">${calc.macros?.choG}g <span style="font-size:10px; color:#888;">(${record.macro_cho_pct}%)</span></div>
                   <div class="label" style="margin-top:5px;">${calc.macros?.choGkg} g/kg</div>
                 </div>
-                <div class="leg-card" style="border-left-color: var(--pink)">
+                <div class="leg-card" style="border-left-color: ${COLORS.pink}">
                   <div class="label">Lípidos</div>
                   <div class="leg-val">${calc.macros?.fatG}g <span style="font-size:10px; color:#888;">(${record.macro_fat_pct}%)</span></div>
                   <div class="label" style="margin-top:5px;">${calc.macros?.fatGkg} g/kg</div>
@@ -268,8 +259,8 @@ export async function generateClinicalReport(
 
               <div style="margin-top:30px; display:flex; justify-content:space-between; border-top:1px solid #333; padding-top:20px;">
                 <div><span class="label">GASTO BASAL</span><div class="value">${calc.bmr} <span class="unit">KCAL</span></div></div>
-                <div><span class="label">VCT TOTAL</span><div class="value" style="color:var(--poison)">${calc.tdee} <span class="unit">KCAL</span></div></div>
-                <div><span class="label">HIDRATACIÓN</span><div class="value" style="color:var(--sky)">${calc.waterLiters} <span class="unit">L/DÍA</span></div></div>
+                <div><span class="label">VCT TOTAL</span><div class="value" style="color:${COLORS.poison}">${calc.tdee} <span class="unit">KCAL</span></div></div>
+                <div><span class="label">HIDRATACIÓN</span><div class="value" style="color:${COLORS.sky}">${calc.waterLiters} <span class="unit">L/DÍA</span></div></div>
               </div>
             </div>
           </section>
@@ -280,14 +271,14 @@ export async function generateClinicalReport(
               <div class="ai-title">DIAGNÓSTICO TÉCNICO INTEGRAL</div>
               <div class="ai-diag">${ai.nutritional_diagnosis}</div>
               
-              <div class="ai-title" style="color:var(--purple)">ANÁLISIS FISIOPATOLÓGICO CRÍTICO</div>
+              <div class="ai-title" style="color:${COLORS.purple}">ANÁLISIS FISIOPATOLÓGICO CRÍTICO</div>
               <div class="ai-text">${ai.summary}</div>
               
-              <div class="ai-title" style="color:var(--poison)">PLAN DE INTERVENCIÓN TÁCTICO</div>
+              <div class="ai-title" style="color:${COLORS.poison}">PLAN DE INTERVENCIÓN TÁCTICO</div>
               <div class="rec-list">
                 ${ai.recommendations.map(r => `
                   <div class="rec-item">
-                    <span style="color:var(--poison); font-weight:900; font-size:20px;">></span>
+                    <span style="color:${COLORS.poison}; font-weight:900; font-size:20px;">></span>
                     <div class="rec-val">${r}</div>
                   </div>
                 `).join('')}
@@ -335,7 +326,7 @@ export async function generateClinicalReport(
         printWindow.focus();
         setTimeout(() => {
           printWindow.print();
-        }, 1000); 
+        }, 1500); // Aumentado el tiempo para renderizado de fuentes y estilos
       }
     } else {
       const result = await Print.printToFileAsync({ html });
