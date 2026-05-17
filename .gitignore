@@ -18,6 +18,7 @@ GoogleService-Info.plist
 
 # Archivos de build nativos (si generas prebuilds)
 android/
+!android/app/debug.keystore
 ios/
 
 # Logs
