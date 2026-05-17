@@ -19,33 +19,33 @@ export default function AppLayout() {
   };
 
   useEffect(() => {
-    // 1. Obtener sesión inicial de forma segura
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSession(session);
-        await loadProfile(session.user.id);
+        const { data: profile } = await authService.getProfile(session.user.id);
+        if (profile) setProfile(profile);
       }
       setIsInitializing(false);
     };
 
     initAuth();
 
-    // 2. Escuchar cambios de estado
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth Layout Event:', event);
-      setSession(session);
       if (session) {
-        await loadProfile(session.user.id);
+        setSession(session);
+        const { data: profile } = await authService.getProfile(session.user.id);
+        if (profile) setProfile(profile);
+        setIsInitializing(false);
       } else if (event === 'SIGNED_OUT') {
+        setSession(null);
         setProfile(null);
         router.replace('/login');
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   if (isInitializing) {

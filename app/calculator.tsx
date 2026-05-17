@@ -161,7 +161,20 @@ export default function Calculator() {
   const handleSave = async () => {
     if (!results) return;
     if (!patient.full_name || !patient.age) {
-      Alert.alert('IDENTIDAD REQUERIDA', 'Debe ingresar Nombre y Edad del paciente para guardar el registro.');
+      Alert.alert('IDENTIDAD REQUERIDA', 'Debe ingresar Nombre y Edad del paciente para procesar el expediente.');
+      return;
+    }
+
+    // FLUJO DE INVITADO: Solo permite generar PDF, no guarda en DB
+    if (!session?.user) {
+      Alert.alert(
+        'ACCESO INVITADO',
+        'Estás en modo GUEST. Los datos no se guardarán en el núcleo, pero puedes exportar el dossier técnico ahora.',
+        [
+          { text: 'GENERAR PDF', onPress: () => generateClinicalReport(patient as any, form as any, results, aiAnalysis || undefined, []) },
+          { text: 'ENTENDIDO', style: 'cancel' }
+        ]
+      );
       return;
     }
 
