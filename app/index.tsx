@@ -51,9 +51,9 @@ export default function Index() {
           <Animated.View style={{ transform: [{ scale: skullScale }] }}>
             <Ionicons name="skull" size={120} color={COLORS.crimson} style={styles.iconShadow} />
           </Animated.View>
-          <Text style={styles.title}>MISFITS{'\n'}TERMINAL</Text>
+          <Text style={styles.title}>NÚCLEO{'\n'}METABÓLICO</Text>
           <View style={styles.divider} />
-          <Text style={styles.subtitle}>NEURAL OVERRIDE PROTOCOL v6.6.6</Text>
+          <Text style={styles.subtitle}>PROTOCOLO DE DISECCIÓN NEURAL v9.0</Text>
         </Animated.View>
 
         <Animated.View style={[styles.buttonContainer, { opacity: fadeAnim }]}>
@@ -65,7 +65,7 @@ export default function Index() {
               colors={[COLORS.crimson, '#800000']}
               style={StyleSheet.absoluteFill}
             />
-            <Text style={styles.primaryButtonText}>INITIATE AUTHORIZATION</Text>
+            <Text style={styles.primaryButtonText}>INICIAR SINCRO CELULAR</Text>
             <Ionicons name="flash" size={24} color={COLORS.white} />
           </TouchableOpacity>
 
@@ -73,14 +73,14 @@ export default function Index() {
             style={[styles.button, styles.secondaryButton]}
             onPress={() => router.push('/calculator')}
           >
-            <Text style={styles.secondaryButtonText}>GUEST NEURAL ACCESS</Text>
+            <Text style={styles.secondaryButtonText}>ACCESO NUTRIGENÉTICO</Text>
             <Ionicons name="pulse" size={20} color={COLORS.muted} />
           </TouchableOpacity>
         </Animated.View>
 
         <View style={styles.footer}>
-          <Text style={styles.copyright}>© 2026 CAMILA OLIVARES ARCE</Text>
-          <Text style={styles.systemStatus}>ID: <Text style={{ color: COLORS.crimson }}>138</Text> | STATUS: <Text style={{ color: COLORS.poison }}>INFECTED</Text></Text>
+          <Text style={styles.copyright}>© 2026 NUTRI-HORROR | CAMILA OLIVARES ARCE</Text>
+          <Text style={styles.systemStatus}>ID: <Text style={{ color: COLORS.crimson }}>666</Text> | STATUS: <Text style={{ color: COLORS.poison }}>INFECTADO</Text></Text>
         </View>
       </View>
     </TerminalBackground>
