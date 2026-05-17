@@ -143,7 +143,7 @@ export default function PatientDossier() {
               sub="OVERRIDE BIOMÉTRICO"
               icon="scan" 
               color={COLORS.crimson}
-              onPress={() => router.push({ pathname: '/calculator', params: { patientId: id } })}
+              onPress={() => router.push({ pathname: '/(app)/calculator', params: { patientId: id } })}
             />
             <ActionButton 
               label="PLAN DIETÉTICO" 

@@ -7,11 +7,13 @@ import { LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import TerminalBackground from '../../../../components/TerminalBackground';
+import { useAuthStore } from '../../../../store/authStore';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function LabsTerminal() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { session } = useAuthStore();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,8 +42,11 @@ export default function LabsTerminal() {
   const handleAddLab = async () => {
     setSaving(true);
     try {
+      if (!session?.user) throw new Error('No autorizado');
+
       const { error } = await biochemicalService.create({
         patient_id: id,
+        user_id: session.user.id,
         exam_date: new Date().toISOString(),
         glucose_mg: parseFloat(newLab.glucose_mg) || null,
         hba1c: parseFloat(newLab.hba1c) || null,

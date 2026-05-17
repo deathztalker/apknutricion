@@ -29,7 +29,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: COLORS.bg1 },
-          headerTintColor: COLORS.neon,
+          headerTintColor: COLORS.crimson,
           headerTitleStyle: { 
             fontWeight: 'bold',
             fontFamily: 'Creepster_400Regular',
@@ -41,7 +41,6 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="calculator" options={{ title: 'CLINICAL OVERRIDE' }} />
       </Stack>
     </View>
   );

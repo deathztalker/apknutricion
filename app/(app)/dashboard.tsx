@@ -1,35 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Modal, Alert, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Alert } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../../constants/theme';
-import { patientService, recordService, supabase } from '../../lib/supabase';
+import { patientService, supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
-import { Patient, ClinicalRecord } from '../../types';
+import { Patient } from '../../types';
 import TerminalBackground from '../../components/TerminalBackground';
 import { LinearGradient } from 'expo-linear-gradient';
 import { dataPortability } from '../../lib/data';
+import { usePatientStore } from '../../store/patientStore';
+import { useAuthStore } from '../../store/authStore';
 
 export default function Dashboard() {
   const [activeView, setActiveView] = useState<'directorio' | 'historial'>('directorio');
-  const [patients, setPatients] = useState<Patient[]>([]);
   const [records, setRecords] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  
+  const { patients, setPatients } = usePatientStore();
+  const { session } = useAuthStore();
   
   const [stats, setStats] = useState({ total: 0, critical: 0, stable: 0 });
-  const [newPatient, setNewPatient] = useState<Partial<Patient>>({
-    full_name: '', age: 0, sex: 'M', insurance: 'FONASA',
-  });
 
   const fetchData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!session?.user) return;
 
       if (activeView === 'directorio') {
-        const { data, error } = await patientService.getAll(user.id, search);
+        const { data, error } = await patientService.getAll(session.user.id, search);
         if (error) throw error;
         setPatients(data || []);
         
@@ -51,7 +50,7 @@ export default function Dashboard() {
               sex
             )
           `)
-          .eq('user_id', user.id)
+          .eq('user_id', session.user.id)
           .order('record_date', { ascending: false });
 
         if (search) {
@@ -70,10 +69,12 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => { 
-    setLoading(true);
-    fetchData(); 
-  }, [activeView]);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchData();
+    }, [activeView])
+  );
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -87,30 +88,11 @@ export default function Dashboard() {
     fetchData();
   };
 
-  const handleAddPatient = async () => {
-    if (!newPatient.full_name || !newPatient.age) {
-      Alert.alert('IDENTIDAD INVÁLIDA', 'Debe ingresar nombre y edad del sujeto.');
-      return;
-    }
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Sesión caducada');
-      const { error } = await patientService.create({ ...newPatient, user_id: user.id });
-      if (error) throw error;
-      setModalVisible(false);
-      setNewPatient({ full_name: '', age: 0, sex: 'M', insurance: 'FONASA' });
-      fetchData();
-      Alert.alert('SISTEMA', 'SUJETO INICIALIZADO');
-    } catch (error: any) {
-      Alert.alert('FALLO DE GÉNESIS', error.message);
-    }
-  };
-
   return (
     <TerminalBackground>
       <View style={styles.container}>
         
-        {/* COMMAND CENTER DASHBOARD (Mirroring index.html order) */}
+        {/* COMMAND CENTER DASHBOARD */}
         <View style={styles.commandHeader}>
           <LinearGradient colors={['rgba(255, 0, 60, 0.25)', 'transparent']} style={StyleSheet.absoluteFill} />
           <View style={styles.topRow}>
@@ -178,7 +160,7 @@ export default function Dashboard() {
         ) : (
           <FlatList
             data={activeView === 'directorio' ? patients : records}
-            renderItem={({ item, index }) => 
+            renderItem={({ item }) => 
               activeView === 'directorio' 
                 ? <DirectoryItem item={item} />
                 : <HistoryItem item={item} />
@@ -197,17 +179,9 @@ export default function Dashboard() {
           />
         )}
 
-        <TouchableOpacity style={[styles.fab, SHADOWS.crimson]} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={[styles.fab, SHADOWS.crimson]} onPress={() => router.push('/(app)/patient/new')}>
           <Ionicons name="add" size={36} color={COLORS.white} />
         </TouchableOpacity>
-
-        <CreateModal 
-          visible={modalVisible} 
-          onClose={() => setModalVisible(false)} 
-          newPatient={newPatient} 
-          setNewPatient={setNewPatient} 
-          onSave={handleAddPatient} 
-        />
       </View>
     </TerminalBackground>
   );
@@ -265,68 +239,6 @@ function HistoryItem({ item }: any) {
   );
 }
 
-function CreateModal({ visible, onClose, newPatient, setNewPatient, onSave }: any) {
-  return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>INICIALIZAR REVENANT</Text>
-          <View style={styles.modalDivider} />
-          
-          <View style={styles.modalInputGroup}>
-            <Text style={styles.modalLabel}>ALIAS DEL SUJETO</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Nombre Completo"
-              placeholderTextColor="#444"
-              value={newPatient.full_name}
-              onChangeText={(v) => setNewPatient({ ...newPatient, full_name: v })}
-            />
-          </View>
-
-          <View style={styles.modalInputGroup}>
-            <Text style={styles.modalLabel}>EDAD (CICLOS GÉNESIS)</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="0"
-              placeholderTextColor="#444"
-              keyboardType="numeric"
-              value={String(newPatient.age || '')}
-              onChangeText={(v) => setNewPatient({ ...newPatient, age: parseInt(v) || 0 })}
-            />
-          </View>
-
-          <View style={styles.modalRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.modalLabel}>GENOTIPO</Text>
-              <View style={styles.sexSelector}>
-                {['M', 'F'].map(s => (
-                  <TouchableOpacity 
-                    key={s}
-                    style={[styles.sexBtn, newPatient.sex === s && styles.sexActive]} 
-                    onPress={() => setNewPatient({ ...newPatient, sex: s as any })}
-                  >
-                    <Text style={[styles.sexText, newPatient.sex === s && { color: '#fff' }]}>{s === 'M' ? 'XY' : 'XX'}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.modalAbort} onPress={onClose}>
-              <Text style={styles.abortText}>ABORTAR</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalInject} onPress={onSave}>
-              <Text style={styles.injectText}>INYECTAR</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   commandHeader: { padding: 25, paddingTop: Platform.OS === 'ios' ? 60 : 30, backgroundColor: '#000', borderBottomWidth: 1, borderBottomColor: '#222' },
@@ -367,22 +279,4 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: 120, gap: 20 },
   emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 32, letterSpacing: 3 },
   fab: { position: 'absolute', bottom: 30, right: 30, width: 80, height: 80, backgroundColor: COLORS.crimson, justifyContent: 'center', alignItems: 'center', borderRadius: 0 },
-  
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.99)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalContent: { width: '100%', maxWidth: 480, backgroundColor: '#0a0a0d', borderWidth: 2, borderColor: COLORS.crimson, padding: 45, gap: 30, ...SHADOWS.crimson },
-  modalTitle: { fontSize: 42, fontFamily: FONTS.horror, color: COLORS.white, textAlign: 'center' },
-  modalDivider: { height: 3, backgroundColor: COLORS.crimson, width: '50%', alignSelf: 'center', marginBottom: 15 },
-  modalInputGroup: { gap: 15 },
-  modalLabel: { fontSize: 12, fontWeight: '900', color: COLORS.white, letterSpacing: 2.5, textTransform: 'uppercase' },
-  modalInput: { backgroundColor: '#000', borderWidth: 1, borderColor: '#444', padding: 22, color: COLORS.white, fontSize: 18, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
-  modalRow: { flexDirection: 'row', gap: 20 },
-  sexSelector: { flexDirection: 'row', gap: 15 },
-  sexBtn: { flex: 1, height: 60, borderWidth: 1, borderColor: '#333', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
-  sexActive: { borderColor: COLORS.crimson, backgroundColor: 'rgba(255, 0, 60, 0.2)' },
-  sexText: { color: COLORS.dim, fontSize: 18, fontWeight: 'bold' },
-  modalActions: { flexDirection: 'row', gap: 20, marginTop: 25 },
-  modalAbort: { flex: 1, height: 70, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#666' },
-  abortText: { color: COLORS.dim, fontWeight: '900', fontSize: 16, letterSpacing: 3 },
-  modalInject: { flex: 1, height: 70, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.crimson, ...SHADOWS.crimson },
-  injectText: { color: COLORS.white, fontFamily: FONTS.horror, fontSize: 28 },
 });
