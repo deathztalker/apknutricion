@@ -7,38 +7,57 @@ import TerminalBackground from '../components/TerminalBackground';
 import { useAuthStore } from '../store/authStore';
 
 export default function GoogleAuthCallback() {
-  const { setSession } = useAuthStore();
+  const { setSession, setProfile } = useAuthStore();
   const hasNavigated = useRef(false);
 
+  const syncSoul = async (session: any) => {
+    if (hasNavigated.current) return;
+    console.log('Syncing Soul with Nucleus...');
+    hasNavigated.current = true;
+    
+    // Sincronizar estado global
+    setSession(session);
+    try {
+      const { data: profile } = await authService.getProfile(session.user.id);
+      if (profile) setProfile(profile);
+    } catch (e) {
+      console.warn('Profile sync failed, but proceeding...');
+    }
+
+    // Navegar directamente al terminal
+    router.replace('/(app)/calculator');
+  };
+
   useEffect(() => {
-    // 1. Escuchamos cambios de auth para capturar el token que viene en el hash de la URL
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth Callback Event:', event);
-      
-      if (session && !hasNavigated.current) {
-        hasNavigated.current = true;
-        setSession(session);
-        // NAVEGACIÓN EXPLÍCITA: Forzamos la entrada al núcleo
-        router.replace('/(app)/calculator');
+    // 1. Verificación inmediata (Por si Supabase ya procesó el hash)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        console.log('Session detected immediately on mount.');
+        syncSoul(session);
       }
     });
 
-    // 2. Verificación de seguridad por si la sesión ya estaba lista
+    // 2. Escuchar cambios de auth (Captura el evento SIGNED_IN tras procesar el hash)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth Callback Event:', event);
+      if ((event === 'SIGNED_IN' || session) && !hasNavigated.current) {
+        syncSoul(session);
+      }
+    });
+
+    // 3. Verificación de seguridad (Fallback por si hay lentitud extrema)
     const timer = setTimeout(async () => {
       if (!hasNavigated.current) {
-        console.log('Auth Callback Timeout - Checking Session manually...');
+        console.log('Auth Timeout: Final manual check...');
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          console.log('Session Found via getSession - Syncing...');
-          hasNavigated.current = true;
-          setSession(session);
-          router.replace('/calculator');
+          syncSoul(session);
         } else {
-          console.log('No Session Found after 10s - Returning to login');
+          console.log('No soul detected in the fragment. Returning to login.');
           router.replace('/login');
         }
       }
-    }, 10000); // Aumentado a 10s para dar margen en conexiones lentas
+    }, 8000);
 
     return () => {
       subscription.unsubscribe();
