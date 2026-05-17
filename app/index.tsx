@@ -71,7 +71,7 @@ export default function Index() {
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={() => router.push('/calculator')}
+            onPress={() => router.push('/(app)/calculator')}
           >
             <Text style={styles.secondaryButtonText}>ACCESO NUTRIGENÉTICO</Text>
             <Ionicons name="pulse" size={20} color={COLORS.muted} />

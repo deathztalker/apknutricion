@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, FlatList, PanResponder } from 'react-native';
-import { COLORS, SHADOWS, FONTS } from '../constants/theme';
-import { calculateAll } from '../lib/calculations';
-import { analyzeWithGemini } from '../lib/ai';
-import { RecordFormData, CalculationResult, AIAnalysis, Patient, ClinicalRecord } from '../types';
+import { COLORS, SHADOWS, FONTS } from '../../constants/theme';
+import { calculateAll } from '../../lib/calculations';
+import { analyzeWithGemini } from '../../lib/ai';
+import { RecordFormData, CalculationResult, AIAnalysis, Patient, ClinicalRecord } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
-import { generateClinicalReport } from '../lib/reports';
+import { generateClinicalReport } from '../../lib/reports';
 import { useLocalSearchParams, router } from 'expo-router';
-import { patientService, recordService, supabase } from '../lib/supabase';
-import Somatocarta from '../components/Somatocarta';
-import TerminalBackground from '../components/TerminalBackground';
-import { dataPortability } from '../lib/data';
-import { syncService } from '../lib/sync';
-import { useAuthStore } from '../store/authStore';
+import { patientService, recordService, supabase } from '../../lib/supabase';
+import Somatocarta from '../../components/Somatocarta';
+import TerminalBackground from '../../components/TerminalBackground';
+import { dataPortability } from '../../lib/data';
+import { syncService } from '../../lib/sync';
+import { useAuthStore } from '../../store/authStore';
 
 const TABS = ['scanner', 'anamnesis', 'macros', 'sports', 'clinical', 'ai', 'history', 'tables'] as const;
 

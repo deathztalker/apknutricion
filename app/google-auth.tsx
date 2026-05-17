@@ -17,10 +17,9 @@ export default function GoogleAuthCallback() {
       
       if (session && !hasNavigated.current) {
         hasNavigated.current = true;
-        // ACTUALIZACIÓN CRUCIAL: Actualizamos el store global.
-        // El AppLayout (padre) detectará este cambio de estado y 
-        // mostrará el contenido del (app) automáticamente.
         setSession(session);
+        // NAVEGACIÓN EXPLÍCITA: Forzamos la entrada al núcleo
+        router.replace('/(app)/calculator');
       }
     });
 
@@ -31,8 +30,8 @@ export default function GoogleAuthCallback() {
         if (session) {
           hasNavigated.current = true;
           setSession(session);
+          router.replace('/(app)/calculator');
         } else {
-          // Solo si fallamos rotundamente después de 5s volvemos al login
           router.replace('/login');
         }
       }
