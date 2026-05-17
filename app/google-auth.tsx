@@ -11,63 +11,70 @@ export default function GoogleAuthCallback() {
   const hasNavigated = useRef(false);
 
   const syncSoul = async (session: any) => {
-    if (hasNavigated.current) return;
-    console.log('Syncing Soul with Nucleus...');
+    if (hasNavigated.current || !session) return;
+    console.log('Soul Synchronization Initiated...');
     hasNavigated.current = true;
     
-    // Sincronizar estado global
     setSession(session);
     try {
       const { data: profile } = await authService.getProfile(session.user.id);
       if (profile) setProfile(profile);
     } catch (e) {
-      console.warn('Profile sync failed, but proceeding...');
+      console.warn('Profile sync lag, proceeding with session...');
     }
 
-    // Navegar directamente al terminal
+    // Teletransporte al terminal clínico
     router.replace('/(app)/calculator');
   };
 
   useEffect(() => {
-    // 1. Verificación inmediata
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const parseUrlAndSync = async () => {
+      // 1. INTENTO DE EXTRACCIÓN MANUAL (HACK PARA GITHUB PAGES)
+      // Supabase a veces falla en subdirectorios, así que extraemos el alma manualmente
+      if (Platform.OS === 'web' && window.location.hash) {
+        console.log('Soul Fragment Detected in URL. Extracting...');
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          console.log('Soul Fragment Captured. Establishing Link...');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (data.session) {
+            return syncSoul(data.session);
+          }
+        }
+      }
+
+      // 2. Verificación estándar por si ya se procesó
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log('Session detected immediately on mount.');
+        console.log('Session already active in nucleus.');
         syncSoul(session);
-      } else {
-        // HACK: Si estamos en web y no hay sesión, intentamos forzar la detección del hash
-        if (Platform.OS === 'web' && window.location.hash) {
-          console.log('Fragment detected, manual re-check...');
-          setTimeout(() => {
-            supabase.auth.getSession().then(({ data: { session: s } }) => {
-              if (s) syncSoul(s);
-            });
-          }, 1000);
-        }
       }
-    });
+    };
 
-    // 2. Escuchar cambios de auth (Captura el evento SIGNED_IN tras procesar el hash)
+    parseUrlAndSync();
+
+    // 3. Escuchador de respaldo
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth Callback Event:', event);
-      if ((event === 'SIGNED_IN' || session) && !hasNavigated.current) {
+      console.log('Core Auth Event:', event);
+      if (session && !hasNavigated.current) {
         syncSoul(session);
       }
     });
 
-    // 3. Verificación de seguridad (Fallback por si hay lentitud extrema)
-    const timer = setTimeout(async () => {
+    // 4. Temporizador de expiración por fallo crítico
+    const timer = setTimeout(() => {
       if (!hasNavigated.current) {
-        console.log('Auth Timeout: Final manual check...');
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          syncSoul(session);
-        } else {
-          console.log('No soul detected in the fragment. Returning to login.');
-          router.replace('/login');
-        }
+        console.error('CRITICAL: Soul Link Timeout. Returning to entry point.');
+        router.replace('/login');
       }
-    }, 8000);
+    }, 12000);
 
     return () => {
       subscription.unsubscribe();
