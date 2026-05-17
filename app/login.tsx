@@ -126,8 +126,8 @@ export default function Login() {
               <Animated.View style={{ transform: [{ scale: skullScale }], opacity: skullOpacity }}>
                 <Ionicons name="skull" size={100} color={COLORS.crimson} style={styles.skullShadow} />
               </Animated.View>
-              <Text style={styles.title}>WE ARE 138</Text>
-              <Text style={styles.subtitle}>DIAGNOSTIC AUTHORIZATION REQUIRED</Text>
+              <Text style={styles.title}>NÚCLEO NUTRICIONAL</Text>
+              <Text style={styles.subtitle}>AUTORIZACIÓN DE ACCESO CELULAR</Text>
               <View style={styles.line} />
             </View>
 
@@ -148,23 +148,23 @@ export default function Login() {
                 {googleLoading ? <ActivityIndicator color="#fff" /> : (
                   <>
                     <Ionicons name="logo-google" size={20} color="#fff" />
-                    <Text style={styles.googleButtonText}>GHOST LOGIN WITH GOOGLE</Text>
+                    <Text style={styles.googleButtonText}>VINCULACIÓN NEURAL GOOGLE</Text>
                   </>
                 )}
               </TouchableOpacity>
 
               <View style={styles.orRow}>
                 <View style={styles.orLine} />
-                <Text style={styles.orText}>OR INTERNAL PROTOCOL</Text>
+                <Text style={styles.orText}>O PROTOCOLO BIOQUÍMICO</Text>
                 <View style={styles.orLine} />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>IDENTITY (EMAIL)</Text>
+                <Text style={styles.label}>ADN DIGITAL (EMAIL)</Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.input}
-                    placeholder="Subject ID"
+                    placeholder="ID de Espécimen"
                     placeholderTextColor={COLORS.muted}
                     value={email}
                     onChangeText={setEmail}
@@ -175,7 +175,7 @@ export default function Login() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>SECRET CODE</Text>
+                <Text style={styles.label}>CÓDIGO GENÉTICO (PASSWORD)</Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.input}
@@ -198,7 +198,7 @@ export default function Login() {
                   style={StyleSheet.absoluteFill}
                 />
                 {loading ? <ActivityIndicator color={COLORS.white} /> : (
-                  <Text style={styles.authButtonText}>{isSignUp ? 'REGISTER SUBJECT' : 'ESTABLISH LINK'}</Text>
+                  <Text style={styles.authButtonText}>{isSignUp ? 'SINTETIZAR SUJETO' : 'SINCronizar METABOLISMO'}</Text>
                 )}
               </TouchableOpacity>
 
@@ -207,7 +207,7 @@ export default function Login() {
                 onPress={() => setIsSignUp(!isSignUp)}
               >
                 <Text style={styles.switchButtonText}>
-                  {isSignUp ? 'EXISTING IDENTITY? SIGN IN' : 'NEW REVENANT? INITIALIZE'}
+                  {isSignUp ? '¿ALMA EXISTENTE? RECONECTAR' : '¿NUEVO ESPECTRO? INICIALIZAR'}
                 </Text>
               </TouchableOpacity>
             </View>
