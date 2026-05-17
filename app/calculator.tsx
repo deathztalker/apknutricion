@@ -201,9 +201,26 @@ export default function Calculator() {
         patient_id: targetPatientId, 
         user_id: session.user.id, 
         record_date: new Date().toISOString(),
+        
+        // Antropometría Base
         weight_kg: val(form.weight_kg), 
         height_cm: val(form.height_cm),
         waist_cm: val(form.waist_cm), 
+        hip_cm: val(form.hip_cm),
+
+        // Pliegues
+        fold_triceps: val(form.fold_triceps),
+        fold_subscapular: val(form.fold_subscapular),
+        fold_supraspinal: val(form.fold_supraspinal),
+        fold_abdominal: val(form.fold_abdominal),
+
+        // Perímetros y Diámetros
+        diameter_humerus: val(form.diameter_humerus),
+        diameter_femur: val(form.diameter_femur),
+        perimeter_arm: val(form.perimeter_arm),
+        perimeter_calf: val(form.perimeter_calf),
+
+        // Calculados
         bmi: results.bmi, 
         bmi_status: results.bmiStatus,
         ideal_weight: results.idealWeight, 
@@ -212,28 +229,59 @@ export default function Calculator() {
         lean_mass_kg: results.leanMassKg, 
         ict: results.ict, 
         cv_risk: results.cvRisk,
+        
+        // Signos Vitales
         systolic_bp: parseInt(form.systolic_bp || '0') || null, 
         diastolic_bp: parseInt(form.diastolic_bp || '0') || null,
         bp_status: results.bpStatus, 
+        heart_rate: val(form.heart_rate),
+        temperature: val(form.temperature),
+        oxygen_sat: val(form.oxygen_sat),
+
+        // Metabólico
         activity_factor: val(form.activity_factor),
         bmr_kcal: Math.round(results.bmr || 0) || null, 
         tdee_kcal: Math.round(results.tdee || 0) || null, 
         water_liters: val(results.waterLiters),
+        
+        // Laboratorio
+        creatinine: val(form.creatinine),
+        glucose_mg: val(form.glucose_mg),
+        hba1c: val(form.hba1c),
+        total_chol: val(form.total_chol),
+        hdl: val(form.hdl),
+        ldl: val(form.ldl),
+        triglycerides: val(form.triglycerides),
+        hemoglobin: val(form.hemoglobin),
+        ferritin: val(form.ferritin),
+        albumin: val(form.albumin),
+
+        // Macros
         macro_prot_pct: parseInt(form.macro_prot_pct || '0') || null, 
         macro_cho_pct: parseInt(form.macro_cho_pct || '0') || null,
         macro_fat_pct: parseInt(form.macro_fat_pct || '0') || null, 
+        
+        // Anamnesis
         pathologies: form.pathologies || [],
         allergies: form.allergies || [], 
         diet_type: form.diet_type || 'Omnívora', 
         liquid_intake: form.liquid_intake || 'Normal',
         digestion_status: form.digestion_status || 'Normal', 
         observations: form.observations || '',
+        
+        // IA
         ai_analysis: aiAnalysis?.summary || null, 
+        
+        // Sarcopenia y Otros (V3)
         grip_strength_kg: val(form.grip_strength_kg),
         calf_circumference_cm: val(form.calf_circumference_cm),
+        knee_height_cm: val(form.knee_height_cm),
+        usual_weight_kg: val(form.usual_weight_kg),
+        weight_loss_weeks: val(form.weight_loss_weeks),
         mna_score: form.mna_score || null, 
         vgs_status: form.vgs_status || null, 
         somatotype: results.somatotype || null,
+        professional_indications: form.professional_indications || '',
       } as any);
       
       if (error) throw error;
