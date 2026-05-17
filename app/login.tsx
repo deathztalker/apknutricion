@@ -106,20 +106,42 @@ export default function Login() {
 
   async function handleAuth() {
     const cleanEmail = email.trim();
+    console.log('Initiating Auth Protocol...', { email: cleanEmail, isSignUp });
+
     if (!cleanEmail || !password) {
       Alert.alert('ERROR DE SISTEMA', 'ADN DIGITAL Y CÓDIGO GENÉTICO REQUERIDOS');
       return;
     }
+
+    if (!cleanEmail.includes('@')) {
+      Alert.alert('ADN INVÁLIDO', 'El ADN Digital debe tener un formato de email válido (ej@adn.com)');
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email: cleanEmail, password });
+        console.log('Synthesizing New Subject...');
+        const { data, error } = await supabase.auth.signUp({ 
+          email: cleanEmail, 
+          password,
+          options: {
+            emailRedirectTo: Linking.createURL('google-auth'),
+          }
+        });
+        
         if (error) throw error;
-        Alert.alert('VÍNCULO INICIADO', 'Verifica tu identidad en el plano espectral (Revisa tu Email).');
+        
+        console.log('Synthesis Initiated:', data);
+        Alert.alert(
+          'VÍNCULO INICIADO', 
+          'Se ha enviado un pulso de verificación a tu ADN Digital. Revisa tu bandeja de entrada para completar la síntesis.',
+          [{ text: 'ENTENDIDO', onPress: () => setIsSignUp(false) }]
+        );
       } else {
+        console.log('Establishing Neural Link...');
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (error) {
-          // Manejo específico de errores de Supabase
           if (error.message.includes('Invalid login credentials')) {
             throw new Error('Código genético o ADN digital incorrecto.');
           }
@@ -128,9 +150,10 @@ export default function Login() {
           }
           throw error;
         }
-        // El RootLayout detectará el cambio de sesión y redirigirá automáticamente.
+        console.log('Neural Link Established:', data.session?.user?.id);
       }
     } catch (error: any) {
+      console.error('Auth Protocol Failure:', error);
       Alert.alert('ACCESO DENEGADO', `ERROR DE NÚCLEO: ${error.message}`);
     } finally {
       setLoading(false);
