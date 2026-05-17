@@ -1,32 +1,56 @@
+// types/index.ts — NutriCESFAM Integrado
+
+// ── Auth / Profile ─────────────────────────────────────────
+export interface Profile {
+  id: string;
+  full_name: string;
+  email: string;
+  role: 'intern' | 'nutricionista' | 'supervisor';
+  institution?: string;
+  avatar_url?: string;
+  created_at: string;
+}
+
+// ── Patient ────────────────────────────────────────────────
 export interface Patient {
   id?: string;
+  user_id?: string;
   full_name: string;
-  age: number;
-  birth_date: string;
-  sex: 'M' | 'F' | '';
-  insurance: string;
   rut?: string;
+  birth_date?: string;
+  age: number;
+  sex: 'M' | 'F' | '';
   phone?: string;
   address?: string;
   commune?: string;
+  insurance: string;
   notes?: string;
   is_active?: boolean;
-  activity_level_id?: string;
-  target_weight?: number;
   avatar_storage_path?: string;
+  created_at?: string;
+  updated_at?: string;
+  
+  // computed/extra
+  visit_count?: number;
+  last_bmi?: number;
+  last_bmi_status?: string;
+  last_visit?: string;
 }
 
+// ── Clinical Record ────────────────────────────────────────
 export interface ClinicalRecord {
   id?: string;
   patient_id?: string;
   user_id?: string;
   record_date?: string;
+
+  // Antropometría
   weight_kg?: number;
   height_cm?: number;
   waist_cm?: number;
   hip_cm?: number;
-  
-  // Pliegues
+
+  // Pliegues Faulkner
   fold_triceps?: number;
   fold_subscapular?: number;
   fold_supraspinal?: number;
@@ -56,12 +80,15 @@ export interface ClinicalRecord {
   tdee_kcal?: number;
   water_liters?: number;
 
-  // Macros (%)
+  // Macros
   macro_prot_pct?: number;
   macro_cho_pct?: number;
   macro_fat_pct?: number;
 
-  // Laboratorio (legacy/denormalized)
+  // Laboratorio
+  creatinine?: number;
+  gfr?: number;
+  kdigo_stage?: string;
   glucose_mg?: number;
   hba1c?: number;
   total_chol?: number;
@@ -71,9 +98,6 @@ export interface ClinicalRecord {
   hemoglobin?: number;
   ferritin?: number;
   albumin?: number;
-  creatinine?: number;
-  gfr?: number;
-  kdigo_stage?: string;
 
   // Anamnesis
   pathologies?: string[];
@@ -83,17 +107,17 @@ export interface ClinicalRecord {
   digestion_status?: string;
   supplements?: string;
   observations?: string;
-  
+
   // IA
   ai_analysis?: string;
   ai_model?: string;
   ai_generated_at?: string;
-  
-  // V2/V3 Additions
-  vgs_status?: 'A' | 'B' | 'C'; // Valoración Global Subjetiva
-  mna_score?: number;           // Mini Nutritional Assessment
-  muscle_mass_kg?: number;      // For Cunningham
-  somatotype?: { endo: number; meso: number; ecto: number };
+
+  // V2/V3 / Sports Additions
+  vgs_status?: 'A' | 'B' | 'C';
+  mna_score?: number;
+  muscle_mass_kg?: number;
+  somatotype?: { endo: number; meso: number; ecto: number; x?: number; y?: number };
   
   grip_strength_kg?: number;
   calf_circumference_cm?: number;
@@ -103,63 +127,21 @@ export interface ClinicalRecord {
   med_dose_mg_kg?: number;
   med_conc_mg_ml?: number;
   professional_indications?: string;
+  
+  created_at?: string;
 }
 
-export interface RecordFormData extends Omit<Partial<ClinicalRecord>, 
-  | 'weight_kg' | 'height_cm' | 'waist_cm' | 'systolic_bp' | 'diastolic_bp' 
-  | 'macro_prot_pct' | 'macro_cho_pct' | 'macro_fat_pct' | 'creatinine'
-  | 'fold_triceps' | 'fold_subscapular' | 'fold_supraspinal' | 'fold_abdominal'
-  | 'activity_factor' | 'grip_strength_kg' | 'calf_circumference_cm'
-  | 'knee_height_cm' | 'usual_weight_kg' | 'weight_loss_weeks'
-> {
-  activity_factor?: string;
-  fold_triceps?: string;
-  fold_subscapular?: string;
-  fold_supraspinal?: string;
-  fold_abdominal?: string;
-  knee_height_cm?: string;
-  usual_weight_kg?: string;
-  weight_loss_weeks?: string;
-  med_dose?: string;
-  med_conc?: string;
-  grip_strength_kg?: string;
-  calf_circumference_cm?: string;
-  // Overrides for parsing
-  weight_kg?: string;
-  height_cm?: string;
-  waist_cm?: string;
-  systolic_bp?: string;
-  diastolic_bp?: string;
-  macro_prot_pct?: string;
-  macro_cho_pct?: string;
-  macro_fat_pct?: string;
-  creatinine?: string;
-
-  // Diameter for somatotype (not in ClinicalRecord directly usually)
-  diameter_humerus?: string;
-  diameter_femur?: string;
-  perimeter_arm?: string;
-  perimeter_calf?: string;
-  professional_indications?: string;
-}
-
-export interface MacroResult {
-  protG: number;
-  choG: number;
-  fatG: number;
-  protGkg: number;
-  choGkg: number;
-  fatGkg: number;
-}
-
+// ── Meal Plan ──────────────────────────────────────────────
 export interface MealPlan {
   id?: string;
   patient_id: string;
-  kcal_target: number;
-  protein_target: number;
-  cho_target: number;
-  fat_target: number;
-  portions: {
+  record_id?: string;
+  title?: string;
+  kcal_target?: number;
+  protein_target?: number;
+  cho_target?: number;
+  fat_target?: number;
+  portions?: {
     dairy_low_fat: number;
     dairy_high_fat: number;
     meat_low_fat: number;
@@ -175,10 +157,34 @@ export interface MealPlan {
     fats_cho: number;
     sugar: number;
   };
+  plan_json?: MealPlanDay[];
   notes?: string;
+  start_date?: string;
+  end_date?: string;
   created_at?: string;
 }
 
+export interface MealPlanDay {
+  day: string;
+  meals: Meal[];
+}
+
+export interface Meal {
+  name: string;
+  time?: string;
+  foods: Food[];
+}
+
+export interface Food {
+  name: string;
+  quantity_g: number;
+  kcal: number;
+  prot_g?: number;
+  cho_g?: number;
+  fat_g?: number;
+}
+
+// ── Clinical Calculations ──────────────────────────────────
 export interface CalculationResult {
   bmi: number | null;
   bmiStatus: string | null;
@@ -207,13 +213,16 @@ export interface CalculationResult {
   sarcopeniaRisk?: string | null;
 }
 
-export interface ClinicalAlert {
-  severity: 'info' | 'warning' | 'danger';
-  icon: string;
-  title: string;
-  description: string;
+export interface MacroResult {
+  protG: number;
+  choG: number;
+  fatG: number;
+  protGkg: number;
+  choGkg: number;
+  fatGkg: number;
 }
 
+// ── AI Analysis ────────────────────────────────────────────
 export interface AIAnalysis {
   summary: string;
   alerts: ClinicalAlert[];
@@ -225,4 +234,85 @@ export interface AIAnalysis {
   goals: string[];
   follow_up: string;
   raw_text: string;
+}
+
+export interface ClinicalAlert {
+  severity: 'info' | 'warning' | 'danger';
+  title: string;
+  description: string;
+  icon: string;
+}
+
+// ── Form State ─────────────────────────────────────────────
+export interface RecordFormData {
+  weight_kg: string;
+  height_cm: string;
+  waist_cm: string;
+  hip_cm: string;
+
+  fold_triceps: string;
+  fold_subscapular: string;
+  fold_supraspinal: string;
+  fold_abdominal: string;
+
+  systolic_bp: string;
+  diastolic_bp: string;
+  heart_rate: string;
+  temperature: string;
+  oxygen_sat: string;
+
+  activity_factor: string;
+  macro_prot_pct: string;
+  macro_cho_pct: string;
+  macro_fat_pct: string;
+
+  creatinine: string;
+  glucose_mg: string;
+  hba1c: string;
+  total_chol: string;
+  hdl: string;
+  ldl: string;
+  triglycerides: string;
+  hemoglobin: string;
+  albumin: string;
+  ferritin: string;
+
+  pathologies: string[];
+  allergies: string[];
+  diet_type: string;
+  liquid_intake: string;
+  digestion_status: string;
+  supplements: string;
+  observations: string;
+
+  knee_height_cm: string;
+  usual_weight_kg: string;
+  weight_loss_weeks: string;
+  
+  m_kcal?: string;
+  med_dose?: string;
+  med_conc?: string;
+  grip_strength_kg: string;
+  calf_circumference_cm: string;
+  
+  diameter_humerus?: string;
+  diameter_femur?: string;
+  perimeter_arm?: string;
+  perimeter_calf?: string;
+  
+  mna_score?: number;
+  vgs_status?: 'A' | 'B' | 'C';
+  muscle_mass_kg?: string;
+  professional_indications?: string;
+}
+
+export interface PatientFormData {
+  full_name: string;
+  rut: string;
+  birth_date: string;
+  sex: 'M' | 'F' | '';
+  phone: string;
+  commune: string;
+  insurance: string;
+  notes: string;
 }
