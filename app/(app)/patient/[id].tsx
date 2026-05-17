@@ -173,7 +173,7 @@ export default function PatientDossier() {
               sub="DOSS. EXPORTACIÓN"
               icon="document-attach" 
               color={COLORS.bone}
-              onPress={() => Alert.alert("SISTEMA", "Generando dossier técnico...")}
+              onPress={handleGeneratePDF}
             />
           </View>
 
@@ -369,6 +369,36 @@ const styles = StyleSheet.create({
     shadowRadius: 10
   },
   actBtnText: { fontSize: 14, fontWeight: '900', letterSpacing: 1.5, fontFamily: FONTS.horror },
+  actBtnSub: { fontSize: 9, color: COLORS.muted, fontWeight: '900', marginTop: 5, textTransform: 'uppercase' },
+  historySection: { gap: 25, marginBottom: 80 },
+  sectionHeader: { 
+    fontSize: 18, 
+    fontWeight: '900', 
+    color: COLORS.white, 
+    letterSpacing: 3, 
+    borderBottomWidth: 3, 
+    borderBottomColor: COLORS.purple, 
+    paddingBottom: 15,
+    fontFamily: FONTS.horror
+  },
+  historyItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: COLORS.bg2, 
+    padding: 30, 
+    borderWidth: 2, 
+    borderColor: COLORS.dim, 
+    gap: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowRadius: 10
+  },
+  historyIndicator: { width: 8, height: '100%', borderRadius: 0 },
+  historyInfo: { flex: 1 },
+  historyDate: { fontSize: 15, color: COLORS.white, fontWeight: '900', marginBottom: 10, letterSpacing: 1 },
+  historySummary: { fontSize: 14, color: COLORS.muted, fontWeight: '800' },
+});
+ fontSize: 14, fontWeight: '900', letterSpacing: 1.5, fontFamily: FONTS.horror },
   actBtnSub: { fontSize: 9, color: COLORS.muted, fontWeight: '900', marginTop: 5, textTransform: 'uppercase' },
   historySection: { gap: 25, marginBottom: 80 },
   sectionHeader: { 

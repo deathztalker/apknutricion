@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Stack, router } from 'expo-router';
+import { Stack, router, Redirect } from 'expo-router';
 import { supabase, authService } from '../../lib/supabase';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { COLORS } from '../../constants/theme';
