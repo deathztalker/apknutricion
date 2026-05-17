@@ -22,14 +22,23 @@ export default function RootLayout() {
   useEffect(() => {
     // 1. Inicialización de Auth
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setSession(session);
-        // Sincronizar perfil con metadatos (avatar de Google, etc)
-        const { data: profile } = await authService.syncProfile(session);
-        if (profile) setProfile(profile);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setSession(session);
+          // Sincronizar perfil con metadatos (avatar de Google, etc)
+          try {
+            const { data: profile } = await authService.syncProfile(session);
+            if (profile) setProfile(profile);
+          } catch (e) {
+            console.error('Initial profile sync failed:', e);
+          }
+        }
+      } catch (e) {
+        console.error('Auth initialization failed:', e);
+      } finally {
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     };
 
     initAuth();
@@ -39,8 +48,12 @@ export default function RootLayout() {
       console.log('Root Auth Event:', event);
       setSession(session);
       if (session) {
-        const { data: profile } = await authService.syncProfile(session);
-        if (profile) setProfile(profile);
+        try {
+          const { data: profile } = await authService.syncProfile(session);
+          if (profile) setProfile(profile);
+        } catch (e) {
+          console.error('Auth state change profile sync failed:', e);
+        }
       } else {
         setProfile(null);
       }
