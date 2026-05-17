@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   bubbleBot: { backgroundColor: 'rgba(20,24,32,0.95)', borderWidth: 1,
     borderColor: 'rgba(0,255,136,0.18)', borderBottomLeftRadius: 4 },
   bubbleTxt: { color: COLORS.text, fontSize: 14, lineHeight: 20 },
-  bubbleTime: { fontSize: 9.5, color: COLORS.dim, alignSelf: 'flex-end' },
+  bubbleTime: { fontSize: 9.5, color: COLORS.muted, alignSelf: 'flex-end' },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: SPACING.sm,
     padding: SPACING.md, borderTopWidth: 1, borderTopColor: 'rgba(0,255,136,0.1)' },
   textInput: { flex: 1, backgroundColor: 'rgba(20,24,32,0.9)', borderRadius: RADIUS.lg,

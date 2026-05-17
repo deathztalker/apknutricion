@@ -12,6 +12,9 @@ web-build/
 .env.*.local
 *.pem
 *.key
+client_secret_*.json
+google-services.json
+GoogleService-Info.plist
 
 # Archivos de build nativos (si generas prebuilds)
 android/

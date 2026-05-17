@@ -623,15 +623,15 @@ export default function Calculator() {
                     <View style={{ gap: 15, marginTop: 10 }}>
                       <View>
                         <Text style={{ color: COLORS.purple, fontWeight: 'bold', fontSize: 12 }}>TFG (COCKCROFT-GAULT)</Text>
-                        <Text style={{ color: COLORS.dim, fontSize: 11, marginTop: 5 }}>((140 - Edad) × Peso) / (72 × Creatinina). Mujeres × 0.85</Text>
+                        <Text style={{ color: COLORS.muted, fontSize: 11, marginTop: 5 }}>((140 - Edad) × Peso) / (72 × Creatinina). Mujeres × 0.85</Text>
                       </View>
                       <View>
                         <Text style={{ color: COLORS.sky, fontWeight: 'bold', fontSize: 12 }}>TALLA ESTIMADA (CHUMLEA)</Text>
-                        <Text style={{ color: COLORS.dim, fontSize: 11, marginTop: 5 }}>Basado en altura de rodilla y edad. Diferente coeficiente por sexo biológico.</Text>
+                        <Text style={{ color: COLORS.muted, fontSize: 11, marginTop: 5 }}>Basado en altura de rodilla y edad. Diferente coeficiente por sexo biológico.</Text>
                       </View>
                       <View>
                         <Text style={{ color: COLORS.pink, fontWeight: 'bold', fontSize: 12 }}>TASA METABÓLICA BASAL (MIFFLIN-ST JEOR)</Text>
-                        <Text style={{ color: COLORS.dim, fontSize: 11, marginTop: 5 }}>(10 × Peso) + (6.25 × Talla) - (5 × Edad) + S (S=5 hombres, S=-161 mujeres)</Text>
+                        <Text style={{ color: COLORS.muted, fontSize: 11, marginTop: 5 }}>(10 × Peso) + (6.25 × Talla) - (5 × Edad) + S (S=5 hombres, S=-161 mujeres)</Text>
                       </View>
                     </View>
                   </View>
