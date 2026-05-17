@@ -234,11 +234,11 @@ export default function Calculator() {
     <View style={styles.inputGroup}>
       <Text style={styles.inputLabel}>{label}</Text>
       <TextInput
-        style={[styles.input, multiline && { height: 120, textAlignVertical: 'top' }]}
-        value={String(value || '')}
+        style={[styles.input, multiline && { height: 160, textAlignVertical: 'top' }]}
+        value={String(value ?? '')}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor="rgba(255, 255, 255, 0.4)"
+        placeholderTextColor={COLORS.muted}
         keyboardType={keyboard as any}
         multiline={multiline}
       />
@@ -295,7 +295,14 @@ export default function Calculator() {
                 {renderInput('CINTURA (CM)', form.waist_cm, (v) => setForm({...form, waist_cm: v}), '0')}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>ACT. FÍSICA</Text>
-                  <TextInput style={styles.input} value={form.activity_factor} onChangeText={(v) => setForm({...form, activity_factor: v})} keyboardType="numeric" placeholder="1.2" placeholderTextColor="rgba(255, 255, 255, 0.4)" />
+                  <TextInput 
+                    style={styles.input} 
+                    value={form.activity_factor} 
+                    onChangeText={(v) => setForm({...form, activity_factor: v})} 
+                    keyboardType="numeric" 
+                    placeholder="1.2" 
+                    placeholderTextColor={COLORS.muted} 
+                  />
                 </View>
               </View>
               <View style={styles.row}>

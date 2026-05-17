@@ -149,7 +149,7 @@ export default function Login() {
                   <TextInput
                     style={styles.input}
                     placeholder="Subject ID"
-                    placeholderTextColor={COLORS.dim}
+                    placeholderTextColor={COLORS.muted}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -164,7 +164,7 @@ export default function Login() {
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••"
-                    placeholderTextColor={COLORS.dim}
+                    placeholderTextColor={COLORS.muted}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry

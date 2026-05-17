@@ -100,11 +100,11 @@ function Field({ label, value, onChangeText, placeholder, multiline, containerSt
     <View style={[styles.field, containerStyle]}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        style={[styles.input, multiline && { height: 80, textAlignVertical: 'top' }]}
+        style={[styles.input, multiline && { height: 120, textAlignVertical: 'top' }]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.dim}
+        placeholderTextColor={COLORS.muted}
         multiline={multiline}
       />
     </View>
@@ -115,17 +115,17 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', padding: SPACING.lg, gap: SPACING.md },
   backBtn: { padding: 4 },
-  title: { fontSize: 22, fontWeight: '900', color: COLORS.neon, letterSpacing: 2 },
+  title: { fontSize: 28, fontWeight: '900', color: COLORS.orange, letterSpacing: 4, fontFamily: FONTS.horror },
   scroll: { padding: SPACING.lg },
-  card: { backgroundColor: 'rgba(20,24,32,0.9)', borderRadius: RADIUS.lg, borderWidth: 1, borderColor: '#444', padding: SPACING.xl, gap: SPACING.lg },
-  field: { gap: 6 },
-  label: { fontSize: 11, color: COLORS.muted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
-  input: { backgroundColor: 'rgba(0,0,0,0.5)', borderWidth: 1, borderColor: '#333', borderRadius: RADIUS.md, padding: 12, color: COLORS.white, fontSize: 15 },
+  card: { backgroundColor: 'rgba(13, 13, 18, 0.95)', borderRadius: 0, borderWidth: 3, borderColor: COLORS.dim, padding: SPACING.xl, gap: SPACING.lg, shadowColor: COLORS.orange, shadowOpacity: 0.2, shadowRadius: 15 },
+  field: { gap: 10 },
+  label: { fontSize: 12, color: COLORS.bone, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 },
+  input: { backgroundColor: '#000', borderWidth: 2, borderColor: COLORS.dim, borderRadius: 0, padding: 18, color: COLORS.white, fontSize: 16, fontWeight: 'bold' },
   row: { flexDirection: 'row', gap: SPACING.md },
-  sexRow: { flexDirection: 'row', gap: 8 },
-  sexBtn: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: '#333', alignItems: 'center', justifyContent: 'center' },
-  sexActive: { backgroundColor: COLORS.neon, borderColor: COLORS.neon },
-  sexTxt: { color: COLORS.muted, fontWeight: '900' },
-  saveBtn: { backgroundColor: COLORS.neon, paddingVertical: 16, borderRadius: RADIUS.full, alignItems: 'center', marginTop: 10 },
-  saveBtnText: { color: '#000', fontWeight: '900', fontSize: 16, letterSpacing: 1 },
+  sexRow: { flexDirection: 'row', gap: 12 },
+  sexBtn: { width: 55, height: 55, borderRadius: 0, borderWidth: 2, borderColor: COLORS.dim, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' },
+  sexActive: { backgroundColor: COLORS.purple, borderColor: COLORS.purple },
+  sexTxt: { color: COLORS.muted, fontWeight: '900', fontSize: 18 },
+  saveBtn: { backgroundColor: COLORS.orange, paddingVertical: 20, borderRadius: 0, alignItems: 'center', marginTop: 20, shadowColor: COLORS.orange, shadowOpacity: 0.5, shadowRadius: 10 },
+  saveBtnText: { color: COLORS.white, fontWeight: '900', fontSize: 22, letterSpacing: 3, fontFamily: FONTS.horror },
 });

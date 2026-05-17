@@ -155,6 +155,6 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   footer: { position: 'absolute', bottom: 40, alignItems: 'center' },
-  copyright: { color: COLORS.dim, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase' },
-  systemStatus: { color: COLORS.dim, fontSize: 8, letterSpacing: 2, marginTop: 10 },
+  copyright: { color: COLORS.muted, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase' },
+  systemStatus: { color: COLORS.muted, fontSize: 8, letterSpacing: 2, marginTop: 10 },
 });

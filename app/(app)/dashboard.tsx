@@ -145,7 +145,7 @@ export default function Dashboard() {
             <TextInput
               style={styles.searchInput}
               placeholder={activeView === 'directorio' ? "BUSCAR POR NOMBRE..." : "FILTRAR HISTORIAL..."}
-              placeholderTextColor="#555"
+              placeholderTextColor={COLORS.muted}
               value={search}
               onChangeText={setSearch}
             />
@@ -208,9 +208,9 @@ function DirectoryItem({ item }: { item: Patient }) {
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.fileName}>{item.full_name.toUpperCase()}</Text>
-        <Text style={styles.fileInfo}>{item.insurance} | {item.sex === 'M' ? 'XY' : 'XX'} | {item.age} AÑOS</Text>
+        <Text style={[styles.fileInfo, { color: COLORS.bone }]}>{item.insurance} | {item.sex === 'M' ? 'XY' : 'XX'} | {item.age} AÑOS</Text>
       </View>
-      <Ionicons name="chevron-forward" size={22} color={COLORS.crimson} />
+      <Ionicons name="chevron-forward" size={26} color={COLORS.neon} />
     </TouchableOpacity>
   );
 }
@@ -221,8 +221,8 @@ function HistoryItem({ item }: any) {
       style={[styles.fileCard, { borderLeftColor: COLORS.purple }]}
       onPress={() => router.push(`/(app)/patient/${item.patient_id}`)}
     >
-      <View style={[styles.fileAvatar, { backgroundColor: 'rgba(157, 0, 255, 0.1)' }]}>
-        <Ionicons name="pulse" size={24} color={COLORS.purple} />
+      <View style={[styles.fileAvatar, { backgroundColor: 'rgba(157, 0, 255, 0.1)', borderColor: COLORS.purple }]}>
+        <Ionicons name="pulse" size={28} color={COLORS.purple} />
       </View>
       <View style={{ flex: 1 }}>
         <View style={styles.cardHeader}>
@@ -230,11 +230,11 @@ function HistoryItem({ item }: any) {
           <Text style={styles.cardDate}>{new Date(item.record_date).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}</Text>
         </View>
         <View style={styles.historyDetail}>
-          <Text style={styles.historyStat}>IMC: <Text style={{ color: '#fff' }}>{item.bmi}</Text></Text>
-          <Text style={[styles.historyStat, { marginLeft: 15 }]}>ESTADO: <Text style={{ color: COLORS.crimson }}>{item.bmi_status}</Text></Text>
+          <Text style={styles.historyStat}>IMC: <Text style={{ color: COLORS.neon }}>{item.bmi}</Text></Text>
+          <Text style={[styles.historyStat, { marginLeft: 15 }]}>STATUS: <Text style={{ color: COLORS.crimson }}>{item.bmi_status}</Text></Text>
         </View>
       </View>
-      <Ionicons name="eye-outline" size={20} color={COLORS.purple} />
+      <Ionicons name="eye-outline" size={22} color={COLORS.purple} />
     </TouchableOpacity>
   );
 }
