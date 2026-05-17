@@ -323,6 +323,7 @@ export default function Calculator() {
       <View style={styles.container}>
         <View style={styles.tabContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabScroll}>
+            <TabItem id="dashboard" label="CENTRO" icon="apps" active={activeTab} onPress={() => router.push('/(app)/dashboard')} color={COLORS.orange} />
             <TabItem id="scanner" label="ESCANER" icon="scan" active={activeTab} onPress={setActiveTab} color={COLORS.crimson} />
             <TabItem id="anamnesis" label="ANAMNESIS" icon="list" active={activeTab} onPress={setActiveTab} color={COLORS.sky} />
             <TabItem id="macros" label="MACROS" icon="pie-chart" active={activeTab} onPress={setActiveTab} color={COLORS.pink} />

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,7 +16,7 @@ export default function Index() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.replace('/(app)/dashboard');
+        router.replace('/(app)/calculator');
       } else {
         setChecking(false);
         Animated.parallel([

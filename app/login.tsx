@@ -151,7 +151,7 @@ export default function Login() {
           throw error;
         }
         console.log('Neural Link Established:', data.session?.user?.id);
-        router.replace('/(app)/dashboard');
+        router.replace('/(app)/calculator');
       }
     } catch (error: any) {
       console.error('Auth Protocol Failure:', error);
