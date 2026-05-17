@@ -29,11 +29,21 @@ export default function GoogleAuthCallback() {
   };
 
   useEffect(() => {
-    // 1. Verificación inmediata (Por si Supabase ya procesó el hash)
+    // 1. Verificación inmediata
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         console.log('Session detected immediately on mount.');
         syncSoul(session);
+      } else {
+        // HACK: Si estamos en web y no hay sesión, intentamos forzar la detección del hash
+        if (Platform.OS === 'web' && window.location.hash) {
+          console.log('Fragment detected, manual re-check...');
+          setTimeout(() => {
+            supabase.auth.getSession().then(({ data: { session: s } }) => {
+              if (s) syncSoul(s);
+            });
+          }, 1000);
+        }
       }
     });
 

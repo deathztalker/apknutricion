@@ -388,4 +388,32 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     textDecorationLine: 'underline',
   },
+  successBox: {
+    padding: 30,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 255, 159, 0.05)',
+    borderWidth: 2,
+    borderColor: COLORS.neon,
+    gap: 20,
+  },
+  successText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 24,
+    letterSpacing: 1,
+  },
+  backToLogin: {
+    marginTop: 10,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: COLORS.neon,
+  },
+  backToLoginText: {
+    color: COLORS.neon,
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 2,
+  },
 });
