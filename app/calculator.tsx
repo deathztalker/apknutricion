@@ -426,6 +426,7 @@ export default function Calculator() {
           {activeTab === 'macros' && (
             <View style={styles.section}>
               <SectionHeader title="CONFIGURACIÓN DE NUTRIENTES" icon="pie-chart" color={COLORS.pink} />
+              <Text style={styles.sectionDesc}>Calcula la carga exacta de macronutrientes basada en el VCT (Vasto Consumo Total) del sujeto.</Text>
               <View style={styles.row}>
                 {renderInput('% PROTEÍNAS', form.macro_prot_pct, (v) => setForm({...form, macro_prot_pct: v}), '20')}
                 {renderInput('% CARBOS', form.macro_cho_pct, (v) => setForm({...form, macro_cho_pct: v}), '50')}
@@ -434,7 +435,7 @@ export default function Calculator() {
               {results?.macros && (
                 <View style={styles.macroDashboard}>
                   <MacroBox label="PROTEÍNAS" grams={results.macros.protG} gkg={results.macros.protGkg} color={COLORS.crimson} />
-                  <MacroBox label="CARBOHIDRATOS" grams={results.macros.choG} gkg={results.macros.choGkg} color={COLORS.sky} />
+                  <MacroBox label="CARBOHIDRATOS" grams={results.macros.choG} gkg={results.macros.choGkg} color={COLORS.purple} />
                   <MacroBox label="LÍPIDOS" grams={results.macros.fatG} gkg={results.macros.fatGkg} color={COLORS.pink} />
                 </View>
               )}
@@ -444,8 +445,10 @@ export default function Calculator() {
           {activeTab === 'sports' && (
             <View style={styles.section}>
               <SectionHeader title="CINEANTROPOMETRÍA AVANZADA" icon="fitness" color={COLORS.poison} />
+              <Text style={styles.sectionDesc}>Evaluación de composición corporal mediante fórmulas de Faulkner y mapeo de Somatotipo.</Text>
               {results?.somatotype && (
                 <View style={styles.vizContainer}>
+                  <Text style={styles.vizTitle}>MAPA DE SOMATOTIPO (X, Y)</Text>
                   <Somatocarta x={results.somatotype.x} y={results.somatotype.y} size={280} />
                 </View>
               )}
@@ -471,6 +474,7 @@ export default function Calculator() {
           {activeTab === 'clinical' && (
             <View style={styles.section}>
               <SectionHeader title="INDICADORES HOSPITALARIOS" icon="medkit" color={COLORS.purple} />
+              <Text style={styles.sectionDesc}>Módulo de diagnóstico para falla renal y estimación antropométrica por Chumlea.</Text>
               <View style={styles.miniCard}>
                 <Text style={styles.cardTitle}>FUNCIÓN RENAL (COCKCROFT-GAULT)</Text>
                 <View style={styles.row}>
@@ -808,6 +812,11 @@ const styles = StyleSheet.create({
   macroLabel: { fontSize: 14, fontWeight: '900', color: COLORS.muted, letterSpacing: 1.5 },
   macroGrams: { fontSize: 32, fontWeight: '900', fontFamily: FONTS.horror },
   macroGkg: { fontSize: 14, color: COLORS.bone, fontWeight: 'bold' },
+  
+  utilityBox: { backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderWidth: 1, borderColor: COLORS.dim, borderLeftWidth: 4, marginBottom: 15, flexDirection: 'row', gap: 15, alignItems: 'center' },
+  utilityText: { color: COLORS.muted, fontSize: 12, lineHeight: 18, flex: 1, fontWeight: '700' },
+  sectionDesc: { color: COLORS.muted, fontSize: 14, marginBottom: 20, fontWeight: '800', letterSpacing: 0.5 },
+  vizTitle: { color: COLORS.bone, fontSize: 14, fontWeight: '900', letterSpacing: 2, marginBottom: 20, textAlign: 'center', fontFamily: FONTS.horror },
   
   vizContainer: { alignItems: 'center', padding: 30, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 3, borderColor: COLORS.purple, shadowColor: COLORS.purple, shadowOpacity: 0.3, shadowRadius: 20 },
   miniCard: { backgroundColor: COLORS.bg2, padding: 35, borderWidth: 2, borderColor: COLORS.dim, gap: 30 },

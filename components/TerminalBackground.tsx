@@ -1,64 +1,69 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Dimensions, Animated, Platform } from 'react-native';
+import { View, StyleSheet, Dimensions, Animated, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS } from '../constants/theme';
 
 const { height, width } = Dimensions.get('window');
-const PARTICLE_COUNT = 10; // Reduced for elegance
+const PARTICLE_COUNT = 25; // Más densidad para atmósfera Misfits
+const ICONS = ['💀', '🍎', '💉', '🧪', '🩸', '🎃', '🍗'];
 
 export default function TerminalBackground({ children }: { children: React.ReactNode }) {
-  const pulseAnim = useRef(new Animated.Value(0.15)).current; // Softer pulse
+  const pulseAnim = useRef(new Animated.Value(0.2)).current;
   
   const particles = useRef(Array.from({ length: PARTICLE_COUNT }).map(() => ({
     x: new Animated.Value(Math.random() * width),
     y: new Animated.Value(Math.random() * height),
-    opacity: new Animated.Value(Math.random() * 0.2),
-    scale: new Animated.Value(Math.random() * 1.5),
+    opacity: new Animated.Value(Math.random() * 0.4),
+    scale: new Animated.Value(0.5 + Math.random() * 1),
+    icon: ICONS[Math.floor(Math.random() * ICONS.length)],
+    speed: 15000 + Math.random() * 25000,
   }))).current;
 
   useEffect(() => {
-    // Subtle pulsating background
+    // Pulsación rítmica del fondo (Haunted Glow)
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 0.3, duration: 6000, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 0.15, duration: 6000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.5, duration: 4000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.2, duration: 4000, useNativeDriver: true }),
       ])
     ).start();
 
-    // Slow drifting particles
+    // Drifting espectral de iconos
     particles.forEach((p) => {
-      const animateParticle = () => {
+      const animate = () => {
         const toX = Math.random() * width;
         const toY = Math.random() * height;
-        const duration = 20000 + Math.random() * 20000;
-
+        
         Animated.parallel([
-          Animated.timing(p.x, { toValue: toX, duration, useNativeDriver: true }),
-          Animated.timing(p.y, { toValue: toY, duration, useNativeDriver: true }),
+          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: true }),
+          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: true }),
           Animated.sequence([
-            Animated.timing(p.opacity, { toValue: 0.3, duration: duration / 2, useNativeDriver: true }),
-            Animated.timing(p.opacity, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
+            Animated.timing(p.opacity, { toValue: 0.4, duration: p.speed / 2, useNativeDriver: true }),
+            Animated.timing(p.opacity, { toValue: 0, duration: p.speed / 2, useNativeDriver: true }),
           ])
-        ]).start(() => animateParticle());
+        ]).start(() => animate());
       };
-      animateParticle();
+      animate();
     });
   }, []);
 
   return (
     <View style={styles.container}>
-      {/* Deep Abyssal Base */}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: COLORS.bg }]} />
+      {/* Base de Abismo Púrpura/Negro (Halloween Style) */}
+      <LinearGradient
+        colors={['#0a0510', '#050505', '#10050a']}
+        style={StyleSheet.absoluteFill}
+      />
       
-      {/* Subtle Premium Glow */}
+      {/* Resplandor Tóxico/Sangriento Pulsante */}
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: pulseAnim }]} pointerEvents="none">
         <LinearGradient
-          colors={['rgba(255, 42, 85, 0.08)', 'transparent', 'transparent', 'rgba(0, 229, 255, 0.05)']}
+          colors={['rgba(157, 0, 255, 0.15)', 'transparent', 'rgba(255, 0, 60, 0.1)']}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
 
-      {/* Floating Particles (Glass/Ash) */}
+      {/* Partículas Temáticas (Calaveras y Nutrición) */}
       {particles.map((p, i) => (
         <Animated.View
           key={i}
@@ -69,17 +74,21 @@ export default function TerminalBackground({ children }: { children: React.React
               opacity: p.opacity,
             },
           ]}
-        />
+        >
+          <Text style={{ fontSize: 16 }}>{p.icon}</Text>
+        </Animated.View>
       ))}
       
-      {/* High-Fidelity CRT Scanlines */}
+      {/* Scanlines de Terminal de Horror (CRT) */}
       <View style={styles.scanlinesContainer} pointerEvents="none">
-        {Array.from({ length: Math.ceil(height / 6) }).map((_, i) => (
+        {Array.from({ length: Math.ceil(height / 8) }).map((_, i) => (
           <View key={i} style={styles.scanline} />
         ))}
       </View>
 
-      {children}
+      <View style={{ flex: 1, zIndex: 1 }}>
+        {children}
+      </View>
     </View>
   );
 }
@@ -87,28 +96,24 @@ export default function TerminalBackground({ children }: { children: React.React
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: '#000',
   },
   particle: {
     position: 'absolute',
-    width: 3,
-    height: 3,
-    backgroundColor: COLORS.bone,
-    borderRadius: 1.5,
     zIndex: 0,
-    shadowColor: COLORS.crimson,
+    shadowColor: COLORS.purple,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 5,
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
   },
   scanlinesContainer: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0.05, // Very subtle
+    opacity: 0.08,
   },
   scanline: {
     height: 1,
     width: '100%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    marginBottom: 5,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 7,
   }
 });

@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 
 export default function AppLayout() {
   const { session, setSession, setProfile } = useAuthStore();
-  const [loading, setLoading] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const loadProfile = async (userId: string) => {
     try {
@@ -19,22 +19,25 @@ export default function AppLayout() {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // 1. Obtener sesión inicial de forma segura
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        loadProfile(session.user.id);
+        setSession(session);
+        await loadProfile(session.user.id);
       }
-      setLoading(false);
-      if (!session) {
-        router.replace('/login');
-      }
-    });
+      setIsInitializing(false);
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    initAuth();
+
+    // 2. Escuchar cambios de estado
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth Layout Event:', event);
       setSession(session);
       if (session) {
-        loadProfile(session.user.id);
-      } else {
+        await loadProfile(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
         setProfile(null);
         router.replace('/login');
       }
@@ -45,12 +48,17 @@ export default function AppLayout() {
     };
   }, []);
 
-  if (loading) {
+  if (isInitializing) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color={COLORS.crimson} />
       </View>
     );
+  }
+
+  // Si después de inicializar no hay sesión, mandamos al login
+  if (!session) {
+    return <Redirect href="/login" />;
   }
 
   return (
