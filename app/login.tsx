@@ -59,24 +59,25 @@ export default function Login() {
   async function handleGoogleLogin() {
     setGoogleLoading(true);
     try {
-      const redirectTo = Linking.createURL('google-auth');
+      // Definimos la URL de retorno explícitamente para GitHub Pages
+      // En Web: https://deathztalker.github.io/apknutricion/google-auth
+      // En APK: nutricesfam://google-auth
+      const redirectTo = Platform.OS === 'web' 
+        ? 'https://deathztalker.github.io/apknutricion/google-auth'
+        : Linking.createURL('google-auth');
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
-          // Evita que Supabase intente redirigir automáticamente usando 'window.location' en nativo
           skipBrowserRedirect: Platform.OS !== 'web',
         },
       });
 
       if (error) throw error;
 
-      // SI ESTAMOS EN LA APK: Abrimos el navegador nativo de forma manual
       if (Platform.OS !== 'web' && data?.url) {
         const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-
-        // Si el usuario cierra el navegador a la fuerza sin logearse
         if (result.type === 'cancel') {
           setGoogleLoading(false);
         }
@@ -86,8 +87,6 @@ export default function Login() {
       Alert.alert('GHOST ERROR', error.message);
       setGoogleLoading(false);
     }
-    // Nota: Quitamos el 'finally' directo porque en Web la redirección es inmediata, 
-    // y en Nativo manejamos el fin del loading cuando el flujo termina.
   }
 
   async function handleAuth() {
