@@ -50,7 +50,6 @@ export default function AppLayout() {
       <Stack.Screen name="dashboard" options={{ title: 'SYSTEM DASHBOARD' }} />
       <Stack.Screen name="patient/[id]" options={{ title: 'PATIENT DOSSIER' }} />
       <Stack.Screen name="patient/new" options={{ title: 'INICIALIZAR SUJETO', presentation: 'modal' }} />
-      <Stack.Screen name="calculator" options={{ title: 'OVERRIDE BIOMÉTRICO' }} />
       <Stack.Screen name="patient/[id]/labs" options={{ title: 'BIOCHEMICAL TERMINAL' }} />
       <Stack.Screen name="meal-plan/new" options={{ title: 'PORTION BUILDER' }} />
       <Stack.Screen name="ai-chat" options={{ title: 'NUTRIBOT IA', presentation: 'modal' }} />
