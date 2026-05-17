@@ -1,18 +1,52 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { COLORS } from '../constants/theme';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useFonts, Creepster_400Regular } from '@expo-google-fonts/creepster';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './global.css';
+import { supabase, authService } from '../lib/supabase';
+import { useAuthStore } from '../store/authStore';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const { setSession, setProfile } = useAuthStore();
   const [loaded, error] = useFonts({
     Creepster_400Regular,
   });
+
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    // 1. Inicialización de Auth
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setSession(session);
+        const { data: profile } = await authService.getProfile(session.user.id);
+        if (profile) setProfile(profile);
+      }
+      setIsInitializing(false);
+    };
+
+    initAuth();
+
+    // 2. Escuchar cambios globales (Login/Logout/OAuth)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Root Auth Event:', event);
+      setSession(session);
+      if (session) {
+        const { data: profile } = await authService.getProfile(session.user.id);
+        if (profile) setProfile(profile);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (loaded || error) {
@@ -20,8 +54,15 @@ export default function RootLayout() {
     }
   }, [loaded, error]);
 
-  if (!loaded && !error) {
-    return null;
+  if (!loaded && !error) return null;
+
+  // Mostramos un spinner global mientras el alma se sincroniza con el núcleo
+  if (isInitializing) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.crimson} />
+      </View>
+    );
   }
 
   return (

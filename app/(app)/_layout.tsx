@@ -7,8 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function AppLayout() {
-  const { session, setSession, setProfile, profile } = useAuthStore();
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { session, profile } = useAuthStore();
   const segments = useSegments();
 
   // Detectamos si estamos en la calculadora (ruta pública permitida dentro del layout)
@@ -47,45 +46,9 @@ export default function AppLayout() {
     </TouchableOpacity>
   );
 
-  useEffect(() => {
-    const initAuth = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      if (currentSession) {
-        setSession(currentSession);
-        const { data: currentProfile } = await authService.getProfile(currentSession.user.id);
-        if (currentProfile) setProfile(currentProfile);
-      }
-      setIsInitializing(false);
-    };
-
-    initAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log('Auth Layout Event:', event);
-      if (currentSession) {
-        setSession(currentSession);
-        const { data: currentProfile } = await authService.getProfile(currentSession.user.id);
-        if (currentProfile) setProfile(currentProfile);
-        setIsInitializing(false);
-      } else if (event === 'SIGNED_OUT') {
-        setSession(null);
-        setProfile(null);
-        router.replace('/login');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (isInitializing) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={COLORS.crimson} />
-      </View>
-    );
-  }
-
-  // Si no hay sesión y NO estamos en la calculadora, mandamos al login
+  // La protección de rutas ahora es más sencilla:
+  // Si no hay sesión y NO es la calculadora, redirigimos al login.
+  // Pero lo hacemos solo después de que el RootLayout haya terminado de inicializar.
   if (!session && !isCalculator) {
     return <Redirect href="/login" />;
   }
