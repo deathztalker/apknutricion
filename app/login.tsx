@@ -14,6 +14,7 @@ import {
   Dimensions
 } from 'react-native';
 import { router } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { COLORS, SHADOWS, FONTS } from '../constants/theme';
 import { supabase } from '../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
@@ -57,12 +58,11 @@ export default function Login() {
   async function handleGoogleLogin() {
     setGoogleLoading(true);
     try {
+      const redirectTo = Linking.createURL('google-auth');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // Client ID: 897785100201-hco12glrgkna84vtgel63jmq7eo1k4fh.apps.googleusercontent.com
-          // Redirection to your app scheme
-          redirectTo: 'apknutricion://google-auth', 
+          redirectTo, 
         },
       });
       if (error) throw error;
