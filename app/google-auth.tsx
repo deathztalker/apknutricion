@@ -1,42 +1,43 @@
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { router, useGlobalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../lib/supabase';
-import { COLORS } from '../constants/theme';
+import { COLORS, FONTS } from '../constants/theme';
+import TerminalBackground from '../components/TerminalBackground';
 
 export default function GoogleAuthCallback() {
-    // Captura los parámetros que vienen en el Deep Link cuando la APK se reactiva
-    const params = useGlobalSearchParams();
+  useEffect(() => {
+    // Supabase maneja automáticamente el hash (#access_token=...) 
+    // al inicializarse, por lo que solo debemos esperar a que la sesión esté lista
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (session) {
+        router.replace('/(app)/dashboard');
+      } else if (error) {
+        console.error('Auth Error:', error);
+        router.replace('/login');
+      } else {
+        // Si no hay sesión inmediata, el listener en AppLayout redirigirá al login
+        // o podemos forzar un pequeño delay
+        setTimeout(() => router.replace('/(app)/dashboard'), 1500);
+      }
+    };
 
-    useEffect(() => {
-        async function handleSession() {
-            // Supabase se encarga de extraer los tokens si detecta que la sesión cambió
-            const { data: { session }, error } = await supabase.auth.getSession();
+    checkSession();
+  }, []);
 
-            if (session) {
-                // Redirige al panel principal si la sesión se estableció con éxito
-                router.replace('/(app)/dashboard');
-            } else {
-                // Si no hay sesión o hubo un error, regresa al login tras el intento
-                router.replace('/login');
-            }
-        }
-
-        handleSession();
-    }, [params]);
-
-    return (
-        <View style={styles.container}>
-            <ActivityIndicator size="large" color={COLORS.crimson} />
-        </View>
-    );
+  return (
+    <TerminalBackground>
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={COLORS.neon} />
+        <Text style={styles.text}>VINCULANDO ALMA CON EL NÚCLEO...</Text>
+      </View>
+    </TerminalBackground>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#050505',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 20 },
+  text: { color: COLORS.neon, fontFamily: FONTS.horror, fontSize: 20, letterSpacing: 2 },
 });
