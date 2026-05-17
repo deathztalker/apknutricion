@@ -99,14 +99,14 @@ export default function Login() {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        Alert.alert('LINK INITIATED', 'Verify your identity via encrypted transmission (Email).');
+        Alert.alert('VÍNCULO INICIADO', 'Verifica tu identidad en el plano espectral (Revisa tu Email).');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         router.replace('/(app)/dashboard');
       }
     } catch (error: any) {
-      Alert.alert('ACCESS DENIED', error.message);
+      Alert.alert('ACCESO DENEGADO', `ERROR DE NÚCLEO: ${error.message}`);
     } finally {
       setLoading(false);
     }

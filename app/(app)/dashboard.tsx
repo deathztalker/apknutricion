@@ -101,13 +101,28 @@ export default function Dashboard() {
               <Text style={styles.subTitle}>SISTEMA DE CONTROL CLÍNICO v8.0</Text>
             </View>
             <View style={styles.headerActions}>
-              <TouchableOpacity style={[styles.headBtn, SHADOWS.poison]} onPress={() => dataPortability.importPatientsCSV().then(fetchData)}>
+              <TouchableOpacity 
+                style={[styles.headBtn, { borderColor: COLORS.poison }]} 
+                onPress={async () => {
+                  const imported = await dataPortability.importPatientsCSV();
+                  if (imported && imported.length > 0) {
+                    Alert.alert('INFECCIÓN EXITOSA', `${imported.length} ALMAS ABSORBIDAS AL NÚCLEO.`);
+                    fetchData(); // Recargar lista
+                  }
+                }}
+              >
                 <Ionicons name="cloud-upload" size={20} color={COLORS.poison} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.headBtn, { marginLeft: 10 }, SHADOWS.crimson]} onPress={() => dataPortability.exportPatientsCSV(patients)}>
+              <TouchableOpacity 
+                style={[styles.headBtn, { marginLeft: 10, borderColor: COLORS.sky }]} 
+                onPress={() => {
+                  dataPortability.exportPatientsCSV(patients);
+                  Alert.alert('EXTRACCIÓN COMPLETA', 'DOSSIER BIOMÉTRICO EXPORTADO AL VACÍO.');
+                }}
+              >
                 <Ionicons name="download" size={20} color={COLORS.sky} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.headBtn, { marginLeft: 10 }]} onPress={() => supabase.auth.signOut()}>
+              <TouchableOpacity style={[styles.headBtn, { marginLeft: 10, borderColor: COLORS.crimson }]} onPress={() => supabase.auth.signOut()}>
                 <Ionicons name="power" size={20} color={COLORS.crimson} />
               </TouchableOpacity>
             </View>

@@ -48,8 +48,8 @@ export default function GoogleAuthCallback() {
     <TerminalBackground>
       <View style={styles.container}>
         <ActivityIndicator size="large" color={COLORS.neon} />
-        <Text style={styles.text}>CAPTurando ESENCIA DIGITAL...</Text>
-        <Text style={styles.subtext}>Sincronizando sesión con el núcleo de Supabase</Text>
+        <Text style={styles.text}>VINCULANDO ALMA AL NÚCLEO...</Text>
+        <Text style={styles.subtext}>EXTRAYENDO ESENCIA DEL GHOST LOGIN</Text>
       </View>
     </TerminalBackground>
   );
