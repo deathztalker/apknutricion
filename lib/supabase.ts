@@ -4,8 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const supabaseUrl  = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://xyzplaceholder.supabase.co';
-const supabaseKey  = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://hrxztljaocqcbbdfmpcq.supabase.co';
+const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_9s_acnWysxmSpLfnZFQtqA_VfrYY8LQ';
 
 // SecureStore adapter para auth tokens
 const ExpoSecureStoreAdapter = {
@@ -162,39 +162,39 @@ export const mealPlanService = {
   async update(id: string, data: Record<string, unknown>) {
     return supabase.from('meal_plans').update(data).eq('id', id);
   },
-async delete(id: string) {
-  return supabase.from('meal_plans').delete().eq('id', id);
-},
+  async delete(id: string) {
+    return supabase.from('meal_plans').delete().eq('id', id);
+  },
 };
 
 // ── Biochemical helpers ──────────────────────────────────
 export const biochemicalService = {
-async getByPatient(patientId: string) {
-  return supabase
-    .from('biochemical_records')
-    .select('*')
-    .eq('patient_id', patientId)
-    .order('exam_date', { ascending: false });
-},
+  async getByPatient(patientId: string) {
+    return supabase
+      .from('biochemical_records')
+      .select('*')
+      .eq('patient_id', patientId)
+      .order('exam_date', { ascending: false });
+  },
 
-async create(data: Record<string, unknown>) {
-  return supabase.from('biochemical_records').insert(data).select().single();
-},
+  async create(data: Record<string, unknown>) {
+    return supabase.from('biochemical_records').insert(data).select().single();
+  },
 };
 
 // ── Lifestyle helpers ────────────────────────────────────
 export const lifestyleService = {
-async getByPatient(patientId: string) {
-  return supabase
-    .from('lifestyle_records')
-    .select('*')
-    .eq('patient_id', patientId)
-    .order('record_date', { ascending: false });
-},
+  async getByPatient(patientId: string) {
+    return supabase
+      .from('lifestyle_records')
+      .select('*')
+      .eq('patient_id', patientId)
+      .order('record_date', { ascending: false });
+  },
 
-async create(data: Record<string, unknown>) {
-  return supabase.from('lifestyle_records').insert(data).select().single();
-},
+  async create(data: Record<string, unknown>) {
+    return supabase.from('lifestyle_records').insert(data).select().single();
+  },
 };
 
 // ── AI Interaction log ─────────────────────────────────────
