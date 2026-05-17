@@ -72,7 +72,7 @@ export default function NewPatientScreen() {
                     <TouchableOpacity key={s} 
                       style={[styles.sexBtn, form.sex === s && styles.sexActive]}
                       onPress={() => setForm({...form, sex: s as any})}>
-                      <Text style={[styles.sexTxt, form.sex === s && { color: '#000' }]}>{s}</Text>
+                      <Text style={[styles.sexTxt, form.sex === s && { color: COLORS.white }]}>{s}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>

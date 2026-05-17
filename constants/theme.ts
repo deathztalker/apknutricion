@@ -24,7 +24,7 @@ export const COLORS = {
   // Text - High contrast
   text:   '#ffffff',
   muted:  '#a0a0b0',
-  dim:    '#4a4a60',
+  dim:    '#8a8a9a',
   white:  '#ffffff',
   bone:   '#e5e5e5',
 

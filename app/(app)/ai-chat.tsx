@@ -160,7 +160,7 @@ export default function AIChatScreen() {
                 <View style={styles.msgAvatar}><Text style={{ fontSize: 15 }}>🐱</Text></View>
               )}
               <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleBot]}>
-                <Text style={[styles.bubbleTxt, msg.role === 'user' && { color: '#000' }]}>{msg.content}</Text>
+                <Text style={[styles.bubbleTxt, msg.role === 'user' && { color: COLORS.white }]}>{msg.content}</Text>
                 <Text style={styles.bubbleTime}>
                   {msg.timestamp.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
                 </Text>

@@ -172,7 +172,7 @@ export default function Dashboard() {
             }
             ListEmptyComponent={
               <View style={styles.empty}>
-                <Ionicons name="skull" size={80} color="#1a1a1f" />
+                <Ionicons name="skull" size={80} color={COLORS.dim} />
                 <Text style={styles.emptyText}>VACÍO DETECTADO</Text>
               </View>
             }
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 25 },
   loadingText: { color: COLORS.orange, fontSize: 16, fontWeight: '900', letterSpacing: 5, fontFamily: FONTS.horror },
   empty: { alignItems: 'center', marginTop: 140, gap: 25 },
-  emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 36, letterSpacing: 5 },
+  emptyText: { color: COLORS.muted, fontFamily: FONTS.horror, fontSize: 36, letterSpacing: 5 },
   fab: { 
     position: 'absolute', 
     bottom: 35, 

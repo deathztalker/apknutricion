@@ -353,7 +353,7 @@ export default function Calculator() {
               <TouchableOpacity style={styles.mainActionBtn} onPress={handleSave} disabled={saving}>
                 {saving ? <ActivityIndicator color={COLORS.bg} /> : (
                   <>
-                    <Ionicons name="save" size={28} color={COLORS.bg} />
+                    <Ionicons name="save" size={28} color={COLORS.white} />
                     <Text style={styles.mainActionText}>GUARDAR EXPEDIENTE</Text>
                   </>
                 )}
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
   input: { 
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderWidth: 2, 
-    borderColor: COLORS.dim,
+    borderColor: COLORS.muted,
     padding: 24, 
     color: COLORS.white, 
     fontSize: 24, 
