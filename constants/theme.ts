@@ -1,41 +1,43 @@
 export const COLORS = {
-  // Backgrounds
-  bg:     '#0b0d12',
-  bg1:    '#0f1219',
-  bg2:    '#141820',
-  bg3:    '#1a2030',
-  bg4:    '#1e2640',
+  // Backgrounds - Deep space but with more texture/depth
+  bg:     '#050505',
+  bg1:    '#0d0d12',
+  bg2:    '#151520',
+  bg3:    '#1c1c2b',
+  bg4:    '#252538',
 
-  // Brand
-  neon:   '#00ff88',
-  neon2:  '#00cc6a',
-  stg:    '#00693e',   // Santo Tomás Green
-  pink:   '#ff6eb4',
-  pink2:  '#e05090',
-  purple: '#9d4dff',
-  purple2:'#7a30dd',
+  // Misfits & Halloween Palette
+  neon:   '#00ff9f',   // Toxic Green
+  poison: '#39ff14',   // Biohazard Green
+  crimson:'#ff003c',   // Blood Red
+  purple: '#9d00ff',   // Haunted Purple
+  orange: '#ff6b00',   // Halloween Pumpkin
+  sky:    '#00d0ff',   // Electric Blue
+  gold:   '#f5c842',   // Necronomicon Gold
 
   // Semantic
-  gold:   '#f5c842',
   red:    '#ff3355',
-  sky:    '#00d0ff',
-  orange: '#ff6b2b',
+  info:   '#00ff9f',
+  warning:'#ff6b00',
+  danger: '#ff003c',
 
-  // Text
-  text:   '#eef2ff',
-  muted:  '#7a8a9a',
-  dim:    '#3a4a5a',
+  // Text - High contrast
+  text:   '#ffffff',
+  muted:  '#a0a0b0',
+  dim:    '#4a4a60',
   white:  '#ffffff',
+  bone:   '#e5e5e5',
 
-  // Card
-  card:   'rgba(20,24,32,0.9)',
-  border: 'rgba(0,255,136,0.15)',
-  borderB:'rgba(0,255,136,0.4)',
+  // Card / Glassmorphism
+  card:   'rgba(13,13,18,0.92)',
+  border: 'rgba(0,255,159,0.3)',
+  borderB:'rgba(255,0,60,0.5)',
 };
 
 export const FONTS = {
   regular: 'System',
   bold:    'System',
+  horror:  'Creepster_400Regular', // Main Misfits font
 };
 
 export const SPACING = {

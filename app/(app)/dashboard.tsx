@@ -241,42 +241,138 @@ function HistoryItem({ item }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  commandHeader: { padding: 25, paddingTop: Platform.OS === 'ios' ? 60 : 30, backgroundColor: '#000', borderBottomWidth: 1, borderBottomColor: '#222' },
-  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
-  mainTitle: { color: COLORS.bone, fontSize: 28, fontFamily: FONTS.horror, letterSpacing: 2, textShadowColor: COLORS.crimson, textShadowRadius: 15 },
-  subTitle: { color: COLORS.crimson, fontSize: 10, fontWeight: '900', letterSpacing: 4, marginTop: 5 },
+  commandHeader: { 
+    padding: 30, 
+    paddingTop: Platform.OS === 'ios' ? 70 : 40, 
+    backgroundColor: 'rgba(5,5,10,0.95)', 
+    borderBottomWidth: 3, 
+    borderBottomColor: COLORS.orange,
+    shadowColor: COLORS.orange,
+    shadowOpacity: 0.3,
+    shadowRadius: 20
+  },
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 35 },
+  mainTitle: { 
+    color: COLORS.white, 
+    fontSize: 32, 
+    fontFamily: FONTS.horror, 
+    letterSpacing: 4, 
+    textShadowColor: COLORS.orange, 
+    textShadowRadius: 15 
+  },
+  subTitle: { 
+    color: COLORS.purple, 
+    fontSize: 11, 
+    fontWeight: '900', 
+    letterSpacing: 5, 
+    marginTop: 5,
+    textTransform: 'uppercase'
+  },
   headerActions: { flexDirection: 'row', alignItems: 'center' },
-  headBtn: { backgroundColor: '#0f0f16', padding: 12, borderWidth: 1, borderColor: '#333' },
-  statsRow: { flexDirection: 'row', gap: 15 },
-  statBox: { flex: 1, backgroundColor: '#0f0f16', padding: 18, borderLeftWidth: 5, gap: 6, ...SHADOWS.crimson },
-  statLabel: { fontSize: 9, color: COLORS.dim, fontWeight: 'bold', letterSpacing: 1.5 },
-  statValue: { fontSize: 30, fontWeight: '900', color: COLORS.white, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  headBtn: { 
+    backgroundColor: '#000', 
+    padding: 14, 
+    borderWidth: 2, 
+    borderColor: COLORS.dim 
+  },
+  statsRow: { flexDirection: 'row', gap: 18 },
+  statBox: { 
+    flex: 1, 
+    backgroundColor: '#000', 
+    padding: 20, 
+    borderLeftWidth: 6, 
+    borderLeftColor: COLORS.orange,
+    gap: 8, 
+    shadowColor: '#000',
+    shadowOpacity: 0.5,
+    shadowRadius: 10
+  },
+  statLabel: { fontSize: 10, color: COLORS.muted, fontWeight: 'bold', letterSpacing: 2 },
+  statValue: { fontSize: 32, fontWeight: '900', color: COLORS.white, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
   
-  tabSelector: { flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.9)', borderBottomWidth: 1, borderBottomColor: '#222' },
-  tab: { flex: 1, paddingVertical: 20, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 12, borderBottomWidth: 4, borderBottomColor: 'transparent' },
-  activeTab: { borderBottomColor: COLORS.crimson, backgroundColor: 'rgba(255,0,60,0.1)' },
-  tabText: { color: COLORS.dim, fontSize: 12, fontWeight: '900', letterSpacing: 2 },
+  tabSelector: { 
+    flexDirection: 'row', 
+    backgroundColor: '#000', 
+    borderBottomWidth: 2, 
+    borderBottomColor: COLORS.dim 
+  },
+  tab: { 
+    flex: 1, 
+    paddingVertical: 22, 
+    alignItems: 'center', 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    gap: 12, 
+    borderBottomWidth: 5, 
+    borderBottomColor: 'transparent' 
+  },
+  activeTab: { 
+    borderBottomColor: COLORS.purple, 
+    backgroundColor: 'rgba(157,0,255,0.1)' 
+  },
+  tabText: { color: COLORS.muted, fontSize: 13, fontWeight: '900', letterSpacing: 2.5 },
   activeTabText: { color: COLORS.white },
 
-  searchConsole: { padding: 20, backgroundColor: 'rgba(0,0,0,0.5)' },
-  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#000', borderWidth: 1, borderColor: COLORS.crimson, paddingHorizontal: 18, height: 60, gap: 15 },
-  searchInput: { flex: 1, color: COLORS.white, fontSize: 16, fontWeight: 'bold', letterSpacing: 1 },
+  searchConsole: { padding: 25, backgroundColor: 'rgba(0,0,0,0.6)' },
+  searchBar: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#000', 
+    borderWidth: 3, 
+    borderColor: COLORS.purple, 
+    paddingHorizontal: 20, 
+    height: 70, 
+    gap: 15 
+  },
+  searchInput: { flex: 1, color: COLORS.white, fontSize: 18, fontWeight: 'bold', letterSpacing: 1.5 },
   
-  list: { paddingBottom: 120 },
-  fileCard: { flexDirection: 'row', alignItems: 'center', padding: 25, borderBottomWidth: 1, borderBottomColor: '#1a1a1f', gap: 20, backgroundColor: 'rgba(15,15,22,0.8)', borderLeftWidth: 4, borderLeftColor: COLORS.crimson },
-  fileAvatar: { width: 60, height: 60, backgroundColor: 'rgba(255, 0, 60, 0.05)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255, 0, 60, 0.3)' },
-  avatarLetter: { fontSize: 32, fontFamily: FONTS.horror, color: COLORS.crimson },
-  fileName: { color: COLORS.white, fontSize: 20, fontWeight: '900', letterSpacing: 1 },
-  fileInfo: { color: COLORS.muted, fontSize: 12, fontWeight: 'bold', letterSpacing: 1.5, marginTop: 6 },
+  list: { paddingBottom: 130 },
+  fileCard: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 30, 
+    borderBottomWidth: 2, 
+    borderBottomColor: COLORS.bg4, 
+    gap: 25, 
+    backgroundColor: 'rgba(15,15,22,0.9)', 
+    borderLeftWidth: 8, 
+    borderLeftColor: COLORS.neon 
+  },
+  fileAvatar: { 
+    width: 65, 
+    height: 65, 
+    backgroundColor: '#000', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    borderWidth: 2, 
+    borderColor: COLORS.neon 
+  },
+  avatarLetter: { fontSize: 36, fontFamily: FONTS.horror, color: COLORS.neon },
+  fileName: { color: COLORS.white, fontSize: 22, fontWeight: '900', letterSpacing: 1.5 },
+  fileInfo: { color: COLORS.muted, fontSize: 13, fontWeight: 'bold', letterSpacing: 2, marginTop: 8 },
   
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardDate: { color: COLORS.dim, fontSize: 11, fontWeight: '900' },
-  historyDetail: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
-  historyStat: { color: COLORS.muted, fontSize: 12, fontWeight: 'bold' },
+  cardDate: { color: COLORS.purple, fontSize: 12, fontWeight: '900', letterSpacing: 1 },
+  historyDetail: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  historyStat: { color: COLORS.bone, fontSize: 13, fontWeight: 'bold' },
   
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 20 },
-  loadingText: { color: COLORS.crimson, fontSize: 14, fontWeight: '900', letterSpacing: 4 },
-  empty: { alignItems: 'center', marginTop: 120, gap: 20 },
-  emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 32, letterSpacing: 3 },
-  fab: { position: 'absolute', bottom: 30, right: 30, width: 80, height: 80, backgroundColor: COLORS.crimson, justifyContent: 'center', alignItems: 'center', borderRadius: 0 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 25 },
+  loadingText: { color: COLORS.orange, fontSize: 16, fontWeight: '900', letterSpacing: 5, fontFamily: FONTS.horror },
+  empty: { alignItems: 'center', marginTop: 140, gap: 25 },
+  emptyText: { color: COLORS.dim, fontFamily: FONTS.horror, fontSize: 36, letterSpacing: 5 },
+  fab: { 
+    position: 'absolute', 
+    bottom: 35, 
+    right: 35, 
+    width: 85, 
+    height: 85, 
+    backgroundColor: COLORS.orange, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    borderRadius: 0,
+    shadowColor: COLORS.orange,
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 10
+  },
 });
