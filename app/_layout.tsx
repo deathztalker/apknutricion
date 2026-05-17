@@ -5,6 +5,7 @@ import { View, StyleSheet } from 'react-native';
 import { useFonts, Creepster_400Regular } from '@expo-google-fonts/creepster';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import './global.css';
 
 SplashScreen.preventAutoHideAsync();
 
