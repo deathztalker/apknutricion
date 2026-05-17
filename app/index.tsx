@@ -11,6 +11,7 @@ export default function Index() {
   const [checking, setChecking] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const skullAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -25,6 +26,12 @@ export default function Index() {
               Animated.timing(skullAnim, { toValue: 1, duration: 2500, useNativeDriver: Platform.OS !== 'web' }),
               Animated.timing(skullAnim, { toValue: 0, duration: 2500, useNativeDriver: Platform.OS !== 'web' }),
             ])
+          ),
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(glowAnim, { toValue: 1, duration: 2000, useNativeDriver: false }),
+              Animated.timing(glowAnim, { toValue: 0, duration: 2000, useNativeDriver: false }),
+            ])
           )
         ]).start();
       }
@@ -34,6 +41,16 @@ export default function Index() {
   const skullScale = skullAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 1.1],
+  });
+
+  const neonGlow = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [10, 35],
+  });
+
+  const toxicColor = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [COLORS.neon, COLORS.poison],
   });
 
   if (checking) {
@@ -51,7 +68,9 @@ export default function Index() {
           <Animated.View style={{ transform: [{ scale: skullScale }] }}>
             <Ionicons name="skull" size={120} color={COLORS.crimson} style={styles.iconShadow} />
           </Animated.View>
-          <Text style={styles.title}>NÚCLEO{'\n'}METABÓLICO</Text>
+          <Animated.Text style={[styles.title, { textShadowRadius: neonGlow, color: toxicColor }]}>
+            NÚCLEO{'\n'}METABÓLICO
+          </Animated.Text>
           <View style={styles.divider} />
           <Text style={styles.subtitle}>PROTOCOLO DE DISECCIÓN NEURAL v9.0</Text>
         </Animated.View>

@@ -33,6 +33,7 @@ export default function Login() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const skullAnim = useRef(new Animated.Value(0)).current;
+  const flickerAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -41,6 +42,15 @@ export default function Login() {
         Animated.sequence([
           Animated.timing(skullAnim, { toValue: 1, duration: 2000, useNativeDriver: Platform.OS !== 'web' }),
           Animated.timing(skullAnim, { toValue: 0, duration: 2000, useNativeDriver: Platform.OS !== 'web' }),
+        ])
+      ),
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(flickerAnim, { toValue: 0.7, duration: 100, useNativeDriver: false }),
+          Animated.timing(flickerAnim, { toValue: 1, duration: 100, useNativeDriver: false }),
+          Animated.delay(3000),
+          Animated.timing(flickerAnim, { toValue: 0.4, duration: 50, useNativeDriver: false }),
+          Animated.timing(flickerAnim, { toValue: 1, duration: 50, useNativeDriver: false }),
         ])
       )
     ]).start();
@@ -54,6 +64,11 @@ export default function Login() {
   const skullOpacity = skullAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0.8, 1],
+  });
+
+  const glowRadius = flickerAnim.interpolate({
+    inputRange: [0.4, 1],
+    outputRange: [5, 25],
   });
 
   async function handleGoogleLogin() {
