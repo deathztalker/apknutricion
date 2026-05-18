@@ -314,7 +314,7 @@ export default function AIChatScreen() {
     if (GEMINI_KEY) {
       try {
         const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const history = messages.slice(-10).map(m => ({
           role: m.role === 'user' ? 'user' : 'model',
