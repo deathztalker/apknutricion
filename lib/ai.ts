@@ -1,6 +1,14 @@
-// lib/ai.ts — Motor IA Clínica v2: Gemini 1.5 Flash + Protocolo de Élite
+// lib/ai.ts — Motor IA Clínica v2: Gemini 2.0 Flash + Protocolo de Élite
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ClinicalRecord, Patient, AIAnalysis, ClinicalAlert, CalculationResult } from '@/types';
+
+// Polyfill para fetch en entornos que lo requieran (ej. Node antiguo durante build)
+if (typeof fetch === 'undefined' && typeof global !== 'undefined') {
+  // En React Native / Web fetch ya existe. Esto es para SSR/Node.
+  // No importamos node-fetch dinámicamente aquí para evitar errores de bundle,
+  // pero aseguramos que el entorno tenga acceso al fetch global si existe.
+  (global as any).fetch = (global as any).fetch || undefined;
+}
 
 const GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 const GEMINI_MODEL = 'gemini-2.0-flash';
