@@ -15,6 +15,7 @@ export const COLORS = {
   orange: '#ff6b00',   // Halloween Pumpkin
   sky:    '#00d0ff',   // Electric Blue
   gold:   '#f5c842',   // Necronomicon Gold
+  stg:    '#00693e',
 
   // Semantic
   red:    '#ff3355',
@@ -79,6 +80,13 @@ export const SHADOWS = {
     shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 6,
+  },
+  crimson: {
+    shadowColor: '#ff003c',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
 };
 

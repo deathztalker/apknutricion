@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { patientService, supabase } from '@/lib/supabase';
-import { COLORS, SPACING, RADIUS } from '@/constants/theme';
+import { COLORS, SPACING, RADIUS, FONTS } from '@/constants/theme';
 import { PatientFormData } from '@/types';
 import TerminalBackground from '@/components/TerminalBackground';
 

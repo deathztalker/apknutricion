@@ -11,7 +11,7 @@ export default function AppLayout() {
   const segments = useSegments();
 
   // Detectamos si estamos en la calculadora (ruta pública permitida dentro del layout)
-  const isCalculator = segments.includes('calculator');
+  const isCalculator = segments.includes('calculator' as never);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -66,7 +66,7 @@ export default function AppLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: COLORS.bg1 },
         headerTintColor: COLORS.crimson,
-        headerTitleStyle: { fontWeight: '900', letterSpacing: 2 },
+        headerTitleStyle: { fontWeight: '900' },
         contentStyle: { backgroundColor: COLORS.bg },
         headerRight: () => <ProfileHeader />,
       }}

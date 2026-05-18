@@ -200,7 +200,7 @@ export default function Login() {
             {/* The Crimson Ghost / Misfits Centerpiece */}
             <View style={styles.header}>
               <Animated.View style={{ transform: [{ scale: skullScale }], opacity: skullOpacity }}>
-                <Ionicons name="skull" size={100} color={COLORS.crimson} style={styles.skullShadow} />
+                <Ionicons name="skull" size={70} color={COLORS.crimson} style={styles.skullShadow} />
               </Animated.View>
               <Animated.Text style={[styles.title, { textShadowRadius: glowRadius, opacity: flickerAnim }]}>
                 NÚCLEO NUTRICIONAL
