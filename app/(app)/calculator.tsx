@@ -503,8 +503,15 @@ export default function Calculator() {
             <View style={styles.section}>
               <SectionHeader title="DISECCIÓN NEURAL" icon="brain" color={COLORS.crimson} />
               
+              <View style={[styles.actionRow, { marginTop: 0, marginBottom: 15 }]}>
+                <TouchableOpacity style={[styles.actionBtn, { flex: 1, borderColor: COLORS.neon, shadowColor: COLORS.neon }]} onPress={() => router.push(`/(app)/ai-chat?patientId=${patientId || ''}`)}>
+                  <Ionicons name='chatbubbles' size={24} color={COLORS.neon} />
+                  <Text style={[styles.actionBtnText, { color: COLORS.neon }]}>ABRIR CHAT IA</Text>
+                </TouchableOpacity>
+              </View>
+
               {!aiAnalysis ? (
-                 <TouchableOpacity style={styles.mainActionBtn} onPress={handleAINeuralDissection} disabled={loading}>
+                 <TouchableOpacity style={[styles.mainActionBtn, { marginTop: 0 }]} onPress={handleAINeuralDissection} disabled={loading}>
                   {loading ? <ActivityIndicator color={COLORS.bg} /> : (
                     <>
                       <Ionicons name="flash" size={28} color={COLORS.bg} />
@@ -539,7 +546,7 @@ export default function Calculator() {
                   </View>
 
                   <View style={styles.actionRow}>
-                    <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, aiAnalysis, globalHistory.filter(r => r.patient_id === patientId))}>
+                    <TouchableOpacity style={[styles.actionBtn, { flex: 1 }]} onPress={() => generateClinicalReport(patient as any, form as any, results!, (aiAnalysis || undefined) as any, globalHistory.filter(r => r.patient_id === patientId))}>
                       <Ionicons name='document-text' size={24} color={COLORS.white} />
                       <Text style={styles.actionBtnText}>GENERAR REPORTE PDF</Text>
                     </TouchableOpacity>

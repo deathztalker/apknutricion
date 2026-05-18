@@ -233,6 +233,8 @@ export interface AIAnalysis {
   renal_hepatic_profile?: string;
   pharmacological_interactions?: string;
   goals: string[];
+  meal_plan_hints?: string;
+  education_topics?: string[];
   follow_up: string;
   raw_text: string;
 }
