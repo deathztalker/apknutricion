@@ -95,6 +95,33 @@ export default function Login() {
         const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
         if (result.type === 'cancel') {
           setGoogleLoading(false);
+        } else if (result.type === 'success' && result.url) {
+          const url = result.url;
+          const hashIdx = url.indexOf('#');
+          const queryIdx = url.indexOf('?');
+          let paramsString = '';
+          if (hashIdx !== -1) {
+            paramsString = url.substring(hashIdx + 1);
+          } else if (queryIdx !== -1) {
+            paramsString = url.substring(queryIdx + 1);
+          }
+
+          const params: Record<string, string> = {};
+          paramsString.split('&').forEach(part => {
+            const [key, val] = part.split('=');
+            if (key && val) params[key] = decodeURIComponent(val);
+          });
+
+          if (params.access_token) {
+            const { error: sessionError } = await supabase.auth.setSession({
+              access_token: params.access_token,
+              refresh_token: params.refresh_token || '',
+            });
+            if (sessionError) throw sessionError;
+            router.replace('/(app)/calculator');
+          } else {
+            setGoogleLoading(false);
+          }
         }
       }
 
