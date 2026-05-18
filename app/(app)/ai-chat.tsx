@@ -399,7 +399,7 @@ export default function AIChatScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <View style={[styles.statusDot, { backgroundColor: GEMINI_KEY ? COLORS.neon : COLORS.gold }]} />
                 <Text style={styles.statusTxt}>
-                  {GEMINI_KEY ? 'Gemini 1.5 Flash · Streaming' : 'Modo offline · Reglas MINSAL'}
+                  {GEMINI_KEY ? 'Gemini 2.0 Flash · Streaming' : 'Modo offline · Reglas MINSAL'}
                 </Text>
               </View>
             </View>

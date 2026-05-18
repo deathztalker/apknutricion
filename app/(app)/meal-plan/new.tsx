@@ -1,4 +1,4 @@
-// app/(app)/meal-plan-builder.tsx — Constructor de Plan Alimentario
+// app/(app)/meal-plan/new.tsx — Constructor de Plan Alimentario
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
@@ -70,7 +70,7 @@ const GRUPOS: GrupoAlimento[] = [
     titulo: 'Cereales y legumbres',
     icono: '🌾',
     color: COLORS.gold,
-    items: ['legumbres', 'cereals_sin_grasa', 'cereals_con_grasa'],
+    items: ['legumbres', 'cereales_sin_grasa', 'cereales_con_grasa'],
   },
   {
     titulo: 'Verduras',
@@ -95,7 +95,7 @@ const GRUPOS: GrupoAlimento[] = [
 const PORCIONES_INICIALES: Porciones = {
   lacteo_bajo_grasa: 0, lacteo_alto_grasa: 0,
   carne_baja_grasa: 0, carne_media_grasa: 0, carne_alta_grasa: 0,
-  legumbres: 0, cereals_sin_grasa: 0, cereals_con_grasa: 0,
+  legumbres: 0, cereales_sin_grasa: 0, cereales_con_grasa: 0,
   verdura_general: 0, verdura_libre: 0,
   fruta: 0, grasa_sin_cho: 0, grasa_con_cho: 0, azucar: 0,
 };
