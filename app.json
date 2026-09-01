@@ -23,7 +23,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0b0d12"
       },
-      "package": "com.camila.nutricesfam"
+      "package": "com.camila.nutricesfam",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -36,8 +37,7 @@
       "expo-font"
     ],
     "experiments": {
-      "typedRoutes": true,
-      "baseUrl": "/apknutricion"
+      "typedRoutes": true
     },
     "scheme": "nutricesfam",
     "extra": {

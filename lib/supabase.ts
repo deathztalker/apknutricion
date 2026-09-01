@@ -1,245 +1,116 @@
-// lib/supabase.ts
-import { createClient } from '@supabase/supabase-js';
+// lib/supabase.ts (Local Mock)
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import { usePatientStore } from '../store/patientStore';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
-
-// SecureStore adapter para auth tokens
-const ExpoSecureStoreAdapter = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+// Mock Supabase Client
+const mockChain: any = {
+  select: (...args: any[]) => mockChain,
+  eq: (...args: any[]) => mockChain,
+  order: (...args: any[]) => mockChain,
+  limit: (...args: any[]) => mockChain,
+  single: async (...args: any[]) => ({ data: { id: 'mock-id', patient_id: 'mock-patient-id' }, error: null }),
+  insert: (...args: any[]) => mockChain,
+  update: (...args: any[]) => mockChain,
+  delete: (...args: any[]) => mockChain,
+  upsert: (...args: any[]) => mockChain,
+  not: (...args: any[]) => mockChain,
+  ilike: (...args: any[]) => mockChain,
+  then: (resolve: any) => resolve({ data: [], error: null })
 };
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = {
   auth: {
-    storage: Platform.OS === 'web' ? undefined : ExpoSecureStoreAdapter,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
+    signInWithPassword: async (args: any) => ({ data: { session: { user: { id: 'local' } } }, error: null as any }),
+    signUp: async (args: any) => ({ data: { user: { id: 'local' } }, error: null as any }),
+    signInWithOAuth: async (args: any) => ({ data: { url: '' }, error: null as any }),
+    setSession: async (session: any) => ({ data: { session }, error: null as any }),
+    signOut: async () => ({ error: null }),
+    getSession: async () => ({ data: { session: { user: { id: 'local' } } }, error: null as any }),
+    getUser: async () => ({ data: { user: { id: 'local' } }, error: null as any }),
+    onAuthStateChange: (callback: (event: string, session: any) => void) => ({ data: { subscription: { unsubscribe: () => {} } } })
   },
-});
+  from: (table: string) => mockChain,
+  rpc: async () => ({ data: [], error: null })
+};
 
 // ── Auth helpers ───────────────────────────────────────────
 export const authService = {
-  async signIn(email: string, password: string) {
-    return supabase.auth.signInWithPassword({ email, password });
-  },
-
-  async signUp(email: string, password: string, fullName: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
-    if (data.user && !error) {
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        email,
-        full_name: fullName,
-        role: 'intern',
-      });
-    }
-    return { data, error };
-  },
-
-  async signOut() {
-    return supabase.auth.signOut();
-  },
-
-  async getSession() {
-    return supabase.auth.getSession();
-  },
-
-  async getProfile(userId: string) {
-    return supabase.from('profiles').select('*').eq('id', userId).single();
-  },
-
-  async syncProfile(session: any) {
-    const { user } = session;
-    const metadata = user.user_metadata;
-    
-    const profileData = {
-      id: user.id,
-      email: user.email!,
-      full_name: metadata?.full_name || metadata?.name || 'Nuevo Sujeto',
-      avatar_url: metadata?.avatar_url || metadata?.picture || null,
-      updated_at: new Date().toISOString(),
-    };
-
-    // Upsert profile
-    const { data, error } = await supabase.from('profiles').upsert(profileData).select().single();
-    return { data, error };
-  },
-
-  async updateProfile(userId: string, updates: Record<string, unknown>) {
-    return supabase.from('profiles').update(updates).eq('id', userId);
-  },
+  async signIn() { return { data: {}, error: null }; },
+  async signUp() { return { data: {}, error: null }; },
+  async signOut() { return { error: null }; },
+  async getSession() { return { data: { session: null }, error: null }; },
+  async getProfile() { return { data: { full_name: 'Local User' }, error: null }; },
+  async syncProfile() { return { data: { full_name: 'Local User' }, error: null }; },
+  async updateProfile() { return { error: null }; },
 };
 
 // ── Patient helpers ────────────────────────────────────────
 export const patientService = {
-  async getAll(userId: string, search?: string) {
-    let query = supabase
-      .from('patients')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .order('full_name');
-
-    if (search) query = query.ilike('full_name', `%${search}%`);
-    return query;
+  async getAll(userId?: string, searchQuery?: string) { return { data: usePatientStore.getState().patients, error: null }; },
+  async getById(id: string) { return { data: usePatientStore.getState().patients.find(p => p.id === id) || null, error: null }; },
+  async create(data: any) { 
+    const newPatient = { ...data, id: data.id || Math.random().toString(36).substring(7) };
+    usePatientStore.getState().addPatient(newPatient);
+    return { data: newPatient, error: null }; 
   },
-
-  async getById(id: string) {
-    return supabase.from('patients').select('*').eq('id', id).single();
+  async update(id: string, data: any) { 
+    usePatientStore.getState().updatePatient(id, data);
+    return { data, error: null }; 
   },
-
-  async create(data: Record<string, unknown>) {
-    return supabase.from('patients').insert(data).select().single();
+  async softDelete(id: string) { 
+    usePatientStore.getState().removePatient(id);
+    return { error: null }; 
   },
-
-  async update(id: string, data: Record<string, unknown>) {
-    return supabase.from('patients').update(data).eq('id', id).select().single();
-  },
-
-  async softDelete(id: string) {
-    return supabase.from('patients').update({ is_active: false }).eq('id', id);
-  },
-
-  async getSummary(patientId: string) {
-    return supabase.rpc('get_patient_summary', { p_id: patientId });
-  },
+  async getSummary() { return { data: {}, error: null }; },
 };
 
 // ── Clinical Record helpers ────────────────────────────────
 export const recordService = {
-  async getByPatient(patientId: string, limit = 20) {
-    return supabase
-      .from('clinical_records')
-      .select('*')
-      .eq('patient_id', patientId)
-      .order('record_date', { ascending: false })
-      .limit(limit);
+  async getByPatient(patientId: string, limit?: number) { 
+    return { data: usePatientStore.getState().guestRecords.filter((r: any) => r.patient_id === patientId), error: null }; 
   },
-
-  async getById(id: string) {
-    return supabase.from('clinical_records').select('*').eq('id', id).single();
+  async getByUser(userId: string) {
+    const records = usePatientStore.getState().guestRecords.filter((r: any) => r.user_id === userId || !r.user_id);
+    const populated = records.map(r => ({
+      ...r,
+      patients: usePatientStore.getState().patients.find(pat => pat.id === r.patient_id) || { full_name: 'Anónimo' }
+    }));
+    return { data: populated, error: null };
   },
-
-  async getRecent(userId: string, limit = 10) {
-    return supabase
-      .from('clinical_records')
-      .select(`*, patients(full_name)`)
-      .eq('user_id', userId)
-      .order('record_date', { ascending: false })
-      .limit(limit);
+  async getById(id: string) { return { data: null as any, error: null }; },
+  async getRecent() { return { data: usePatientStore.getState().guestRecords, error: null }; },
+  async create(data: any) { 
+    const newRecord = { ...data, id: data.id || Math.random().toString(36).substring(7) };
+    usePatientStore.getState().addGuestRecord(newRecord);
+    return { data: newRecord, error: null }; 
   },
-
-  async create(data: Record<string, unknown>) {
-    return supabase.from('clinical_records').insert(data).select().single();
-  },
-
-  async update(id: string, data: Record<string, unknown>) {
-    return supabase.from('clinical_records').update(data).eq('id', id).select().single();
-  },
-
-  async delete(id: string) {
-    return supabase.from('clinical_records').delete().eq('id', id);
-  },
-
-  async getBMITrend(patientId: string) {
-    return supabase
-      .from('clinical_records')
-      .select('record_date, bmi, weight_kg, tdee_kcal')
-      .eq('patient_id', patientId)
-      .not('bmi', 'is', null)
-      .order('record_date', { ascending: true })
-      .limit(8);
-  },
+  async update() { return { data: {}, error: null }; },
+  async delete() { return { error: null }; },
+  async getBMITrend() { return { data: [], error: null }; },
 };
 
 // ── Meal Plan helpers ──────────────────────────────────────
 export const mealPlanService = {
-  async getByPatient(patientId: string) {
-    return supabase
-      .from('meal_plans')
-      .select('*')
-      .eq('patient_id', patientId)
-      .order('created_at', { ascending: false });
-  },
-
-  async create(data: Record<string, unknown>) {
-    return supabase.from('meal_plans').insert(data).select().single();
-  },
-
-  async update(id: string, data: Record<string, unknown>) {
-    return supabase.from('meal_plans').update(data).eq('id', id);
-  },
-  async delete(id: string) {
-    return supabase.from('meal_plans').delete().eq('id', id);
-  },
+  async getByPatient(patientId?: string) { return { data: [], error: null }; },
+  async create(data: any) { return { data, error: null }; },
+  async update() { return { error: null }; },
+  async delete() { return { error: null }; },
 };
 
 // ── Biochemical helpers ──────────────────────────────────
 export const biochemicalService = {
-  async getByPatient(patientId: string) {
-    return supabase
-      .from('biochemical_records')
-      .select('*')
-      .eq('patient_id', patientId)
-      .order('exam_date', { ascending: false });
-  },
-
-  async create(data: Record<string, unknown>) {
-    return supabase.from('biochemical_records').insert(data).select().single();
-  },
+  async getByPatient(patientId?: string) { return { data: [], error: null }; },
+  async create(data: any) { return { data, error: null }; },
 };
 
 // ── Lifestyle helpers ────────────────────────────────────
 export const lifestyleService = {
-  async getByPatient(patientId: string) {
-    return supabase
-      .from('lifestyle_records')
-      .select('*')
-      .eq('patient_id', patientId)
-      .order('record_date', { ascending: false });
-  },
-
-  async create(data: Record<string, unknown>) {
-    return supabase.from('lifestyle_records').insert(data).select().single();
-  },
+  async getByPatient(patientId?: string) { return { data: [], error: null }; },
+  async create(data: any) { return { data, error: null }; },
 };
 
 // ── AI Interaction log ─────────────────────────────────────
 export const aiService = {
-  async log(data: {
-    user_id: string;
-    patient_id?: string;
-    record_id?: string;
-    prompt: string;
-    response: string;
-    tokens_used?: number;
-    interaction_type?: string;
-  }) {
-    return supabase.from('ai_interactions').insert({
-      ...data,
-      model: 'claude-sonnet-4-20250514',
-    });
-  },
-
-  async getHistory(userId: string, patientId?: string) {
-    let query = supabase
-      .from('ai_interactions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (patientId) query = query.eq('patient_id', patientId);
-    return query;
-  },
+  async log(data: any) { return { error: null }; },
+  async getHistory(patientId?: string) { return { data: [], error: null }; },
 };

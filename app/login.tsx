@@ -11,7 +11,8 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Dimensions
+  Dimensions,
+  Image
 } from 'react-native';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
@@ -77,7 +78,7 @@ export default function Login() {
       // Definimos la URL de retorno explícitamente para GitHub Pages
       // En Web: https://deathztalker.github.io/apknutricion/google-auth
       // En APK: nutricesfam://google-auth
-      const redirectTo = Platform.OS === 'web' 
+      const redirectTo = Platform.OS === 'web'
         ? 'https://deathztalker.github.io/apknutricion/google-auth'
         : Linking.createURL('google-auth');
 
@@ -118,7 +119,7 @@ export default function Login() {
               refresh_token: params.refresh_token || '',
             });
             if (sessionError) throw sessionError;
-            router.replace('/(app)/calculator');
+            router.replace('/(app)/dashboard');
           } else {
             setGoogleLoading(false);
           }
@@ -133,7 +134,6 @@ export default function Login() {
 
   async function handleAuth() {
     const cleanEmail = email.trim();
-    console.log('Initiating Auth Protocol...', { email: cleanEmail, isSignUp });
 
     if (!cleanEmail || !password) {
       Alert.alert('ERROR DE SISTEMA', 'ADN DIGITAL Y CÓDIGO GENÉTICO REQUERIDOS');
@@ -148,25 +148,22 @@ export default function Login() {
     setLoading(true);
     try {
       if (isSignUp) {
-        console.log('Synthesizing New Subject...');
-        const { data, error } = await supabase.auth.signUp({ 
-          email: cleanEmail, 
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
           password,
           options: {
             emailRedirectTo: Linking.createURL('google-auth'),
           }
         });
-        
+
         if (error) throw error;
-        
-        console.log('Synthesis Initiated:', data);
+
         Alert.alert(
-          'VÍNCULO INICIADO', 
+          'VÍNCULO INICIADO',
           'Se ha enviado un pulso de verificación a tu ADN Digital. Revisa tu bandeja de entrada para completar la síntesis.',
           [{ text: 'ENTENDIDO', onPress: () => setIsSignUp(false) }]
         );
       } else {
-        console.log('Establishing Neural Link...');
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
@@ -177,11 +174,9 @@ export default function Login() {
           }
           throw error;
         }
-        console.log('Neural Link Established:', data.session?.user?.id);
-        router.replace('/(app)/calculator');
+        router.replace('/(app)/dashboard');
       }
     } catch (error: any) {
-      console.error('Auth Protocol Failure:', error);
       Alert.alert('ACCESO DENEGADO', `ERROR DE NÚCLEO: ${error.message}`);
     } finally {
       setLoading(false);
@@ -197,15 +192,17 @@ export default function Login() {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <Animated.View style={[styles.loginBox, { opacity: fadeAnim }]}>
 
-            {/* The Crimson Ghost / Misfits Centerpiece */}
+            {/* The Misfits / Punk Centerpiece */}
             <View style={styles.header}>
               <Animated.View style={{ transform: [{ scale: skullScale }], opacity: skullOpacity }}>
-                <Ionicons name="skull" size={70} color={COLORS.crimson} style={styles.skullShadow} />
+                <View style={styles.avatarContainer}>
+                  <Image source={require('../assets/images/camila_avatar.jpg')} style={styles.avatar} />
+                </View>
               </Animated.View>
               <Animated.Text style={[styles.title, { textShadowRadius: glowRadius, opacity: flickerAnim }]}>
-                NÚCLEO NUTRICIONAL
+                MEOW CLUB
               </Animated.Text>
-              <Text style={styles.subtitle}>AUTORIZACIÓN DE ACCESO CELULAR</Text>
+              <Text style={styles.subtitle}>SÍNTESIS DE ADN DIGITAL // NUTRICIÓN</Text>
               <View style={styles.line} />
             </View>
 
@@ -276,7 +273,7 @@ export default function Login() {
                   style={StyleSheet.absoluteFill}
                 />
                 {loading ? <ActivityIndicator color={COLORS.white} /> : (
-                  <Text style={styles.authButtonText}>{isSignUp ? 'SINTETIZAR SUJETO' : 'SINCronizar METABOLISMO'}</Text>
+                  <Text style={styles.authButtonText}>{isSignUp ? 'SINTETIZAR SUJETO' : 'SINCRONIZAR METABOLISMO'}</Text>
                 )}
               </TouchableOpacity>
 
@@ -300,7 +297,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 30 },
   loginBox: {
-    backgroundColor: 'rgba(5, 5, 5, 0.96)',
+    backgroundColor: 'rgba(5, 5, 5, 0.88)',
     borderWidth: 3,
     borderColor: COLORS.orange,
     padding: 40,
@@ -312,24 +309,39 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   header: { alignItems: 'center', marginBottom: 40 },
+  avatarContainer: {
+    padding: 6,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 0, 255, 0.1)',
+    borderWidth: 2,
+    borderColor: COLORS.pink,
+    overflow: 'hidden',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    resizeMode: 'cover',
+  },
   skullShadow: {
     textShadowColor: COLORS.orange,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 30,
   },
   title: {
-    fontSize: 58,
+    fontSize: 48,
     fontFamily: FONTS.horror,
     color: COLORS.white,
     marginTop: 15,
-    letterSpacing: 5,
+    letterSpacing: 4,
+    textAlign: 'center',
     textShadowColor: '#000',
     textShadowRadius: 10,
   },
   subtitle: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.purple,
-    letterSpacing: 6,
+    letterSpacing: 4,
     textTransform: 'uppercase',
     fontWeight: '900',
     marginTop: 8,

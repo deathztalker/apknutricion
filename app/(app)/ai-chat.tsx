@@ -3,20 +3,22 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
-  Animated, Clipboard, Alert,
+  Animated, Clipboard, Alert, Modal, Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+
 import { recordService, patientService, aiService } from '@/lib/supabase';
-import { generateOfflineAnswer } from '@/lib/ai';
+import { generateOfflineAnswer, generateGroqChat, fetchGroqModels } from '@/lib/ai';
 import { useAuthStore } from '@/store/authStore';
-import { COLORS, SPACING, RADIUS } from '@/constants/theme';
+import { useSettingsStore } from '@/store/settingsStore';
+import NeuralBackground from '@/components/NeuralBackground';
+import { COLORS, SPACING, RADIUS, FONTS } from '@/constants/theme';
 import { formatDate } from '@/lib/calculations';
 
-const GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -41,7 +43,7 @@ interface PatientContext {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const SYSTEM_PROMPT = `Eres NutriBot, una nutricionista clínica virtual experta en Chile.
-Base normativa: MINSAL Chile 2024, GES, Guías Alimentarias, KDIGO, ESC/ESH 2023.
+Base normativa: MINSAL Chile Actualizado (2026), GES, Guías Alimentarias, KDIGO, ESC/ESH.
 Fórmulas disponibles: Mifflin-St Jeor, Faulkner, Cockcroft-Gault, Chumlea, Lorenz.
 Responde en español, con claridad clínica y empatía. Usa evidencia actualizada.
 Si hay datos del paciente en el contexto, úsalos para personalizar la respuesta.
@@ -128,14 +130,14 @@ function inlineParse(text: string): React.ReactElement {
 }
 
 const md = StyleSheet.create({
-  h2: { fontSize: 15, fontWeight: '800', color: COLORS.neon, marginBottom: 2 },
-  h3: { fontSize: 13.5, fontWeight: '700', color: COLORS.text, marginBottom: 1 },
-  body: { fontSize: 14, lineHeight: 21, color: COLORS.text },
-  bold: { fontWeight: '700', color: COLORS.text },
+  h2: { fontSize: 16, fontWeight: '800', color: COLORS.orange, marginBottom: 4, fontFamily: FONTS.horror, letterSpacing: 1 },
+  h3: { fontSize: 14, fontWeight: '700', color: COLORS.neon, marginBottom: 2 },
+  body: { fontSize: 14, lineHeight: 22, color: COLORS.text },
+  bold: { fontWeight: '700', color: COLORS.neon },
   italic: { fontStyle: 'italic', color: COLORS.muted },
-  bulletRow: { flexDirection: 'row', gap: 6, marginBottom: 2 },
-  bullet: { color: COLORS.neon, fontSize: 14, lineHeight: 21 },
-  bulletText: { flex: 1, fontSize: 14, lineHeight: 21, color: COLORS.text },
+  bulletRow: { flexDirection: 'row', gap: 6, marginBottom: 3 },
+  bullet: { color: COLORS.crimson, fontSize: 16, lineHeight: 22 },
+  bulletText: { flex: 1, fontSize: 14, lineHeight: 22, color: COLORS.text },
 });
 
 // ─── Message Bubble ───────────────────────────────────────────────────────────
@@ -163,13 +165,13 @@ function MessageBubble({ msg, onCopy }: { msg: Message; onCopy: (text: string) =
     >
       {!isUser && (
         <View style={styles.msgAvatar}>
-          <Text style={{ fontSize: 15 }}>🐱</Text>
+          <Image source={require('../../assets/images/camila_avatar.jpg')} style={styles.msgAvatarImage} />
         </View>
       )}
 
       <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot, msg.error && styles.bubbleError]}>
         {isUser ? (
-          <Text style={[styles.bubbleTxt, { color: '#000' }]}>{msg.content}</Text>
+          <Text style={[styles.bubbleTxt, { color: COLORS.white }]}>{msg.content}</Text>
         ) : msg.streaming ? (
           <>
             {renderMarkdown(msg.content)}
@@ -207,8 +209,8 @@ function TypingIndicator() {
       Animated.loop(
         Animated.sequence([
           Animated.delay(delay),
-          Animated.timing(dot, { toValue: 1, duration: 300, useNativeDriver: true }),
-          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: false }),
           Animated.delay(600),
         ])
       ).start();
@@ -218,7 +220,9 @@ function TypingIndicator() {
 
   return (
     <View style={styles.msgRow}>
-      <View style={styles.msgAvatar}><Text style={{ fontSize: 15 }}>🐱</Text></View>
+      <View style={styles.msgAvatar}>
+        <Image source={require('../../assets/images/camila_avatar.jpg')} style={styles.msgAvatarImage} />
+      </View>
       <View style={[styles.bubble, styles.bubbleBot, { paddingVertical: 14 }]}>
         <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
           {dots.map((d, i) => (
@@ -244,8 +248,17 @@ export default function AIChatScreen() {
   const insets = useSafeAreaInsets();
   const { patientId, recordId } = useLocalSearchParams<{ patientId?: string; recordId?: string }>();
   const { profile } = useAuthStore();
+  const { groqApiKey, groqModel, setGroqApiKey, setGroqModel } = useSettingsStore();
+  
   const scrollRef = useRef<ScrollView>(null);
   const isAtBottomRef = useRef(true);
+
+  // Settings state
+  const [showSettings, setShowSettings] = useState(false);
+  const [availableModels, setAvailableModels] = useState<{id: string, name?: string}[]>([]);
+  const [tempKey, setTempKey] = useState('');
+  const [tempModel, setTempModel] = useState('');
+  const [fetchingModels, setFetchingModels] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -280,7 +293,7 @@ export default function AIChatScreen() {
 
       const greeting = ctx.name
         ? `¡Hola! 🐱 Tengo el contexto clínico de **${ctx.name}**. ¿Qué consulta quieres analizar hoy?`
-        : '¡Hola! 🐱 Soy **NutriBot**. Pregúntame sobre cálculos, interpretación de exámenes, planes alimentarios o cualquier duda clínica basada en MINSAL 2024.';
+        : '¡Hola! 🐱 Soy **NutriBot**. Pregúntame sobre cálculos, interpretación de exámenes, planes alimentarios o cualquier duda clínica basada en guías MINSAL actualizadas.';
 
       setMessages([{ id: '0', role: 'assistant', content: greeting, timestamp: new Date() }]);
     })();
@@ -311,61 +324,36 @@ export default function AIChatScreen() {
     let response = '';
     let isError = false;
 
-    if (GEMINI_KEY) {
-      try {
-        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    try {
+      const history = messages.slice(-10).map(m => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.content
+      }));
 
-        const history = messages.slice(-10).map(m => ({
-          role: m.role === 'user' ? 'user' : 'model',
-          parts: [{ text: m.content }],
-        }));
+      const sysPrompt = SYSTEM_PROMPT + (patientCtx.raw ? `\n\nContexto actual: ${patientCtx.raw}` : '');
+      
+      const fullHistory = [
+        ...history,
+        { role: 'user', content }
+      ];
 
-        const chat = model.startChat({
-          history: [
-            { role: 'user', parts: [{ text: SYSTEM_PROMPT + (patientCtx.raw ? `\n\nContexto actual: ${patientCtx.raw}` : '') }] },
-            { role: 'model', parts: [{ text: 'Entendido. Lista para ayudarte con consultas clínicas basadas en MINSAL Chile.' }] },
-            ...history,
-          ],
-          generationConfig: { maxOutputTokens: 900, temperature: 0.65 },
+      response = await generateGroqChat(fullHistory, sysPrompt, groqModel, groqApiKey || undefined);
+
+      if (profile?.id) {
+        await aiService.log({
+          user_id: profile.id,
+          patient_id: patientId,
+          record_id: recordId,
+          prompt: content,
+          response,
+          interaction_type: 'chat',
         });
-
-        // Streaming response
-        const streamingId = (Date.now() + 1).toString();
-        setMessages(prev => [...prev, { id: streamingId, role: 'assistant', content: '', timestamp: new Date(), streaming: true }]);
-        setLoading(false);
-
-        const result = await chat.sendMessageStream(content);
-        let accumulated = '';
-
-        for await (const chunk of result.stream) {
-          const chunkText = chunk.text();
-          accumulated += chunkText;
-          setMessages(prev => prev.map(m => m.id === streamingId ? { ...m, content: accumulated } : m));
-          if (isAtBottomRef.current) scrollToEnd();
-        }
-
-        response = accumulated;
-        setMessages(prev => prev.map(m => m.id === streamingId ? { ...m, streaming: false } : m));
-
-        if (profile?.id) {
-          await aiService.log({
-            user_id: profile.id,
-            patient_id: patientId,
-            record_id: recordId,
-            prompt: content,
-            response,
-            interaction_type: 'chat',
-          });
-        }
-        return; // skip final setMessages below — already handled via streaming
-      } catch (e) {
-        console.warn('Gemini error:', e);
-        response = generateOfflineAnswer(content);
-        isError = false; // offline fallback is still a valid answer
       }
-    } else {
+
+    } catch (err: any) {
+      console.warn('Groq Error, fallback to offline:', err);
       response = generateOfflineAnswer(content);
+      isError = false; // El offline fallback no es un error visual
     }
 
     setLoading(false);
@@ -381,7 +369,7 @@ export default function AIChatScreen() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <LinearGradient colors={['#080a10', '#0d1018']} style={{ flex: 1 }}>
+    <NeuralBackground>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -391,18 +379,38 @@ export default function AIChatScreen() {
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <LinearGradient colors={['rgba(0,255,136,0.18)', 'rgba(0,255,136,0.06)']} style={styles.botIcon}>
-              <Text style={{ fontSize: 18 }}>🐱</Text>
-            </LinearGradient>
+            <View style={styles.botIconContainer}>
+              <Image source={require('../../assets/images/camila_avatar.jpg')} style={styles.botAvatar} />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.headerTitle}>NutriBot IA</Text>
+              <Text style={styles.headerTitle}>NutriBot IA 💀</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <View style={[styles.statusDot, { backgroundColor: GEMINI_KEY ? COLORS.neon : COLORS.gold }]} />
+                <View style={[styles.statusDot, { backgroundColor: COLORS.neon }]} />
                 <Text style={styles.statusTxt}>
-                  {GEMINI_KEY ? 'Gemini 1.5 Flash · Streaming' : 'Modo offline · Reglas MINSAL'}
+                  {groqModel} · Groq IA
                 </Text>
               </View>
             </View>
+
+            <TouchableOpacity 
+              style={styles.settingsBtn}
+              onPress={async () => {
+                setTempKey(groqApiKey || '');
+                setTempModel(groqModel);
+                setShowSettings(true);
+                setFetchingModels(true);
+                try {
+                  const models = await fetchGroqModels(groqApiKey || undefined);
+                  setAvailableModels(models);
+                } catch (e) {
+                  Alert.alert('Error', 'No se pudieron cargar los modelos de Groq');
+                } finally {
+                  setFetchingModels(false);
+                }
+              }}
+            >
+              <Ionicons name="settings-outline" size={22} color={COLORS.neon} />
+            </TouchableOpacity>
           </View>
 
           {/* Patient context badge */}
@@ -512,8 +520,68 @@ export default function AIChatScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* ── Settings Modal ──────────────────────────────────────────────── */}
+        <Modal visible={showSettings} animationType="slide" transparent={true}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>CONFIGURACIÓN GROQ</Text>
+                <TouchableOpacity onPress={() => setShowSettings(false)}>
+                  <Ionicons name="close" size={24} color={COLORS.muted} />
+                </TouchableOpacity>
+              </View>
+              
+              <Text style={styles.modalLabel}>Groq API Key (Activa)</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="gsk_..."
+                placeholderTextColor={COLORS.dim}
+                value={tempKey}
+                onChangeText={setTempKey}
+                secureTextEntry
+              />
+              <Text style={styles.modalSub}>Tu API Key está configurada por defecto en el núcleo.</Text>
+
+              <Text style={styles.modalLabel}>Modelo IA (Groq)</Text>
+              {fetchingModels ? (
+                <ActivityIndicator color={COLORS.neon} style={{ marginVertical: 20 }} />
+              ) : (
+                <View style={styles.modelList}>
+                  <ScrollView nestedScrollEnabled style={{ maxHeight: 200 }}>
+                    {availableModels.map(m => (
+                      <TouchableOpacity 
+                        key={m.id} 
+                        style={[styles.modelItem, tempModel === m.id && styles.modelItemActive]}
+                        onPress={() => setTempModel(m.id)}
+                      >
+                        <Text style={[styles.modelItemTxt, tempModel === m.id && { color: COLORS.neon }]}>
+                          {m.name || m.id}
+                        </Text>
+                        {tempModel === m.id && <Ionicons name="checkmark" size={16} color={COLORS.neon} />}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              <TouchableOpacity 
+                style={styles.modalSaveBtn} 
+                onPress={() => {
+                  setGroqApiKey(tempKey.trim() || null);
+                  setGroqModel(tempModel);
+                  setShowSettings(false);
+                  Alert.alert('Sistema Actualizado', 'El módulo IA ha sido reconfigurado.');
+                }}
+              >
+                <LinearGradient colors={['rgba(0,255,136,0.3)', 'transparent']} style={StyleSheet.absoluteFillObject} />
+                <Text style={styles.modalSaveTxt}>GUARDAR Y REINICIAR NÚCLEO</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </NeuralBackground>
   );
 }
 
@@ -524,16 +592,25 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: SPACING.lg, paddingBottom: SPACING.sm,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(0,255,136,0.1)', gap: SPACING.sm,
+    borderBottomWidth: 2, borderBottomColor: 'rgba(255,0,60,0.4)',
+    backgroundColor: 'rgba(5,5,5,0.95)',
+    gap: SPACING.sm,
   },
   backBtn: { padding: 4, marginRight: -2 },
   headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  botIcon: {
-    width: 40, height: 40, borderRadius: 20,
-    borderWidth: 1, borderColor: COLORS.neon + '33',
+  botIconContainer: {
+    width: 44, height: 44, borderRadius: 22,
+    borderWidth: 2, borderColor: COLORS.pink,
+    backgroundColor: 'rgba(255, 0, 255, 0.1)',
     alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden'
   },
-  headerTitle: { fontSize: 15, fontWeight: '800', color: COLORS.text, letterSpacing: 0.2 },
+  botAvatar: {
+    width: 44,
+    height: 44,
+    resizeMode: 'cover',
+  },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.horror, letterSpacing: 1 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusTxt: { fontSize: 10.5, color: COLORS.muted },
   contextBadge: {
@@ -570,19 +647,33 @@ const styles = StyleSheet.create({
   msgRow: { flexDirection: 'row', gap: SPACING.sm, alignItems: 'flex-end' },
   msgRowUser: { flexDirection: 'row-reverse' },
   msgAvatar: {
-    width: 30, height: 30, borderRadius: 15,
-    backgroundColor: 'rgba(0,255,136,0.1)',
-    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    width: 26, height: 26, borderRadius: 13,
+    backgroundColor: 'rgba(255, 0, 255, 0.1)',
+    alignItems: 'center', justifyContent: 'center',
+    marginRight: 8,
+    borderWidth: 1, borderColor: COLORS.pink,
+    overflow: 'hidden'
   },
-  bubble: { maxWidth: '82%', borderRadius: RADIUS.lg, padding: SPACING.md, gap: 2 },
-  bubbleUser: { backgroundColor: COLORS.neon, borderBottomRightRadius: 4 },
+  msgAvatarImage: {
+    width: 26,
+    height: 26,
+    resizeMode: 'cover',
+  },
+  bubble: { maxWidth: '85%', padding: SPACING.md, gap: 2, borderWidth: 1, borderRadius: RADIUS.md },
+  bubbleUser: { 
+    backgroundColor: 'rgba(157, 0, 255, 0.25)', 
+    borderColor: COLORS.purple,
+    borderBottomRightRadius: 2,
+    shadowColor: COLORS.purple, shadowOpacity: 0.4, shadowRadius: 12
+  },
   bubbleBot: {
-    backgroundColor: 'rgba(16,20,30,0.97)',
-    borderWidth: 1, borderColor: 'rgba(0,255,136,0.15)',
-    borderBottomLeftRadius: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderColor: 'rgba(255,0,60,0.35)',
+    borderBottomLeftRadius: 2,
+    shadowColor: COLORS.crimson, shadowOpacity: 0.2, shadowRadius: 10
   },
   bubbleError: { borderColor: 'rgba(255,107,107,0.4)' },
-  bubbleTxt: { fontSize: 14, lineHeight: 20, color: COLORS.text },
+  bubbleTxt: { fontSize: 14, lineHeight: 20, color: COLORS.white, fontFamily: FONTS.space },
   bubbleMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginTop: 4 },
   bubbleTime: { fontSize: 9.5, color: COLORS.muted },
   cursor: { color: COLORS.neon, fontSize: 14 },
@@ -595,14 +686,115 @@ const styles = StyleSheet.create({
   },
   inputWrap: { flex: 1, position: 'relative' },
   textInput: {
-    backgroundColor: 'rgba(16,20,30,0.9)',
-    borderRadius: RADIUS.lg,
-    borderWidth: 1, borderColor: 'rgba(157,77,255,0.3)',
-    color: COLORS.text,
+    backgroundColor: 'rgba(5,5,10,0.95)',
+    borderWidth: 1, borderColor: COLORS.crimson,
+    borderRadius: RADIUS.md,
+    color: COLORS.white,
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm + 2,
     fontSize: 14, maxHeight: 100,
+    fontFamily: FONTS.space,
+    shadowColor: COLORS.crimson, shadowOpacity: 0.4, shadowRadius: 10
   },
   charCount: { position: 'absolute', bottom: 6, right: 10, fontSize: 9.5, color: COLORS.muted },
   sendBtn: { flexShrink: 0 },
   sendGrad: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+
+  settingsBtn: {
+    padding: 10,
+    backgroundColor: 'rgba(0,255,136,0.05)',
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(0,255,136,0.2)',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: 'rgba(5,5,10,0.98)',
+    borderRadius: RADIUS.lg,
+    borderWidth: 2,
+    borderColor: 'rgba(255,107,0,0.5)',
+    padding: 20,
+    shadowColor: COLORS.orange,
+    shadowOpacity: 0.4,
+    shadowRadius: 25,
+    elevation: 15,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    paddingBottom: 10,
+  },
+  modalTitle: {
+    color: COLORS.orange,
+    fontFamily: FONTS.horror,
+    fontSize: 22,
+    letterSpacing: 2,
+  },
+  modalLabel: {
+    color: COLORS.white,
+    fontFamily: FONTS.space,
+    fontSize: 12,
+    marginTop: 15,
+    marginBottom: 8,
+  },
+  modalSub: {
+    color: COLORS.muted,
+    fontSize: 11,
+    marginTop: 4,
+    marginBottom: 10,
+  },
+  modalInput: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderWidth: 1,
+    borderColor: COLORS.dim,
+    borderRadius: RADIUS.md,
+    color: COLORS.white,
+    padding: 12,
+    fontFamily: FONTS.space,
+    fontSize: 12,
+  },
+  modelList: {
+    borderWidth: 1,
+    borderColor: COLORS.dim,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    overflow: 'hidden',
+  },
+  modelItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  modelItemActive: {
+    backgroundColor: 'rgba(0,255,136,0.1)',
+  },
+  modelItemTxt: {
+    color: COLORS.white,
+    fontSize: 13,
+  },
+  modalSaveBtn: {
+    marginTop: 25,
+    borderWidth: 1,
+    borderColor: COLORS.neon,
+    borderRadius: RADIUS.md,
+    padding: 15,
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  modalSaveTxt: {
+    color: COLORS.neon,
+    fontFamily: FONTS.space,
+    fontSize: 12,
+    letterSpacing: 1,
+  }
 });

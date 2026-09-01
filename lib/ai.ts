@@ -1,17 +1,8 @@
-// lib/ai.ts — Motor IA Clínica v2: Gemini 2.0 Flash + Protocolo de Élite
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// lib/ai.ts — Motor IA Clínica v2: Groq Llama 3.1 (100% Gratuito sin Tarjeta)
 import { ClinicalRecord, Patient, AIAnalysis, ClinicalAlert, CalculationResult } from '@/types';
 
-// Polyfill para fetch en entornos que lo requieran (ej. Node antiguo durante build)
-if (typeof fetch === 'undefined' && typeof global !== 'undefined') {
-  // En React Native / Web fetch ya existe. Esto es para SSR/Node.
-  // No importamos node-fetch dinámicamente aquí para evitar errores de bundle,
-  // pero aseguramos que el entorno tenga acceso al fetch global si existe.
-  (global as any).fetch = (global as any).fetch || undefined;
-}
-
-const GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GROQ_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
+const GROQ_MODEL = 'llama-3.1-70b-versatile';
 const MAX_RETRIES = 2;
 const TIMEOUT_MS = 15_000;
 
@@ -288,7 +279,7 @@ function buildPrompt(
     record.systolic_bp ? `PA: ${record.systolic_bp}/${record.diastolic_bp} mmHg` : null,
   ].filter(Boolean).join(' | ') || 'No disponibles';
 
-  return `Eres una Nutricionista Clínica de élite en Chile (MINSAL 2024, KDIGO, ESC/ESH 2023).
+  return `Eres una Nutricionista Clínica de élite en Chile (MINSAL Actualizado 2026, KDIGO, ESC/ESH).
 Realiza un análisis de alta densidad clínica. Sin redundancias ni frases genéricas.
 
 ## DATOS DEL PACIENTE
@@ -308,7 +299,7 @@ ${labs}
 ## INSTRUCCIONES
 Responde ÚNICAMENTE con el siguiente JSON (sin markdown ni texto adicional):
 {
-  "nutritional_diagnosis": "Diagnóstico formal, técnico, de grado hospitalario (2–3 oraciones)",
+  "nutritional_diagnosis": "Diagnóstico Nutricional Integrado (DNI) según norma MINSAL (ej: 'Estado Nutricional Normal con Riesgo Cardiovascular Alto y Sarcopenia')",
   "summary": "Análisis fisiopatológico integrando los datos. Explica interconexiones clave (2–3 párrafos)",
   "recommendations": ["Protocolo 1 específico y accionable", "Protocolo 2", "Protocolo 3", "Protocolo 4", "Protocolo 5"],
   "goals": ["Meta SMART 1 con número y plazo", "Meta SMART 2", "Meta SMART 3"],
@@ -339,20 +330,40 @@ function validateGeminiResponse(data: unknown): data is GeminiAnalysisResponse {
 // LLAMADA A GEMINI CON RETRY Y TIMEOUT
 // ══════════════════════════════════════════════════════════════════════════════
 
-async function callGeminiWithRetry(
-  model: ReturnType<InstanceType<typeof GoogleGenerativeAI>['getGenerativeModel']>,
+async function callGroqREST(
   prompt: string,
   retries = MAX_RETRIES
 ): Promise<GeminiAnalysisResponse> {
+  const url = `https://api.groq.com/openai/v1/chat/completions`;
+
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-      const result = await model.generateContent(prompt);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_KEY}`
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.5,
+          response_format: { type: 'json_object' }
+        }),
+        signal: controller.signal
+      });
       clearTimeout(timeout);
 
-      const rawText = result.response.text();
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`API Error ${response.status}: ${errText}`);
+      }
+
+      const result = await response.json();
+      const rawText = result.choices?.[0]?.message?.content || '';
       const clean = rawText.replace(/```json\s*|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
@@ -363,7 +374,6 @@ async function callGeminiWithRetry(
     } catch (err) {
       const isLast = attempt === retries;
       if (isLast) throw err;
-      // Backoff exponencial simple
       await new Promise(r => setTimeout(r, 1000 * attempt));
     }
   }
@@ -385,15 +395,9 @@ export async function analyzeWithGemini(
 
   const ruleAlerts = generateRuleBasedAlerts(record, calc, age, patient.sex ?? '');
 
-  if (GEMINI_KEY) {
+  if (GROQ_KEY) {
     try {
-      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const model = genAI.getGenerativeModel({
-        model: GEMINI_MODEL,
-        generationConfig: { temperature: 0.6, maxOutputTokens: 1200 },
-      });
-
-      const parsed = await callGeminiWithRetry(model, buildPrompt(patient, record, calc, ruleAlerts));
+      const parsed = await callGroqREST(buildPrompt(patient, record, calc, ruleAlerts));
 
       return {
         summary: parsed.summary,
@@ -407,7 +411,7 @@ export async function analyzeWithGemini(
         raw_text: JSON.stringify(parsed),
       };
     } catch (err) {
-      console.warn('[NutriBot] Gemini falló, usando análisis por reglas:', err);
+      console.warn('[NutriBot] Groq falló, usando análisis por reglas:', err);
     }
   }
 
@@ -516,7 +520,7 @@ function buildRuleBasedAnalysis(
       hasObesity ? 'Déficit calórico sin restricción extrema' : 'Densidad nutricional vs densidad calórica',
       'Hidratación y función metabólica',
     ],
-    raw_text: '[Análisis offline — configura GEMINI_API_KEY para análisis narrativo IA]',
+    raw_text: '[Análisis offline — configura tu API Key de Groq para análisis narrativo IA]',
   };
 }
 
@@ -532,7 +536,7 @@ interface OfflineTopic {
 const OFFLINE_TOPICS: OfflineTopic[] = [
   {
     keywords: ['imc', 'índice de masa', 'obesidad', 'sobrepeso', 'bajo peso'],
-    answer: `**Clasificación IMC (OMS / MINSAL 2024)**
+    answer: `**Clasificación IMC (OMS / MINSAL Actualizado)**
 • < 18.5 → Déficit ponderal
 • 18.5–24.9 → Rango óptimo ✓
 • 25–29.9 → Sobrepeso
@@ -706,7 +710,7 @@ export function generateOfflineAnswer(question: string): string {
 
   if (bestScore > 0) return bestAnswer;
 
-  return `🐱 Para esta consulta necesito conexión a Gemini.
+  return `🐱 Para esta consulta necesito conexión a Groq.
 Puedo responder en modo offline sobre:
 • **Antropometría:** IMC, Lorenz, Chumlea, ICT, cintura
 • **Composición:** Faulkner, % grasa, sarcopenia
@@ -715,5 +719,68 @@ Puedo responder en modo offline sobre:
 • **Proteínas:** requerimientos por patología y edad
 • **Adulto mayor:** nutrición geriátrica, MNA
 
-Configura **GEMINI_API_KEY** para análisis clínico narrativo de alta densidad.`;
+
+Configura tu **API Key de Groq** en los ajustes para un análisis clínico narrativo de alta densidad.`;
+}
+
+export async function fetchGroqModels(apiKey?: string): Promise<{id: string, name?: string}[]> {
+  const key = apiKey || GROQ_KEY;
+  const response = await fetch('https://api.groq.com/openai/v1/models', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${key}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('No se pudieron obtener los modelos de Groq');
+  }
+
+  const data = await response.json();
+  return data.data.filter((m: any) => m.active).map((m: any) => ({
+    id: m.id,
+    name: m.name || m.id
+  }));
+}
+
+export async function generateGroqChat(
+  messages: {role: string, content: string}[], 
+  systemPrompt: string,
+  model?: string,
+  apiKey?: string
+): Promise<string> {
+  const key = apiKey || GROQ_KEY;
+  const selectedModel = model || GROQ_MODEL;
+
+  const payload = {
+    model: selectedModel,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(m => ({ role: m.role, content: m.content }))
+    ],
+    temperature: 0.3,
+    max_tokens: 1500,
+  };
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Groq Error Details:', errorText);
+    throw new Error(`Groq API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error('Groq API malformed response.');
+  }
+  
+  return data.choices[0].message.content;
 }

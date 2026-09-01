@@ -1,8 +1,13 @@
-import * as Print from 'expo-print';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 import { Patient, ClinicalRecord, CalculationResult, AIAnalysis } from '../types';
 import { COLORS } from '../constants/theme';
+
+// Configurar fuentes virtuales para pdfmake
+(pdfMake as any).vfs = pdfFonts;
 
 export async function generateClinicalReport(
   patient: Patient,
@@ -11,329 +16,336 @@ export async function generateClinicalReport(
   ai: AIAnalysis,
   history: ClinicalRecord[] = []
 ) {
+  // ── Cálculo de Proporciones para Macros ───────────
+  const p = calc.macros?.protG || 0;
+  const c = calc.macros?.choG || 0;
+  const f = calc.macros?.fatG || 0;
+
   // ── Generar Gráfico SVG Evolutivo ──────────────────────────
   const validHistory = history.filter(r => r.weight_kg).slice(0, 10).reverse();
-  let chartSVG = '';
-  
+  let chartNode: any = null;
+
   if (validHistory.length > 1) {
     const minW = Math.min(...validHistory.map(r => r.weight_kg!)) - 5;
     const maxW = Math.max(...validHistory.map(r => r.weight_kg!)) + 5;
     const range = maxW - minW || 10;
-    
+
     const points = validHistory.map((r, i) => {
-      const x = (i / (validHistory.length - 1)) * 360 + 20; 
+      const x = (i / (validHistory.length - 1)) * 480 + 25;
       const y = 100 - ((r.weight_kg! - minW) / range) * 80;
       return `${x},${y}`;
     }).join(' ');
 
     const circles = validHistory.map((r, i) => {
-      const x = (i / (validHistory.length - 1)) * 360 + 20;
+      const x = (i / (validHistory.length - 1)) * 480 + 25;
       const y = 100 - ((r.weight_kg! - minW) / range) * 80;
-      return `<circle cx="${x}" cy="${y}" r="4" fill="${COLORS.crimson}" />
-              <text x="${x}" y="${y - 10}" fill="#ffffff" font-size="9" text-anchor="middle" font-family="monospace" font-weight="900">${r.weight_kg}kg</text>`;
+      return `<circle cx="${x}" cy="${y}" r="5" fill="${COLORS.crimson}" />
+              <text x="${x}" y="${y - 12}" fill="#ffffff" font-size="10" text-anchor="middle" font-weight="900">${r.weight_kg}kg</text>`;
     }).join('');
 
-    chartSVG = `
-      <div class="chart-container">
-        <div class="hud-title" style="color:${COLORS.bone}; margin-bottom:10px;">EVOLUCIÓN PONDERAL HISTÓRICA</div>
-        <svg width="100%" height="120" viewBox="0 0 400 120" style="background:#000; border:1px solid #333; display:block;">
-          <line x1="0" y1="20" x2="400" y2="20" stroke="#222" stroke-width="1" />
-          <line x1="0" y1="60" x2="400" y2="60" stroke="#222" stroke-width="1" />
-          <line x1="0" y1="100" x2="400" y2="100" stroke="#222" stroke-width="1" />
-          <polyline points="${points}" fill="none" stroke="${COLORS.poison}" stroke-width="3" />
-          ${circles}
-        </svg>
-      </div>
+    const rawSvg = `
+      <svg width="530" height="130" viewBox="0 0 530 130">
+        <rect x="0" y="0" width="530" height="130" fill="#000" stroke="#333" stroke-width="1" />
+        <line x1="0" y1="20" x2="530" y2="20" stroke="#222" stroke-width="1" />
+        <line x1="0" y1="60" x2="530" y2="60" stroke="#222" stroke-width="1" />
+        <line x1="0" y1="100" x2="530" y2="100" stroke="#222" stroke-width="1" />
+        <polyline points="${points}" fill="none" stroke="${COLORS.poison}" stroke-width="3" />
+        ${circles}
+      </svg>
     `;
+
+    chartNode = {
+      stack: [
+        { text: 'EVOLUCIÓN PONDERAL HISTÓRICA', color: COLORS.bone, fontSize: 10, bold: true, margin: [0, 0, 0, 10] },
+        { svg: rawSvg, width: 530 }
+      ],
+      margin: [0, 20, 0, 0],
+      unbreakable: true
+    };
   }
 
-  // ── Cálculo de Proporciones para Barra de Macros ───────────
-  const p = calc.macros?.protG || 0;
-  const c = calc.macros?.choG || 0;
-  const f = calc.macros?.fatG || 0;
-  const totalG = p + c + f || 1;
-  const pPct = (p / totalG) * 100;
-  const cPct = (c / totalG) * 100;
-  const fPct = (f / totalG) * 100;
+  // AI Recomendaciones
+  const recList = (ai?.recommendations || []).map(r => ({
+    text: [
+      { text: '> ', color: COLORS.poison, bold: true, fontSize: 12 },
+      { text: r, color: '#eeeeee', fontSize: 10 }
+    ],
+    margin: [0, 5, 0, 5]
+  }));
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap');
-          
-          /* Forzar colores en impresión */
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  const docDefinition: any = {
+    pageSize: 'A4',
+    pageMargins: [30, 40, 30, 40],
+    background: function (currentPage: any, pageSize: any) {
+      return {
+        canvas: [
+          { type: 'rect', x: 0, y: 0, w: pageSize.width, h: pageSize.height, color: '#050505' }
+        ]
+      };
+    },
+    defaultStyle: { color: '#ffffff', fontSize: 10 },
+    styles: {
+      header: { fontSize: 28, bold: true, color: '#ffffff' },
+      headerHighlight: { fontSize: 28, bold: true, color: COLORS.crimson },
+      tag: { color: '#ffffff', background: COLORS.crimson, bold: true, fontSize: 10, margin: [0, 20, 0, 10], alignment: 'left' },
+      label: { color: '#888888', fontSize: 8, bold: true },
+      value: { color: '#ffffff', fontSize: 12, bold: true },
+    },
+    content: [
+      // HEADER
+      {
+        table: {
+          widths: ['*', 'auto'],
+          body: [
+            [
+              {
+                stack: [
+                  { text: [{ text: 'DOSSIER ', style: 'header' }, { text: 'METABÓLICO', style: 'headerHighlight' }] },
+                  { text: `NÚCLEO_ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()} | REPORTE TÉCNICO DE ÉLITE`, color: '#888888', fontSize: 8, margin: [0, 5, 0, 0] }
+                ],
+                border: [false, false, false, false]
+              },
+              {
+                stack: [
+                  { text: calc.bmiStatus?.split(' ')[0].toUpperCase() || 'ESTABLE', fontSize: 18, color: COLORS.poison, bold: true, alignment: 'right' },
+                  { text: 'STATUS BIOMÉTRICO', fontSize: 8, color: '#666666', alignment: 'right' }
+                ],
+                border: [true, false, false, false],
+                borderColor: ['#333333', '#333333', '#333333', '#333333']
+              }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: () => 0,
+          vLineWidth: (i: number) => (i === 1 ? 2 : 0),
+          vLineColor: () => '#333333',
+          paddingLeft: (i: number) => (i === 1 ? 15 : 0)
+        },
+        margin: [0, 0, 0, 20]
+      },
 
-          body { 
-            font-family: 'Space Mono', monospace; 
-            padding: 0; margin: 0;
-            background-color: #050505 !important; color: #ffffff !important; 
-          }
+      // IDENTIDAD DEL SUJETO
+      {
+        table: { widths: ['auto'], body: [[{ text: ' IDENTIDAD DEL SUJETO ', color: '#ffffff', fillColor: COLORS.crimson, bold: true, fontSize: 9, border: [false, false, false, false] }]] }
+      },
+      { text: '\n', fontSize: 5 },
+      {
+        table: {
+          widths: ['*', '*', '*', '*'],
+          body: [
+            [
+              { text: [{ text: 'SUJETO\n', style: 'label' }, { text: patient.full_name.toUpperCase(), style: 'value' }], fillColor: '#0d0d12', border: [true, true, true, true] },
+              { text: [{ text: 'GENOTIPO\n', style: 'label' }, { text: patient.sex === 'F' ? 'XX (FEMENINO)' : 'XY (MASCULINO)', style: 'value' }], fillColor: '#0d0d12', border: [true, true, true, true] },
+              { text: [{ text: 'EDAD\n', style: 'label' }, { text: `${patient.age} AÑOS`, style: 'value' }], fillColor: '#0d0d12', border: [true, true, true, true] },
+              { text: [{ text: 'FECHA\n', style: 'label' }, { text: new Date().toLocaleDateString('es-CL'), style: 'value' }], fillColor: '#0d0d12', border: [true, true, true, true] }
+            ]
+          ]
+        },
+        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#333333', vLineColor: () => '#333333', paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 8, paddingBottom: () => 8 },
+        margin: [0, 0, 0, 15]
+      },
 
-          .page { padding: 40px; }
+      // TELEMETRÍA AVANZADA
+      {
+        table: { widths: ['auto'], body: [[{ text: ' TELEMETRÍA CORPORAL AVANZADA ', color: '#ffffff', fillColor: COLORS.crimson, bold: true, fontSize: 9, border: [false, false, false, false] }]] },
+        unbreakable: true
+      },
+      { text: '\n', fontSize: 5 },
+      {
+        table: {
+          widths: ['*', '*', '*', '*'],
+          body: [
+            [
+              { text: [{ text: 'MASA TOTAL\n', style: 'label' }, { text: `${record.weight_kg ?? 'N/A'} KG`, style: 'value' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'ESTATURA\n', style: 'label' }, { text: `${record.height_cm ?? 'N/A'} CM`, style: 'value' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'ÍNDICE IMC\n', style: 'label' }, { text: `${calc.bmi ?? 'N/A'}`, style: 'value', color: COLORS.crimson }], fillColor: '#0d0d12' },
+              { text: [{ text: 'PESO IDEAL\n', style: 'label' }, { text: `${calc.idealWeight ?? 'N/A'} KG`, style: 'value' }], fillColor: '#0d0d12' }
+            ],
+            [
+              { text: [{ text: 'ADIPOSIDAD %\n', style: 'label' }, { text: calc.fatPercent != null ? `${calc.fatPercent}%` : 'N/A', style: 'value' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'TEJIDO GRASO\n', style: 'label' }, { text: `${calc.fatMassKg ?? 'N/A'} KG`, style: 'value' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'TEJIDO MAGRO\n', style: 'label' }, { text: `${calc.leanMassKg ?? 'N/A'} KG`, style: 'value' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'RIESGO CV\n', style: 'label' }, { text: `${calc.cvRisk || 'N/A'}`, style: 'value', color: COLORS.crimson }], fillColor: '#0d0d12' }
+            ]
+          ]
+        },
+        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#333333', vLineColor: () => '#333333', paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 8, paddingBottom: () => 8 },
+        unbreakable: true
+      },
 
-          /* Header Estilo Terminal */
-          .header { 
-            border: 3px solid #333; padding: 30px; 
-            display: flex; justify-content: space-between; align-items: center;
-            background-color: #0d0d12 !important; margin-bottom: 40px;
-            border-left: 15px solid ${COLORS.crimson};
-          }
+      chartNode,
 
-          .title-area h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 32px; 
-            color: #ffffff !important; margin: 0; text-transform: uppercase;
-            letter-spacing: 4px; line-height: 1;
-          }
-          .title-area span { color: ${COLORS.crimson} !important; }
-          .transmission-id { font-size: 10px; color: #888; margin-top: 10px; letter-spacing: 3px; font-weight: 700; }
+      // HUD SECUNDARIO
+      {
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: [{ text: 'HEMODINÁMICA\n', style: 'label' }, { text: `${record.systolic_bp || '--'}/${record.diastolic_bp || '--'} mmHg\n`, style: 'value' }, { text: calc.bpStatus || 'Sin Registro', fontSize: 8, color: COLORS.sky }], fillColor: '#0d0d12' },
+              { text: [{ text: 'FILTRACIÓN RENAL\n', style: 'label' }, { text: `${calc.gfr || 'N/A'} ml/min\n`, style: 'value' }, { text: `KDIGO: ${calc.kdigoStage || '--'}`, fontSize: 8, color: COLORS.crimson }], fillColor: '#0d0d12' },
+              { text: [{ text: 'CAPACIDAD FUNCIONAL\n', style: 'label' }, { text: `${record.grip_strength_kg || '0'} KG (GRIP)\n`, style: 'value' }, { text: `Sarcopenia: ${calc.sarcopeniaRisk || 'Estable'}`, fontSize: 8, color: COLORS.purple }], fillColor: '#0d0d12' }
+            ]
+          ]
+        },
+        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#333333', vLineColor: () => '#333333', paddingLeft: () => 10, paddingRight: () => 10, paddingTop: () => 10, paddingBottom: () => 10 },
+        margin: [0, 15, 0, 15],
+        unbreakable: true
+      },
 
-          .status-box {
-            text-align: right; border-left: 2px solid #333; padding-left: 30px;
-          }
-          .status-val { font-family: 'Orbitron', sans-serif; font-size: 28px; color: ${COLORS.poison} !important; font-weight: 900; }
-          .status-lab { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+      // MACROS
+      {
+        table: { widths: ['auto'], body: [[{ text: ' ASIGNACIÓN DE RECURSOS METABÓLICOS ', color: '#ffffff', fillColor: COLORS.crimson, bold: true, fontSize: 9, border: [false, false, false, false] }]] },
+        unbreakable: true
+      },
+      { text: '\n', fontSize: 5 },
+      {
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: [{ text: 'PROTEÍNAS\n', style: 'label' }, { text: `${p}g `, style: 'value' }, { text: `(${record.macro_prot_pct || 0}%)\n`, fontSize: 8, color: '#888888' }, { text: `${calc.macros?.protGkg || 0} g/kg`, style: 'label' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'CARBOHIDRATOS\n', style: 'label' }, { text: `${c}g `, style: 'value' }, { text: `(${record.macro_cho_pct || 0}%)\n`, fontSize: 8, color: '#888888' }, { text: `${calc.macros?.choGkg || 0} g/kg`, style: 'label' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'LÍPIDOS\n', style: 'label' }, { text: `${f}g `, style: 'value' }, { text: `(${record.macro_fat_pct || 0}%)\n`, fontSize: 8, color: '#888888' }, { text: `${calc.macros?.fatGkg || 0} g/kg`, style: 'label' }], fillColor: '#0d0d12' }
+            ],
+            [
+              { text: [{ text: 'GASTO BASAL\n', style: 'label' }, { text: `${calc.bmr} KCAL`, style: 'value' }], fillColor: '#0d0d12' },
+              { text: [{ text: 'VCT TOTAL\n', style: 'label' }, { text: `${calc.tdee} KCAL`, style: 'value', color: COLORS.poison }], fillColor: '#0d0d12' },
+              { text: [{ text: 'HIDRATACIÓN\n', style: 'label' }, { text: `${calc.waterLiters} L/DÍA`, style: 'value', color: COLORS.sky }], fillColor: '#0d0d12' }
+            ]
+          ]
+        },
+        layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#333333', vLineColor: () => '#333333', paddingLeft: () => 10, paddingRight: () => 10, paddingTop: () => 10, paddingBottom: () => 10 },
+        unbreakable: true
+      },
 
-          /* Contenedores de Datos */
-          .section { margin-bottom: 40px; }
-          .tag { 
-            display: inline-block; background-color: ${COLORS.crimson} !important; color: #fff !important;
-            font-size: 10px; font-weight: 900; padding: 8px 20px; 
-            text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px;
-          }
+      // IA
+      ...(ai ? [
+        {
+          table: { widths: ['auto'], body: [[{ text: ' ANÁLISIS CLÍNICO Y FISIOPATOLÓGICO IA ', color: '#ffffff', fillColor: COLORS.crimson, bold: true, fontSize: 9, border: [false, false, false, false] }]] },
+          margin: [0, 15, 0, 0],
+          unbreakable: true
+        },
+        { text: '\n', fontSize: 5 },
+        {
+          table: {
+            widths: ['*'],
+            body: [
+              [
+                {
+                  stack: [
+                    { text: 'DIAGNÓSTICO TÉCNICO INTEGRAL', color: COLORS.sky, fontSize: 12, bold: true, margin: [0, 0, 0, 5] },
+                    { text: ai.nutritional_diagnosis || 'Sin registro.', color: '#ffffff', fontSize: 10, margin: [0, 0, 0, 15] },
+                    { text: 'ANÁLISIS FISIOPATOLÓGICO CRÍTICO', color: COLORS.purple, fontSize: 12, bold: true, margin: [0, 0, 0, 5] },
+                    { text: ai.summary || 'Sin registro.', color: '#bbbbbb', fontSize: 10, margin: [0, 0, 0, 15] },
+                    { text: 'PLAN DE INTERVENCIÓN TÁCTICO', color: COLORS.poison, fontSize: 12, bold: true, margin: [0, 0, 0, 5] },
+                    ...recList
+                  ],
+                  fillColor: '#0d0d12'
+                }
+              ]
+            ]
+          },
+          layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#333333', vLineColor: () => '#333333', paddingLeft: () => 15, paddingRight: () => 15, paddingTop: () => 15, paddingBottom: () => 15 },
+          unbreakable: true
+        }
+      ] : [
+        {
+          table: { widths: ['auto'], body: [[{ text: ' ANÁLISIS IA (NÚCLEO CORTEX) ', color: '#ffffff', fillColor: COLORS.muted, bold: true, fontSize: 9, border: [false, false, false, false] }]] },
+          margin: [0, 15, 0, 0],
+          unbreakable: true
+        },
+        { text: '\n', fontSize: 5 },
+        {
+          table: {
+            widths: ['*'],
+            body: [
+              [
+                {
+                  stack: [
+                    { text: '⚠️', fontSize: 24, alignment: 'center', margin: [0, 0, 0, 10] },
+                    { text: 'ANÁLISIS IA NO INICIADO', color: COLORS.muted, fontSize: 14, bold: true, alignment: 'center' },
+                    { text: 'El expediente fue generado sin activar el NÚCLEO CORTEX.', color: '#666666', fontSize: 10, alignment: 'center', margin: [0, 5, 0, 0] }
+                  ],
+                  fillColor: '#0d0d12'
+                }
+              ]
+            ]
+          },
+          layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#333333', vLineColor: () => '#333333', paddingLeft: () => 15, paddingRight: () => 15, paddingTop: () => 30, paddingBottom: () => 30 },
+          unbreakable: true
+        }
+      ]),
 
-          .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-          .cell { background-color: #0d0d12 !important; padding: 18px; border: 1px solid #333; }
-          .label { font-size: 9px; color: #888; text-transform: uppercase; display: block; margin-bottom: 8px; font-weight: 700; }
-          .value { font-size: 18px; color: #ffffff !important; font-weight: 900; }
-          .unit { font-size: 10px; color: #666; margin-left: 4px; }
+      ...(record.professional_indications ? [
+        {
+          table: { widths: ['auto'], body: [[{ text: ' INDICACIONES PROFESIONALES ADICIONALES ', color: '#ffffff', fillColor: '#333333', bold: true, fontSize: 9, border: [false, false, false, false] }]] },
+          margin: [0, 15, 0, 0],
+          unbreakable: true
+        },
+        { text: '\n', fontSize: 5 },
+        {
+          table: {
+            widths: ['*'],
+            body: [
+              [
+                { text: record.professional_indications, color: '#eeeeee', fontSize: 10, fillColor: '#0d0d12' }
+              ]
+            ]
+          },
+          layout: { hLineWidth: () => 1, vLineWidth: () => 1, hLineColor: () => '#555555', vLineColor: () => '#555555', paddingLeft: () => 15, paddingRight: () => 15, paddingTop: () => 15, paddingBottom: () => 15, hLineStyle: () => ({ dash: { length: 4 } }) },
+          unbreakable: true
+        }
+      ] : []),
 
-          /* HUD de Visualización */
-          .hud-container { display: flex; gap: 20px; margin-top: 20px; }
-          .hud-card { flex: 1; background-color: #0d0d12 !important; border: 2px solid #333; padding: 20px; border-top: 5px solid ${COLORS.sky}; }
-          .hud-title { font-size: 11px; color: #aaa; font-weight: 900; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
-
-          /* Barra de Macros Segmentada */
-          .macro-display {
-            background-color: #000000 !important; border: 2px solid #444; padding: 35px; margin-top: 20px;
-          }
-          .macro-bar {
-            height: 40px; display: flex; width: 100%; margin-bottom: 30px;
-            border: 2px solid #555; overflow: hidden; background-color: #111 !important;
-          }
-          .segment { 
-            height: 100%; display: flex; align-items: center; justify-content: center; 
-            font-size: 12px; font-weight: 900; color: #fff !important; text-shadow: 0 0 5px #000;
-          }
-          .seg-p { background-color: ${COLORS.crimson} !important; }
-          .seg-c { background-color: ${COLORS.purple} !important; }
-          .seg-f { background-color: ${COLORS.pink} !important; }
-
-          .legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
-          .leg-card { padding: 15px; border-left: 6px solid #333; background-color: #0d0d12 !important; }
-          .leg-val { font-size: 18px; font-weight: 900; color: #ffffff !important; margin-top: 5px; }
-
-          /* Caja de Análisis IA */
-          .ai-box {
-            background-color: #0d0d12 !important;
-            border: 3px solid #333; border-left: 10px solid ${COLORS.purple};
-            padding: 40px; position: relative;
-          }
-          .ai-title { font-family: 'Orbitron', sans-serif; font-size: 16px; color: ${COLORS.sky} !important; margin-bottom: 20px; letter-spacing: 3px; border-bottom: 1px solid #444; padding-bottom: 10px;}
-          .ai-diag { font-size: 15px; line-height: 1.8; color: #ffffff !important; font-weight: 700; margin-bottom: 30px; text-align: justify; }
-          .ai-text { font-size: 13px; line-height: 1.8; color: #bbbbbb !important; text-align: justify; margin-bottom: 30px; }
-
-          .rec-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
-          .rec-item { background-color: #151520 !important; padding: 20px; border-left: 4px solid ${COLORS.poison}; display: flex; align-items: center; gap: 20px;}
-          .rec-val { font-size: 14px; color: #eeeeee !important; line-height: 1.6; font-weight: 600; }
-
-          /* Footer y Firma */
-          .signature-area { margin-top: 80px; display: flex; justify-content: flex-end; }
-          .signature-box { text-align: center; border-top: 2px solid #555; padding-top: 20px; width: 350px; }
-          .signer-name { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff !important; margin-bottom: 5px; }
-          
-          .footer { 
-            margin-top: 80px; padding: 30px; border-top: 2px solid #333;
-            display: flex; justify-content: space-between; align-items: center; background-color: #0d0d12 !important;
-          }
-          .footer-text { font-size: 10px; color: #666; line-height: 1.6; text-transform: uppercase; letter-spacing: 2px;}
-
-          .chart-container { background-color: #000000 !important; border: 2px solid #333; padding: 25px; margin-top: 20px; }
-
-          @media print {
-            body { background-color: #050505 !important; -webkit-print-color-adjust: exact !important; }
-            .page { padding: 20px; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="page">
-          
-          <header class="header">
-            <div class="title-area">
-              <h1>DOSSIER <span>METABÓLICO</span></h1>
-              <div class="transmission-id">NÚCLEO_ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()} | REPORTE TÉCNICO DE ÉLITE</div>
-            </div>
-            <div class="status-box">
-              <div class="status-val">${calc.bmiStatus?.split(' ')[0].toUpperCase() || 'ESTABLE'}</div>
-              <div class="status-lab">STATUS BIOMÉTRICO</div>
-            </div>
-          </header>
-
-          <section class="section">
-            <div class="tag">Identidad del Sujeto</div>
-            <div class="grid">
-              <div class="cell"><span class="label">Sujeto</span><span class="value">${patient.full_name.toUpperCase()}</span></div>
-              <div class="cell"><span class="label">Genotipo</span><span class="value">${patient.sex === 'F' ? 'XX (FEMENINO)' : 'XY (MASCULINO)'}</span></div>
-              <div class="cell"><span class="label">Edad Biológica</span><span class="value">${patient.age} <span class="unit">AÑOS</span></span></div>
-              <div class="cell"><span class="label">Previsión</span><span class="value">${patient.insurance}</span></div>
-              <div class="cell"><span class="label">Expediente ID</span><span class="value">${patient.id?.slice(0,8).toUpperCase() || 'LOCAL'}</span></div>
-              <div class="cell"><span class="label">Fecha</span><span class="value">${new Date().toLocaleDateString('es-CL')}</span></div>
-            </div>
-          </section>
-
-          <section class="section">
-            <div class="tag">Telemetría Corporal Avanzada</div>
-            <div class="grid">
-              <div class="cell"><span class="label">Masa Total</span><span class="value">${record.weight_kg} <span class="unit">KG</span></span></div>
-              <div class="cell"><span class="label">Estatura</span><span class="value">${record.height_cm} <span class="unit">CM</span></span></div>
-              <div class="cell"><span class="label">Índice IMC</span><span class="value" style="color:${COLORS.crimson}">${calc.bmi}</span></div>
-              <div class="cell"><span class="label">Peso Ideal</span><span class="value">${calc.idealWeight} <span class="unit">KG</span></span></div>
-              <div class="cell"><span class="label">Adiposidad %</span><span class="value">${calc.fatPercent}%</span></div>
-              <div class="cell"><span class="label">Tejido Graso</span><span class="value">${calc.fatMassKg} <span class="unit">KG</span></span></div>
-              <div class="cell"><span class="label">Tejido Magro</span><span class="value">${calc.leanMassKg} <span class="unit">KG</span></span></div>
-              <div class="cell"><span class="label">Riesgo CV</span><span class="value" style="color:${COLORS.crimson}">${calc.cvRisk}</span></div>
-            </div>
-            
-            ${chartSVG}
-
-            <div class="hud-container">
-              <div class="hud-card">
-                <div class="hud-title">Hemodinámica</div>
-                <div class="value">${record.systolic_bp || '--'}/${record.diastolic_bp || '--'} <span class="unit">mmHg</span></div>
-                <div class="label" style="color:${COLORS.sky}; margin-top:5px;">${calc.bpStatus || 'Sin Registro'}</div>
-              </div>
-              <div class="hud-card" style="border-top-color: ${COLORS.crimson}">
-                <div class="hud-title">Filtración Renal</div>
-                <div class="value">${calc.gfr || 'N/A'} <span class="unit">ml/min</span></div>
-                <div class="label" style="color:${COLORS.crimson}; margin-top:5px;">KDIGO: ${calc.kdigoStage || '--'}</div>
-              </div>
-              <div class="hud-card" style="border-top-color: ${COLORS.purple}">
-                <div class="hud-title">Capacidad Funcional</div>
-                <div class="value">${record.grip_strength_kg || '0'} <span class="unit">KG (GRIP)</span></div>
-                <div class="label" style="color:${COLORS.purple}; margin-top:5px;">Sarcopenia: ${calc.sarcopeniaRisk || 'Estable'}</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <div class="tag">Asignación de Recursos Metabólicos</div>
-            <div class="macro-display">
-              <div class="hud-title" style="margin-bottom:20px; color:${COLORS.crimson}">VINCULACIÓN DE RECURSOS (DISTRIBUCIÓN ENERGÉTICA)</div>
-              <div class="macro-bar">
-                <div class="segment seg-p" style="width: ${pPct}%">PRO</div>
-                <div class="segment seg-c" style="width: ${cPct}%">CHO</div>
-                <div class="segment seg-f" style="width: ${fPct}%">LIP</div>
-              </div>
-              
-              <div class="legend">
-                <div class="leg-card" style="border-left-color: ${COLORS.crimson}">
-                  <div class="label">Proteínas</div>
-                  <div class="leg-val">${calc.macros?.protG}g <span style="font-size:10px; color:#888;">(${record.macro_prot_pct}%)</span></div>
-                  <div class="label" style="margin-top:5px;">${calc.macros?.protGkg} g/kg</div>
-                </div>
-                <div class="leg-card" style="border-left-color: ${COLORS.purple}">
-                  <div class="label">Carbohidratos</div>
-                  <div class="leg-val">${calc.macros?.choG}g <span style="font-size:10px; color:#888;">(${record.macro_cho_pct}%)</span></div>
-                  <div class="label" style="margin-top:5px;">${calc.macros?.choGkg} g/kg</div>
-                </div>
-                <div class="leg-card" style="border-left-color: ${COLORS.pink}">
-                  <div class="label">Lípidos</div>
-                  <div class="leg-val">${calc.macros?.fatG}g <span style="font-size:10px; color:#888;">(${record.macro_fat_pct}%)</span></div>
-                  <div class="label" style="margin-top:5px;">${calc.macros?.fatGkg} g/kg</div>
-                </div>
-              </div>
-
-              <div style="margin-top:30px; display:flex; justify-content:space-between; border-top:1px solid #333; padding-top:20px;">
-                <div><span class="label">GASTO BASAL</span><div class="value">${calc.bmr} <span class="unit">KCAL</span></div></div>
-                <div><span class="label">VCT TOTAL</span><div class="value" style="color:${COLORS.poison}">${calc.tdee} <span class="unit">KCAL</span></div></div>
-                <div><span class="label">HIDRATACIÓN</span><div class="value" style="color:${COLORS.sky}">${calc.waterLiters} <span class="unit">L/DÍA</span></div></div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <div class="tag">Análisis Clínico y Fisiopatológico IA</div>
-            <div class="ai-box">
-              <div class="ai-title">DIAGNÓSTICO TÉCNICO INTEGRAL</div>
-              <div class="ai-diag">${ai.nutritional_diagnosis}</div>
-              
-              <div class="ai-title" style="color:${COLORS.purple}">ANÁLISIS FISIOPATOLÓGICO CRÍTICO</div>
-              <div class="ai-text">${ai.summary}</div>
-              
-              <div class="ai-title" style="color:${COLORS.poison}">PLAN DE INTERVENCIÓN TÁCTICO</div>
-              <div class="rec-list">
-                ${ai.recommendations.map(r => `
-                  <div class="rec-item">
-                    <span style="color:${COLORS.poison}; font-weight:900; font-size:20px;">></span>
-                    <div class="rec-val">${r}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </section>
-
-          ${record.professional_indications ? `
-          <section class="section">
-            <div class="tag" style="background-color: #333 !important;">Indicaciones Profesionales Adicionales</div>
-            <div style="background-color: #0d0d12 !important; border: 2px dashed #444; padding: 30px;">
-              <p style="font-size: 15px; color: #eeeeee !important; line-height: 1.8; white-space: pre-wrap; margin:0;">${record.professional_indications}</p>
-            </div>
-          </section>
-          ` : ''}
-
-          <div class="signature-area">
-            <div class="signature-box">
-              <div class="signer-name">CAMILA OLIVARES ARCE</div>
-              <div class="label" style="letter-spacing: 2px;">NUTRICIONISTA CLÍNICA</div>
-              <div class="label" style="font-size:8px;">REGISTRO NACIONAL DE SALUD</div>
-            </div>
-          </div>
-
-          <footer class="footer">
-            <div class="footer-text">
-              SISTEMA DE CONTROL BIOMÉTRICO "NÚCLEO METABÓLICO"<br/>
-              REPORTE DE USO EXCLUSIVO PROFESIONAL - CONFIDENCIAL
-            </div>
-            <div style="text-align: right;">
-              <div style="font-size: 11px; color: #444; font-weight: 900; font-family:'Orbitron', sans-serif;">PROTOCOL_138_GEN_9</div>
-            </div>
-          </footer>
-        </div>
-      </body>
-    </html>
-  `;
+      // FIRMA Y FOOTER
+      {
+        stack: [
+          { text: 'CAMILA OLIVARES ARCE', color: '#ffffff', fontSize: 12, bold: true, alignment: 'right' },
+          { text: 'NUTRICIONISTA CLÍNICA', color: '#888888', fontSize: 8, alignment: 'right' },
+          { text: 'REGISTRO NACIONAL DE SALUD', color: '#666666', fontSize: 6, alignment: 'right' }
+        ],
+        margin: [0, 40, 0, 20],
+        unbreakable: true
+      },
+      {
+        table: {
+          widths: ['*', 'auto'],
+          body: [
+            [
+              { text: 'SISTEMA DE CONTROL BIOMÉTRICO "NÚCLEO METABÓLICO"\nREPORTE DE USO EXCLUSIVO PROFESIONAL - CONFIDENCIAL', color: '#666666', fontSize: 8, border: [false, false, false, false] },
+              { text: 'PROTOCOL_138_GEN_9\nGenerado por SYNDROME OS v9.0 — Camila Olivares Arce', color: '#444444', fontSize: 8, alignment: 'right', border: [false, false, false, false] }
+            ]
+          ]
+        },
+        layout: 'noBorders',
+        margin: [0, 10, 0, 0],
+        unbreakable: true
+      }
+    ].filter(Boolean)
+  };
 
   try {
-    if (Platform.OS === 'web') {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(html);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => {
-          printWindow.print();
-        }, 1500); // Aumentado el tiempo para renderizado de fuentes y estilos
+    return new Promise((resolve, reject) => {
+      if (Platform.OS === 'web') {
+        pdfMake.createPdf(docDefinition).open();
+        resolve(true);
+      } else {
+        const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+        (pdfDocGenerator as any).getBase64(async (data: string) => {
+          try {
+            const fileName = `Reporte_${patient.full_name.replace(/ /g, '_')}.pdf`;
+            const fileUri = FileSystem.documentDirectory + fileName;
+            await FileSystem.writeAsStringAsync(fileUri, data, { encoding: FileSystem.EncodingType.Base64 });
+            await Sharing.shareAsync(fileUri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: fileName });
+            resolve(true);
+          } catch (err) {
+            console.error('Error sharing PDF:', err);
+            reject(err);
+          }
+        });
       }
-    } else {
-      const result = await Print.printToFileAsync({ html });
-      if (result && result.uri) {
-        await Sharing.shareAsync(result.uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: `Reporte_${patient.full_name}.pdf` });
-      }
-    }
+    });
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw error;

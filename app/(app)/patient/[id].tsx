@@ -7,14 +7,17 @@ import { Patient, ClinicalRecord, CalculationResult, AIAnalysis } from '../../..
 import { LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import TerminalBackground from '../../../components/TerminalBackground';
+import NeuralBackground from '@/components/NeuralBackground';
 import { generateClinicalReport } from '../../../lib/reports';
 import { calculateAll } from '../../../lib/calculations';
+import CyberButton from '../../../components/CyberButton';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function PatientDossier() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [records, setRecords] = useState<ClinicalRecord[]>([]);
   const [mealPlans, setMealPlans] = useState<any[]>([]);
@@ -97,15 +100,23 @@ export default function PatientDossier() {
   };
 
   return (
-    <TerminalBackground>
+    <NeuralBackground>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
         {/* DOSSIER HEADER - ULTRA HD CONTRAST */}
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 50) + 20 }]}>
           <LinearGradient
             colors={['rgba(255, 0, 60, 0.2)', 'transparent']}
             style={StyleSheet.absoluteFill}
           />
+          <TouchableOpacity 
+            style={{ position: 'absolute', top: Math.max(insets.top, 40) + 15, left: 20, zIndex: 10, flexDirection: 'row', alignItems: 'center' }} 
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color={COLORS.crimson} />
+            <Text style={{ color: COLORS.crimson, fontWeight: 'bold', letterSpacing: 1 }}>VOLVER</Text>
+          </TouchableOpacity>
+
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
               <Text style={styles.avatarLetter}>{patient?.full_name[0].toUpperCase()}</Text>
@@ -115,7 +126,9 @@ export default function PatientDossier() {
             </View>
           </View>
           
-          <Text style={styles.subjectName}>{patient?.full_name.toUpperCase()}</Text>
+          <Text style={styles.subjectName} adjustsFontSizeToFit numberOfLines={2}>
+            {patient?.full_name.toUpperCase()}
+          </Text>
           <View style={styles.idContainer}>
             <Text style={styles.idText}>EXPEDIENTE_ID: {id?.toUpperCase()}</Text>
           </View>
@@ -172,17 +185,15 @@ export default function PatientDossier() {
 
           {/* HUD ACTION GRID */}
           <View style={styles.actionGrid}>
-            <ActionButton 
-              label="NUEVO ESCANEO" 
-              sub="OVERRIDE BIOMÉTRICO"
-              icon="scan" 
+            <CyberButton 
+              title="NUEVO ESCANEO"
+              icon={<Ionicons name="scan" size={24} color={COLORS.crimson} />}
               color={COLORS.crimson}
               onPress={() => router.push({ pathname: '/(app)/calculator', params: { patientId: id } })}
             />
-            <ActionButton 
-              label="PLAN DIETÉTICO" 
-              sub="ASIGNACIÓN RECURSOS"
-              icon="restaurant" 
+            <CyberButton 
+              title="PLAN DIETÉTICO"
+              icon={<Ionicons name="restaurant" size={24} color={COLORS.pink} />}
               color={COLORS.pink}
               onPress={() => router.push({
                 pathname: '/(app)/meal-plan/new',
@@ -195,20 +206,28 @@ export default function PatientDossier() {
                 }
               })}
             />
-            <ActionButton 
-              label="BIOQUÍMICA" 
-              sub="TERMINAL LABS"
-              icon="flask" 
-              color={COLORS.purple}
-              onPress={() => router.push(`/(app)/patient/${id}/labs`)}
+            <CyberButton 
+              title="BIOQUÍMICA"
+              icon={<Ionicons name="flask" size={24} color={COLORS.sky} />}
+              color={COLORS.sky}
+              onPress={() => router.push({ pathname: '/(app)/biochemical/new' as any, params: { patientId: id } })}
             />
-            <ActionButton 
-              label="ARCHIVO PDF" 
-              sub="DOSS. EXPORTACIÓN"
-              icon="document-attach" 
-              color={COLORS.bone}
-              onPress={handleGeneratePDF}
+            <CyberButton 
+              title="HÁBITOS & LIFESTYLE"
+              icon={<Ionicons name="body" size={24} color={COLORS.gold} />}
+              color={COLORS.gold}
+              onPress={() => router.push({ pathname: '/(app)/lifestyle/new' as any, params: { patientId: id } })}
             />
+            
+            {records.length > 0 && (
+              <CyberButton 
+                title="GENERAR DOSSIER PDF"
+                icon={<Ionicons name="document-text" size={24} color={COLORS.neon} />}
+                color={COLORS.neon}
+                onPress={handleGeneratePDF}
+                style={{ marginTop: 20 }}
+              />
+            )}
           </View>
 
           {/* MEAL PLANS SECTION */}
@@ -247,16 +266,21 @@ export default function PatientDossier() {
           {/* TRANSMISSION HISTORY LOG */}
           <View style={styles.historySection}>
             <Text style={styles.sectionHeader}>LOG CRONOLÓGICO DE TRANSMISIONES</Text>
-            {records.map((r, i) => (
-              <TouchableOpacity key={r.id} style={styles.historyItem}>
-                <View style={[styles.historyIndicator, { backgroundColor: i === 0 ? COLORS.crimson : '#555' }]} />
-                <View style={styles.historyInfo}>
-                  <Text style={styles.historyDate}>{new Date(r.record_date!).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}</Text>
-                  <Text style={styles.historySummary}>NÚCLEO: {r.bmi} IMC | {r.weight_kg}KG | {r.bmi_status}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={24} color={COLORS.crimson} />
-              </TouchableOpacity>
-            ))}
+            <View style={styles.historyList}>
+              {records.map((r, i) => (
+                <TouchableOpacity key={r.id} style={styles.historyItem}>
+                  <View style={styles.historyGlow} />
+                  <View style={styles.historyHeader}>
+                    <Text style={styles.historyDate}>{new Date(r.record_date!).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' }).toUpperCase()}</Text>
+                    <View style={[styles.statusDot, { backgroundColor: i === 0 ? COLORS.crimson : COLORS.dim }]} />
+                  </View>
+                  <View style={styles.historyInfo}>
+                    <Text style={styles.historySummary}>IMC: {r.bmi} // {r.bmi_status?.toUpperCase()}</Text>
+                    <Text style={styles.historySub}>PESO: {r.weight_kg}KG</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
         </View>
@@ -305,7 +329,7 @@ export default function PatientDossier() {
         </Modal>
 
       </ScrollView>
-    </TerminalBackground>
+    </NeuralBackground>
   );
 }
 
@@ -337,18 +361,6 @@ function ConsoleCard({ label, value, status, color }: any) {
   );
 }
 
-function ActionButton({ label, sub, icon, color, onPress }: any) {
-  return (
-    <TouchableOpacity style={[styles.actBtn, { borderColor: color }]} onPress={onPress}>
-      <Ionicons name={icon} size={30} color={color} />
-      <View style={{ flex: 1 }}>
-        <Text style={[styles.actBtnText, { color }]}>{label}</Text>
-        <Text style={styles.actBtnSub}>{sub}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
 const chartConfig = {
   backgroundColor: '#0a0a0d',
   backgroundGradientFrom: '#0a0a0d',
@@ -367,7 +379,6 @@ const styles = StyleSheet.create({
   loadingText: { color: COLORS.orange, fontSize: 18, fontWeight: '900', letterSpacing: 5, fontFamily: FONTS.horror },
   header: { 
     padding: 45, 
-    paddingTop: Platform.OS === 'ios' ? 80 : 50, 
     alignItems: 'center', 
     backgroundColor: 'rgba(5,5,10,0.96)', 
     borderBottomWidth: 3, 
@@ -452,13 +463,13 @@ const styles = StyleSheet.create({
   consoleValue: { fontSize: 36, fontWeight: '900', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', color: COLORS.white },
   consoleStatus: { fontSize: 13, color: COLORS.bone, fontWeight: '900', marginTop: 12, textTransform: 'uppercase' },
   panel: { 
-    backgroundColor: COLORS.bg2, 
-    padding: 30, 
-    borderWidth: 2, 
-    borderColor: COLORS.dim, 
-    borderRadius: 0,
-    shadowColor: '#000',
-    shadowOpacity: 0.4,
+    backgroundColor: 'rgba(10,10,15,0.7)', 
+    padding: 20, 
+    borderWidth: 1.5, 
+    borderColor: COLORS.purple, 
+    borderRadius: 8,
+    shadowColor: COLORS.purple,
+    shadowOpacity: 0.3,
     shadowRadius: 15
   },
   panelHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 30 },
@@ -474,22 +485,7 @@ const styles = StyleSheet.create({
     gap: 20 
   },
   noDataText: { color: COLORS.muted, fontSize: 13, fontWeight: '900', letterSpacing: 2 },
-  actionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
-  actBtn: { 
-    width: '46.5%', 
-    height: 110, 
-    backgroundColor: '#000', 
-    borderWidth: 3, 
-    paddingHorizontal: 20, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 10
-  },
-  actBtnText: { fontSize: 14, fontWeight: '900', letterSpacing: 1.5, fontFamily: FONTS.horror },
-  actBtnSub: { fontSize: 9, color: COLORS.muted, fontWeight: '900', marginTop: 5, textTransform: 'uppercase' },
+  actionGrid: { flexDirection: 'column', gap: 15 },
   historySection: { gap: 25, marginBottom: 80 },
   sectionHeader: { 
     fontSize: 18, 
@@ -501,22 +497,15 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     fontFamily: FONTS.horror
   },
-  historyItem: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: COLORS.bg2, 
-    padding: 30, 
-    borderWidth: 2, 
-    borderColor: COLORS.dim, 
-    gap: 25,
-    shadowColor: '#000',
-    shadowOpacity: 0.4,
-    shadowRadius: 10
-  },
-  historyIndicator: { width: 8, height: '100%', borderRadius: 0 },
-  historyInfo: { flex: 1 },
-  historyDate: { fontSize: 15, color: COLORS.white, fontWeight: '900', marginBottom: 10, letterSpacing: 1 },
-  historySummary: { fontSize: 14, color: COLORS.muted, fontWeight: '800' },
+  historyList: { gap: 15 },
+  historyItem: { backgroundColor: 'rgba(10,10,15,0.7)', borderWidth: 1, borderColor: COLORS.dim, borderRadius: 8, padding: 15, position: 'relative', overflow: 'hidden' },
+  historyGlow: { position: 'absolute', top: 0, left: 0, bottom: 0, width: 4, backgroundColor: COLORS.dim },
+  historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  historyDate: { color: COLORS.purple, fontSize: 10, fontWeight: '900', letterSpacing: 1 },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  historyInfo: { paddingRight: 30 },
+  historySummary: { color: COLORS.white, fontSize: 13, fontWeight: 'bold', fontFamily: FONTS.space, letterSpacing: 1 },
+  historySub: { color: COLORS.dim, fontSize: 11, fontWeight: '900', marginTop: 4 },
 
   // Estilos para Planes Dietéticos
   planItem: { 

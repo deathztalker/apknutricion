@@ -7,10 +7,12 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { mealPlanService } from '../../../lib/supabase';
-import TerminalBackground from '../../../components/TerminalBackground';
+import NeuralBackground from '@/components/NeuralBackground';
 import { useAuthStore } from '../../../store/authStore';
-import { COLORS, FONTS } from '../../../constants/theme';
+import { COLORS, FONTS, RADIUS } from '../../../constants/theme';
+import * as Haptics from 'expo-haptics';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -107,6 +109,7 @@ export default function ConstructorPlanAlimentario() {
     kcal?: string; prot?: string; cho?: string; fat?: string; patientId?: string;
   }>();
   const { session } = useAuthStore();
+  const insets = useSafeAreaInsets();
 
   const [porciones, setPorciones] = useState<Porciones>(PORCIONES_INICIALES);
   const [guardando, setGuardando] = useState(false);
@@ -156,6 +159,8 @@ export default function ConstructorPlanAlimentario() {
     }
 
     setGuardando(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    
     try {
       const { error } = await mealPlanService.create({
         patient_id: patientId,
@@ -185,25 +190,19 @@ export default function ConstructorPlanAlimentario() {
     : 0;
 
   return (
-    <TerminalBackground>
-      <View style={styles.container}>
+    <NeuralBackground>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <LinearGradient
-          colors={['rgba(5,5,12,0.98)', 'rgba(10,10,20,0.95)']}
-          style={styles.header}
-        >
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={22} color={COLORS.neon} />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => { Haptics.selectionAsync(); router.back(); }} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={28} color={COLORS.neon} />
           </TouchableOpacity>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Plan Alimentario</Text>
-            <Text style={styles.headerSub}>Distribución de equivalentes MINSAL</Text>
+          <Ionicons name="restaurant" size={32} color={COLORS.neon} style={{ marginRight: 10 }} />
+          <View>
+            <Text style={styles.headerTitle}>PLAN ALIMENTARIO</Text>
+            <Text style={styles.headerSub}>ASIGNACIÓN DE RECURSOS</Text>
           </View>
-          <View style={styles.kcalBadge}>
-            <Text style={styles.kcalBadgeNum}>{porcentajeKcal}%</Text>
-            <Text style={styles.kcalBadgeLbl}>del objetivo</Text>
-          </View>
-        </LinearGradient>
+        </View>
 
         {/* ── Monitores de macros ─────────────────────────────────────────── */}
         <View style={styles.monitors}>
@@ -310,7 +309,7 @@ export default function ConstructorPlanAlimentario() {
           </TouchableOpacity>
         </ScrollView>
       </View>
-    </TerminalBackground>
+    </NeuralBackground>
   );
 }
 
@@ -472,14 +471,17 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   // Header
-  header: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingTop: 56, paddingBottom: 14, paddingHorizontal: 20,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(0,255,136,0.12)',
+  header: { 
+    padding: 20, 
+    flexDirection: 'row',
+    alignItems: 'center', 
+    borderBottomWidth: 1, 
+    borderBottomColor: COLORS.bg4,
+    backgroundColor: 'rgba(5, 5, 10, 0.9)'
   },
-  backBtn: { padding: 4 },
-  headerTitle: { fontSize: 17, fontWeight: '800', color: COLORS.text, letterSpacing: 0.2 },
-  headerSub: { fontSize: 11, color: COLORS.muted, marginTop: 2 },
+  headerTitle: { fontFamily: FONTS.space, fontSize: 16, color: COLORS.white, fontWeight: 'bold' },
+  headerSub: { fontSize: 10, color: COLORS.dim, letterSpacing: 2 },
+  backBtn: { marginRight: 15 },
   kcalBadge: {
     alignItems: 'center', backgroundColor: 'rgba(0,255,136,0.1)',
     borderRadius: 10, borderWidth: 1, borderColor: 'rgba(0,255,136,0.25)',
@@ -490,29 +492,35 @@ const styles = StyleSheet.create({
 
   // Monitores
   monitors: {
-    flexDirection: 'row', gap: 8, padding: 12,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    flexDirection: 'row', gap: 15, padding: 20,
+    flexWrap: 'wrap',
   },
   monitor: {
-    flex: 1, backgroundColor: 'rgba(16,20,30,0.95)',
-    borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
-    borderTopWidth: 3, padding: 10, gap: 4,
+    width: '47%', backgroundColor: 'rgba(10,10,15,0.7)',
+    borderWidth: 2, borderColor: COLORS.dim,
+    padding: 15, gap: 10,
+    position: 'relative',
+    shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 10
   },
   monitorHeader: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  monitorLabel: { fontSize: 10, color: COLORS.muted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
-  monitorValor: { fontSize: 13, fontWeight: '800', fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace' },
-  monitorObjetivo: { fontSize: 10, color: COLORS.muted, fontWeight: '400' },
-  monitorDelta: { fontSize: 9, fontWeight: '600', marginTop: 2 },
-  barraFondo: { height: 3, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 2, marginTop: 4 },
-  barraRelleno: { height: '100%', borderRadius: 2 },
+  monitorLabel: { fontSize: 10, color: COLORS.muted, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+  monitorValor: { fontSize: 18, fontWeight: '900', fontFamily: FONTS.space },
+  monitorObjetivo: { fontSize: 10, color: COLORS.muted, fontWeight: '900' },
+  monitorDelta: { fontSize: 9, fontWeight: '900', marginTop: 5 },
+  barraFondo: { height: 4, backgroundColor: 'rgba(255,255,255,0.1)', marginTop: 8 },
+  barraRelleno: { height: '100%' },
 
   // Scroll
   scrollContent: { padding: 16, paddingBottom: 48, gap: 20 },
 
   // Grupo
   grupo: {
-    backgroundColor: 'rgba(12,15,22,0.8)', borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+    backgroundColor: 'rgba(10,10,20,0.85)', borderRadius: RADIUS.lg,
+    borderWidth: 1, borderColor: 'rgba(0,255,136,0.2)', overflow: 'hidden',
+    shadowColor: COLORS.neon,
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
   },
   grupoHeader: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -544,13 +552,13 @@ const styles = StyleSheet.create({
 
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   stepBtn: {
-    width: 28, height: 28, borderRadius: 8,
-    borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.04)',
+    width: 35, height: 35,
+    borderWidth: 2, backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center', justifyContent: 'center',
   },
   input: {
-    width: 44, textAlign: 'center', fontSize: 16, fontWeight: '800',
-    fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
+    width: 44, textAlign: 'center', fontSize: 18, fontWeight: '900',
+    fontFamily: FONTS.space,
   },
 
   // Resumen

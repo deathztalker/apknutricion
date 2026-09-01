@@ -1,45 +1,50 @@
 export const COLORS = {
-  // Backgrounds - Deep space but with more texture/depth
+  // Backgrounds - Deep Space Horror / Professional Dark
   bg:     '#050505',
-  bg1:    '#0d0d12',
-  bg2:    '#151520',
-  bg3:    '#1c1c2b',
-  bg4:    '#252538',
+  bg1:    '#0A0A0E',
+  bg2:    '#12121A',
+  bg3:    '#1A1A24',
+  bg4:    '#222230',
 
-  // Misfits & Halloween Palette
-  neon:   '#00ff9f',   // Toxic Green
-  poison: '#39ff14',   // Biohazard Green
-  crimson:'#ff003c',   // Blood Red
-  purple: '#9d00ff',   // Haunted Purple
-  pink:   '#ff00ff',   // Magenta / Shocking Pink
-  orange: '#ff6b00',   // Halloween Pumpkin
-  sky:    '#00d0ff',   // Electric Blue
-  gold:   '#f5c842',   // Necronomicon Gold
-  stg:    '#00693e',
+  // Horrorpunk Palette
+  neon:   '#00FF9F',   // Toxic Green
+  poison: '#39FF14',   // Biohazard Green
+  crimson:'#FF003C',   // Blood Red
+  purple: '#9D00FF',   // Haunted Purple
+  pink:   '#FF00FF',   // Shocking Pink
+  orange: '#FF6B00',   // Halloween Pumpkin
+  sky:    '#00D0FF',   // Electric Blue
+  gold:   '#F5C842',   // Necronomicon Gold
+  stg:    '#00693E',   // Dark Swamp
 
-  // Semantic
-  red:    '#ff3355',
-  info:   '#00ff9f',
-  warning:'#ff6b00',
-  danger: '#ff003c',
+  // Semantic mappings (using horror palette)
+  primary: '#FF003C',  // Crimson is now primary
+  secondary: '#00FF9F', // Toxic Green as secondary
+  accent: '#9D00FF',    // Purple accent
+  success: '#00FF9F',
+  info:    '#00D0FF',
+  warning: '#FF6B00',
+  danger:  '#FF003C',
+  red:     '#FF003C',
 
   // Text - High contrast
-  text:   '#ffffff',
-  muted:  '#b0b0c0',
-  dim:    '#808090',
-  white:  '#ffffff',
-  bone:   '#f0f0f0',
+  text:   '#F8FAFC',
+  muted:  '#A0A0B0',
+  dim:    '#707080',
+  white:  '#FFFFFF',
+  bone:   '#F0F0F0',
 
   // Card / Glassmorphism
-  card:   'rgba(13,13,18,0.92)',
-  border: 'rgba(0,255,159,0.3)',
-  borderB:'rgba(255,0,60,0.5)',
+  card:   'rgba(15, 15, 20, 0.95)',
+  border: 'rgba(255, 0, 60, 0.4)', // Crimson border
+  borderB:'rgba(0, 255, 159, 0.3)', // Neon border
 };
 
 export const FONTS = {
   regular: 'System',
   bold:    'System',
-  horror:  'Creepster_400Regular', // Main Misfits font
+  horror:  'Creepster_400Regular', // Horror font restored
+  space:   'SpaceMono_400Regular',
 };
 
 export const SPACING = {
@@ -60,33 +65,40 @@ export const RADIUS = {
 };
 
 export const SHADOWS = {
-  neon: {
-    shadowColor: '#00ff88',
+  primary: {
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  pink: {
-    shadowColor: '#ff6eb4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.7,
+    shadowRadius: 15,
+    elevation: 10,
   },
   card: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  neon: {
+    shadowColor: COLORS.neon,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  pink: {
+    shadowColor: COLORS.pink,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 8,
   },
   crimson: {
-    shadowColor: '#ff003c',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowColor: COLORS.crimson,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 12,
   },
 };
 

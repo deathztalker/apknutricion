@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Polygon, Circle, Text as SvgText, Line } from 'react-native-svg';
-import { COLORS } from '../constants/theme';
+import { COLORS, FONTS } from '../constants/theme';
 
 interface Props {
   x: number;
@@ -37,9 +37,9 @@ export default function Somatocarta({ x, y, size = 300 }: Props) {
         <Line x1="10" y1="85" x2="90" y2="85" stroke={COLORS.bg4} strokeWidth="0.2" strokeDasharray="1,1" />
 
         {/* Etiquetas de los vértices */}
-        <SvgText x="50" y="10" fill={COLORS.neon} fontSize="4" fontWeight="bold" textAnchor="middle">MESOMORFIA</SvgText>
-        <SvgText x="5" y="90" fill={COLORS.pink} fontSize="4" fontWeight="bold" textAnchor="middle">ENDOMORFIA</SvgText>
-        <SvgText x="95" y="90" fill={COLORS.sky} fontSize="4" fontWeight="bold" textAnchor="middle">ECTOMORFIA</SvgText>
+        <SvgText x="50" y="10" fill={COLORS.neon} fontSize="4" fontWeight="bold" fontFamily={FONTS.space} textAnchor="middle">MESOMORFIA</SvgText>
+        <SvgText x="5" y="90" fill={COLORS.pink} fontSize="4" fontWeight="bold" fontFamily={FONTS.space} textAnchor="middle">ENDOMORFIA</SvgText>
+        <SvgText x="95" y="90" fill={COLORS.sky} fontSize="4" fontWeight="bold" fontFamily={FONTS.space} textAnchor="middle">ECTOMORFIA</SvgText>
 
         {/* El punto del paciente */}
         <Circle
@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
     color: COLORS.dim,
     fontSize: 10,
     fontWeight: 'bold',
-    fontFamily: 'System',
+    fontFamily: FONTS.space,
   },
 });

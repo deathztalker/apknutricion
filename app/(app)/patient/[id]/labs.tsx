@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions, Modal, TextInput, Alert, Platform } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { COLORS, SHADOWS, FONTS } from '../../../../constants/theme';
+import { useLocalSearchParams, router } from 'expo-router';
+import { COLORS, SHADOWS, FONTS, RADIUS } from '../../../../constants/theme';
 import { biochemicalService } from '../../../../lib/supabase';
+import * as Haptics from 'expo-haptics';
 import { LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import TerminalBackground from '../../../../components/TerminalBackground';
+import NeuralBackground from '../../../../components/NeuralBackground';
 import { useAuthStore } from '../../../../store/authStore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function LabsTerminal() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuthStore();
+  const insets = useSafeAreaInsets();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -77,6 +80,7 @@ export default function LabsTerminal() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={COLORS.neon} />
+        <Text style={{ color: COLORS.neon, fontFamily: FONTS.space, fontSize: 12, letterSpacing: 3, marginTop: 15 }}>DESCIFRANDO BIOQUÍMICA...</Text>
       </View>
     );
   }
@@ -95,10 +99,19 @@ export default function LabsTerminal() {
   };
 
   return (
-    <TerminalBackground>
-      <View style={styles.container}>
+    <NeuralBackground>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Ionicons name="flask" size={32} color={COLORS.neon} />
+          <TouchableOpacity 
+            style={{ marginRight: 15 }} 
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.back();
+            }}
+          >
+            <Ionicons name="chevron-back" size={28} color={COLORS.neon} />
+          </TouchableOpacity>
+          <Ionicons name="flask" size={32} color={COLORS.neon} style={{ marginRight: 10 }} />
           <View>
             <Text style={styles.headerTitle}>TERMINAL BIOQUÍMICO</Text>
             <Text style={styles.headerSub}>ANÁLISIS HISTÓRICO DEL SUJETO</Text>
@@ -151,7 +164,7 @@ export default function LabsTerminal() {
           style={styles.fab}
           onPress={() => setModalVisible(true)}
         >
-          <Ionicons name="add" size={32} color={COLORS.bg} />
+          <Ionicons name="add" size={32} color={COLORS.white} />
         </TouchableOpacity>
 
         <Modal
@@ -192,7 +205,7 @@ export default function LabsTerminal() {
           </View>
         </Modal>
       </View>
-    </TerminalBackground>
+    </NeuralBackground>
   );
 }
 
@@ -205,19 +218,18 @@ function LabItem({ label, value, unit }: any) {
   );
 }
 
+import CyberInput from '../../../../components/CyberInput';
+
 function LabInput({ label, value, onChange }: any) {
   return (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="0.0"
-        placeholderTextColor={COLORS.muted}
-        keyboardType="numeric"
-        value={value}
-        onChangeText={onChange}
-      />
-    </View>
+    <CyberInput
+      label={label}
+      value={value}
+      onChangeText={onChange}
+      placeholder="0.0"
+      keyboardType="numeric"
+      color={COLORS.neon}
+    />
   );
 }
 
@@ -240,25 +252,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 15,
-    backgroundColor: 'rgba(5,5,10,0.95)',
-    borderBottomWidth: 3,
-    borderBottomColor: COLORS.purple,
+    borderBottomWidth: 1, 
+    borderBottomColor: COLORS.bg4,
+    backgroundColor: 'rgba(5, 5, 10, 0.9)'
   },
-  headerTitle: { fontSize: 24, fontFamily: FONTS.horror, color: COLORS.white, letterSpacing: 3 },
-  headerSub: { fontSize: 11, color: COLORS.purple, letterSpacing: 2, fontWeight: '900', textTransform: 'uppercase' },
-  content: { padding: 25, gap: 35 },
-  panel: {
-    backgroundColor: COLORS.bg2,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: COLORS.dim,
-    borderLeftWidth: 8,
-    borderLeftColor: COLORS.neon,
-    shadowColor: COLORS.neon,
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
+  headerTitle: { fontFamily: FONTS.horror, fontSize: 20, color: COLORS.white, letterSpacing: 2 },
+  headerSub: { fontSize: 10, color: COLORS.neon, letterSpacing: 2, fontWeight: '900' },
+  content: { padding: 20, paddingBottom: 100 },
+  panel: { 
+    backgroundColor: COLORS.bg1, 
+    borderWidth: 1, 
+    borderColor: COLORS.bg4, 
+    borderRadius: RADIUS.md, 
+    padding: 20, 
+    marginBottom: 20,
+    borderTopWidth: 3,
+    borderTopColor: COLORS.neon,
   },
-  panelTitle: { fontSize: 12, fontWeight: '900', color: COLORS.bone, letterSpacing: 2, marginBottom: 20, textTransform: 'uppercase' },
+  panelTitle: { fontFamily: FONTS.space, fontSize: 12, color: COLORS.neon, marginBottom: 15, letterSpacing: 2 },
   chart: { marginVertical: 15 },
   noDataCard: { height: 120, justifyContent: 'center', alignItems: 'center', borderStyle: 'dashed', borderWidth: 2, borderColor: COLORS.dim },
   noDataText: { color: COLORS.muted, fontSize: 11, fontWeight: 'bold', letterSpacing: 1.5 },

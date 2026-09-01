@@ -7,7 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { patientService, supabase } from '@/lib/supabase';
 import { COLORS, SPACING, RADIUS, FONTS } from '@/constants/theme';
 import { PatientFormData } from '@/types';
-import TerminalBackground from '@/components/TerminalBackground';
+import NeuralBackground from '@/components/NeuralBackground';
+import CyberInput from '@/components/CyberInput';
+import CyberButton from '@/components/CyberButton';
+import * as Haptics from 'expo-haptics';
 
 export default function NewPatientScreen() {
   const insets = useSafeAreaInsets();
@@ -25,7 +28,7 @@ export default function NewPatientScreen() {
 
   const handleSave = async () => {
     if (!form.full_name || !form.birth_date || !form.sex) {
-      return Alert.alert('Error', 'Nombre, Fecha de Nacimiento y Sexo son obligatorios.');
+      return Alert.alert('DATOS INCOMPLETOS', 'Nombre, Fecha de Nacimiento y Genotipo son obligatorios para inicializar al sujeto.');
     }
 
     setLoading(true);
@@ -40,92 +43,113 @@ export default function NewPatientScreen() {
       } as any);
 
       if (error) throw error;
-      Alert.alert('Éxito', 'Paciente registrado correctamente.');
+      Alert.alert('SUJETO REGISTRADO 💀', 'El espécimen ha sido inyectado exitosamente en el núcleo.');
       router.replace(`/(app)/patient/${data.id}`);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert('FALLO DE SÍNTESIS', error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <TerminalBackground>
+    <NeuralBackground>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.neon} />
+          <TouchableOpacity onPress={() => { Haptics.selectionAsync(); router.back(); }} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={28} color={COLORS.neon} />
           </TouchableOpacity>
-          <Text style={styles.title}>NUEVO SUJETO</Text>
+          <Ionicons name="person-add" size={32} color={COLORS.neon} style={{ marginRight: 10 }} />
+          <View>
+            <Text style={styles.headerTitle}>REGISTRO DE SUJETO</Text>
+            <Text style={styles.headerSub}>SISTEMA DE INGRESO BIOMÉTRICO</Text>
+          </View>
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.card}>
-            <Field label="Nombre Completo" value={form.full_name} onChangeText={(v: string) => setForm({...form, full_name: v})} placeholder="Ej. Juan Pérez" />
-            <Field label="RUT (Opcional)" value={form.rut} onChangeText={(v: string) => setForm({...form, rut: v})} placeholder="12.345.678-9" />
+            <CyberInput label="NOMBRE COMPLETO" value={form.full_name} onChangeText={(v: string) => setForm({...form, full_name: v})} placeholder="Ej. Juan Pérez" />
+            <CyberInput label="RUT (OPCIONAL)" value={form.rut} onChangeText={(v: string) => setForm({...form, rut: v})} placeholder="12.345.678-9" />
+            
             <View style={styles.row}>
-              <Field label="Fecha Nacimiento" value={form.birth_date} onChangeText={(v: string) => setForm({...form, birth_date: v})} placeholder="YYYY-MM-DD" containerStyle={{ flex: 1 }} />
+              <CyberInput label="FECHA NACIMIENTO" value={form.birth_date} onChangeText={(v: string) => setForm({...form, birth_date: v})} placeholder="YYYY-MM-DD" style={{ flex: 1 }} />
               <View style={styles.field}>
-                <Text style={styles.label}>Sexo</Text>
+                <Text style={styles.label}>GENOTIPO</Text>
                 <View style={styles.sexRow}>
                   {['M', 'F'].map(s => (
                     <TouchableOpacity key={s} 
                       style={[styles.sexBtn, form.sex === s && styles.sexActive]}
-                      onPress={() => setForm({...form, sex: s as any})}>
-                      <Text style={[styles.sexTxt, form.sex === s && { color: COLORS.white }]}>{s}</Text>
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        setForm({...form, sex: s as any})
+                      }}>
+                      <Text style={[styles.sexTxt, form.sex === s && { color: COLORS.white }]}>{s === 'M' ? 'XY' : 'XX'}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
             </View>
-            <View style={styles.row}>
-              <Field label="Previsión" value={form.insurance} onChangeText={(v: string) => setForm({...form, insurance: v})} placeholder="FONASA" containerStyle={{ flex: 1 }} />
-              <Field label="Comuna" value={form.commune} onChangeText={(v: string) => setForm({...form, commune: v})} placeholder="Santiago" containerStyle={{ flex: 1 }} />
-            </View>
-            <Field label="Teléfono" value={form.phone} onChangeText={(v: string) => setForm({...form, phone: v})} placeholder="+569..." />
-            <Field label="Notas / Antecedentes" value={form.notes} onChangeText={(v: string) => setForm({...form, notes: v})} placeholder="Escribir aquí..." multiline />
 
-            <TouchableOpacity style={[styles.saveBtn, loading && { opacity: 0.6 }]} onPress={handleSave} disabled={loading}>
-              <Text style={styles.saveBtnText}>{loading ? 'PROCESANDO...' : 'REGISTRAR PACIENTE'}</Text>
-            </TouchableOpacity>
+            <View style={styles.row}>
+              <CyberInput label="PREVISIÓN" value={form.insurance} onChangeText={(v: string) => setForm({...form, insurance: v})} placeholder="FONASA" style={{ flex: 1 }} />
+              <CyberInput label="COMUNA" value={form.commune} onChangeText={(v: string) => setForm({...form, commune: v})} placeholder="Santiago" style={{ flex: 1 }} />
+            </View>
+            
+            <CyberInput label="TELÉFONO" value={form.phone} onChangeText={(v: string) => setForm({...form, phone: v})} placeholder="+569..." />
+            <CyberInput label="NOTAS / ANTECEDENTES" value={form.notes} onChangeText={(v: string) => setForm({...form, notes: v})} placeholder="Escribir aquí..." multiline={true} />
+
+            <CyberButton 
+              title={loading ? "INYECTANDO ADN..." : "REGISTRAR SUJETO"}
+              onPress={loading ? () => {} : handleSave}
+              color={loading ? COLORS.dim : COLORS.crimson}
+              style={{ marginTop: 20, opacity: loading ? 0.5 : 1 }}
+            />
           </View>
         </ScrollView>
       </View>
-    </TerminalBackground>
+    </NeuralBackground>
   );
 }
 
-function Field({ label, value, onChangeText, placeholder, multiline, containerStyle }: any) {
-  return (
-    <View style={[styles.field, containerStyle]}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={[styles.input, multiline && { height: 120, textAlignVertical: 'top' }]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={COLORS.muted}
-        multiline={multiline}
-      />
-    </View>
-  );
-}
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', padding: SPACING.lg, gap: SPACING.md },
-  backBtn: { padding: 4 },
-  title: { fontSize: 28, fontWeight: '900', color: COLORS.orange, letterSpacing: 4, fontFamily: FONTS.horror },
-  scroll: { padding: SPACING.lg },
-  card: { backgroundColor: 'rgba(13, 13, 18, 0.95)', borderRadius: 0, borderWidth: 3, borderColor: COLORS.dim, padding: SPACING.xl, gap: SPACING.lg, shadowColor: COLORS.orange, shadowOpacity: 0.2, shadowRadius: 15 },
-  field: { gap: 10 },
-  label: { fontSize: 12, color: COLORS.bone, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 },
-  input: { backgroundColor: '#000', borderWidth: 2, borderColor: COLORS.dim, borderRadius: 0, padding: 18, color: COLORS.white, fontSize: 16, fontWeight: 'bold' },
+  header: { 
+    padding: 20, 
+    flexDirection: 'row',
+    alignItems: 'center', 
+    borderBottomWidth: 2, 
+    borderBottomColor: COLORS.crimson,
+    backgroundColor: 'rgba(5, 5, 10, 0.75)'
+  },
+  headerTitle: { fontFamily: FONTS.horror, fontSize: 20, color: COLORS.white, letterSpacing: 2 },
+  headerSub: { fontSize: 10, color: COLORS.crimson, letterSpacing: 2, fontWeight: '900' },
+  backBtn: { marginRight: 15 },
+  scroll: { padding: 20, paddingBottom: 100 },
+  card: { 
+    backgroundColor: 'rgba(10,10,20,0.85)', 
+    borderWidth: 1, 
+    borderColor: 'rgba(255,0,60,0.3)', 
+    borderRadius: RADIUS.lg, 
+    padding: 20, 
+    borderTopWidth: 3,
+    borderTopColor: COLORS.neon,
+    shadowColor: COLORS.neon,
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  field: { gap: 10, marginTop: 12 },
+  label: { fontSize: 11, color: COLORS.bone, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, fontFamily: FONTS.space, marginLeft: 10 },
   row: { flexDirection: 'row', gap: SPACING.md },
-  sexRow: { flexDirection: 'row', gap: 12 },
-  sexBtn: { width: 55, height: 55, borderRadius: 0, borderWidth: 2, borderColor: COLORS.dim, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' },
-  sexActive: { backgroundColor: COLORS.purple, borderColor: COLORS.purple },
-  sexTxt: { color: COLORS.muted, fontWeight: '900', fontSize: 18 },
-  saveBtn: { backgroundColor: COLORS.orange, paddingVertical: 20, borderRadius: 0, alignItems: 'center', marginTop: 20, shadowColor: COLORS.orange, shadowOpacity: 0.5, shadowRadius: 10 },
-  saveBtnText: { color: COLORS.white, fontWeight: '900', fontSize: 22, letterSpacing: 3, fontFamily: FONTS.horror },
+  sexRow: { flexDirection: 'row', gap: 10 },
+  sexBtn: { 
+    width: 60, height: 55, borderRadius: RADIUS.md, 
+    borderWidth: 1.5, borderColor: COLORS.dim, 
+    alignItems: 'center', justifyContent: 'center', 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)' 
+  },
+  sexActive: { backgroundColor: 'rgba(157, 0, 255, 0.2)', borderColor: COLORS.purple },
+  sexTxt: { color: COLORS.muted, fontWeight: '900', fontSize: 14, letterSpacing: 1 },
 });
