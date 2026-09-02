@@ -12,7 +12,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      groqApiKey: process.env.EXPO_PUBLIC_GROQ_API_KEY || null,
+      groqApiKey: null,
       groqModel: 'llama-3.1-70b-versatile',
       setGroqApiKey: (key) => set({ groqApiKey: key }),
       setGroqModel: (model) => set({ groqModel: model }),

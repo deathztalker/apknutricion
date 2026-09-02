@@ -11,30 +11,32 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Dimensions,
   Image
 } from 'react-native';
 import { router } from 'expo-router';
-import * as Linking from 'expo-linking';
-import { COLORS, SHADOWS, FONTS } from '../constants/theme';
-import { supabase } from '../lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS } from '../constants/theme';
+import { useAuthStore } from '../store/authStore';
 import TerminalBackground from '../components/TerminalBackground';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as WebBrowser from 'expo-web-browser';
-
-const { width } = Dimensions.get('window');
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { login, pin: currentPin, setPin: storeSetPin } = useAuthStore();
+  const hasPin = !!currentPin;
+
+  const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(!hasPin);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const skullAnim = useRef(new Animated.Value(0)).current;
   const flickerAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Si ya tiene PIN y por alguna razón isSignUp es true, forzar a false
+    if (hasPin && isSignUp) {
+      setIsSignUp(false);
+    }
+  }, [hasPin]);
 
   useEffect(() => {
     const skullLoop = Animated.loop(
@@ -83,109 +85,25 @@ export default function Login() {
     outputRange: [5, 25],
   });
 
-  async function handleGoogleLogin() {
-    setGoogleLoading(true);
-    try {
-      // Definimos la URL de retorno explícitamente para GitHub Pages
-      // En Web: https://deathztalker.github.io/apknutricion/google-auth
-      // En APK: nutricesfam://google-auth
-      const redirectTo = Platform.OS === 'web'
-        ? 'https://deathztalker.github.io/apknutricion/google-auth'
-        : Linking.createURL('google-auth');
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          skipBrowserRedirect: Platform.OS !== 'web',
-        },
-      });
-
-      if (error) throw error;
-
-      if (Platform.OS !== 'web' && data?.url) {
-        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-        if (result.type === 'cancel') {
-          setGoogleLoading(false);
-        } else if (result.type === 'success' && result.url) {
-          const url = result.url;
-          const hashIdx = url.indexOf('#');
-          const queryIdx = url.indexOf('?');
-          let paramsString = '';
-          if (hashIdx !== -1) {
-            paramsString = url.substring(hashIdx + 1);
-          } else if (queryIdx !== -1) {
-            paramsString = url.substring(queryIdx + 1);
-          }
-
-          const params: Record<string, string> = {};
-          paramsString.split('&').forEach(part => {
-            const [key, val] = part.split('=');
-            if (key && val) params[key] = decodeURIComponent(val);
-          });
-
-          if (params.access_token) {
-            const { error: sessionError } = await supabase.auth.setSession({
-              access_token: params.access_token,
-              refresh_token: params.refresh_token || '',
-            });
-            if (sessionError) throw sessionError;
-            router.replace('/(app)/dashboard');
-          } else {
-            setGoogleLoading(false);
-          }
-        }
-      }
-
-    } catch (error: any) {
-      Alert.alert('GHOST ERROR', error.message);
-      setGoogleLoading(false);
-    }
-  }
-
   async function handleAuth() {
-    const cleanEmail = email.trim();
-
-    if (!cleanEmail || !password) {
-      Alert.alert('ERROR DE SISTEMA', 'ADN DIGITAL Y CÓDIGO GENÉTICO REQUERIDOS');
-      return;
-    }
-
-    if (!cleanEmail.includes('@')) {
-      Alert.alert('ADN INVÁLIDO', 'El ADN Digital debe tener un formato de email válido (ej@adn.com)');
+    if (!pin) {
+      Alert.alert('ERROR DE SISTEMA', 'PIN DE ACCESO REQUERIDO');
       return;
     }
 
     setLoading(true);
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            emailRedirectTo: Linking.createURL('google-auth'),
-          }
-        });
-
-        if (error) throw error;
-
-        Alert.alert(
-          'VÍNCULO INICIADO',
-          'Se ha enviado un pulso de verificación a tu ADN Digital. Revisa tu bandeja de entrada para completar la síntesis.',
-          [{ text: 'ENTENDIDO', onPress: () => setIsSignUp(false) }]
-        );
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            throw new Error('Código genético o ADN digital incorrecto.');
-          }
-          if (error.message.includes('Email not confirmed')) {
-            throw new Error('Vínculo no verificado. Revisa tu bandeja de entrada.');
-          }
-          throw error;
-        }
+        storeSetPin(pin);
+        login(pin);
         router.replace('/(app)/dashboard');
+      } else {
+        const success = login(pin);
+        if (success) {
+          router.replace('/(app)/dashboard');
+        } else {
+          Alert.alert('ACCESO DENEGADO', 'PIN INCORRECTO. INTENTO FALLIDO.');
+        }
       }
     } catch (error: any) {
       Alert.alert('ACCESO DENEGADO', `ERROR DE NÚCLEO: ${error.message}`);
@@ -213,63 +131,24 @@ export default function Login() {
               <Animated.Text style={[styles.title, { textShadowRadius: glowRadius, opacity: flickerAnim }]}>
                 MEOW CLUB
               </Animated.Text>
-              <Text style={styles.subtitle}>SÍNTESIS DE ADN DIGITAL // NUTRICIÓN</Text>
+              <Text style={styles.subtitle}>SÍNTESIS DE ADN DIGITAL // MODO OFFLINE</Text>
               <View style={styles.line} />
             </View>
 
             <View style={styles.form}>
 
-              {/* Google Auth - Premium HD Button */}
-              <TouchableOpacity
-                style={styles.googleButton}
-                onPress={handleGoogleLogin}
-                disabled={googleLoading}
-              >
-                <LinearGradient
-                  colors={['#4285F4', '#34a853']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={StyleSheet.absoluteFill}
-                />
-                {googleLoading ? <ActivityIndicator color="#fff" /> : (
-                  <>
-                    <Ionicons name="logo-google" size={20} color="#fff" />
-                    <Text style={styles.googleButtonText}>VINCULACIÓN NEURAL GOOGLE</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-
-              <View style={styles.orRow}>
-                <View style={styles.orLine} />
-                <Text style={styles.orText}>O PROTOCOLO BIOQUÍMICO</Text>
-                <View style={styles.orLine} />
-              </View>
-
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>ADN DIGITAL (EMAIL)</Text>
+                <Text style={styles.label}>{isSignUp ? 'CREAR PIN MAESTRO' : 'PIN DE ACCESO'}</Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.input}
-                    placeholder="ID de Espécimen"
+                    placeholder="••••"
                     placeholderTextColor={COLORS.muted}
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                  />
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>CÓDIGO GENÉTICO (PASSWORD)</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="••••••••"
-                    placeholderTextColor={COLORS.muted}
-                    value={password}
-                    onChangeText={setPassword}
+                    value={pin}
+                    onChangeText={setPin}
                     secureTextEntry
+                    keyboardType="numeric"
+                    maxLength={8}
                   />
                 </View>
               </View>
@@ -284,18 +163,18 @@ export default function Login() {
                   style={StyleSheet.absoluteFill}
                 />
                 {loading ? <ActivityIndicator color={COLORS.white} /> : (
-                  <Text style={styles.authButtonText}>{isSignUp ? 'SINTETIZAR SUJETO' : 'SINCRONIZAR METABOLISMO'}</Text>
+                  <Text style={styles.authButtonText}>{isSignUp ? 'SINTETIZAR PIN' : 'SINCRONIZAR'}</Text>
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.switchButton}
-                onPress={() => setIsSignUp(!isSignUp)}
-              >
-                <Text style={styles.switchButtonText}>
-                  {isSignUp ? '¿ALMA EXISTENTE? RECONECTAR' : '¿NUEVO ESPECTRO? INICIALIZAR'}
-                </Text>
-              </TouchableOpacity>
+              {!hasPin && !isSignUp && (
+                <TouchableOpacity
+                  style={styles.switchButton}
+                  onPress={() => setIsSignUp(true)}
+                >
+                  <Text style={styles.switchButtonText}>¿NUEVO ESPECTRO? CREAR PIN</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </Animated.View>
         </ScrollView>
@@ -334,11 +213,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     resizeMode: 'cover',
   },
-  skullShadow: {
-    textShadowColor: COLORS.orange,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 30,
-  },
   title: {
     fontSize: 48,
     fontFamily: FONTS.horror,
@@ -364,34 +238,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   form: { gap: 25 },
-  googleButton: {
-    height: 65,
-    borderRadius: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15,
-    backgroundColor: '#000',
-    borderWidth: 2,
-    borderColor: COLORS.purple,
-    shadowColor: COLORS.purple,
-    shadowOpacity: 0.4,
-    shadowRadius: 15,
-  },
-  googleButtonText: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 2,
-  },
-  orRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-    marginVertical: 15,
-  },
-  orLine: { flex: 1, height: 2, backgroundColor: COLORS.dim },
-  orText: { color: COLORS.purple, fontSize: 10, fontWeight: '900', letterSpacing: 2 },
   inputGroup: { gap: 10 },
   label: { fontSize: 12, fontWeight: '900', color: COLORS.bone, letterSpacing: 2, textTransform: 'uppercase' },
   inputWrapper: {
@@ -404,9 +250,11 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: COLORS.white,
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    textAlign: 'center',
+    letterSpacing: 10,
   },
   authButton: {
     height: 75,
@@ -438,33 +286,5 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 2,
     textDecorationLine: 'underline',
-  },
-  successBox: {
-    padding: 30,
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 255, 159, 0.05)',
-    borderWidth: 2,
-    borderColor: COLORS.neon,
-    gap: 20,
-  },
-  successText: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    lineHeight: 24,
-    letterSpacing: 1,
-  },
-  backToLogin: {
-    marginTop: 10,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: COLORS.neon,
-  },
-  backToLoginText: {
-    color: COLORS.neon,
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 2,
   },
 });

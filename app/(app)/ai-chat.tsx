@@ -148,8 +148,8 @@ function MessageBubble({ msg, onCopy }: { msg: Message; onCopy: (text: string) =
 
   useEffect(() => {
     const anim = Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 220, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: false }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 220, useNativeDriver: false }),
     ]);
     anim.start();
     
@@ -266,7 +266,7 @@ function TypingIndicator() {
 export default function AIChatScreen() {
   const insets = useSafeAreaInsets();
   const { patientId, recordId } = useLocalSearchParams<{ patientId?: string; recordId?: string }>();
-  const { profile } = useAuthStore();
+  const { session } = useAuthStore();
   const { groqApiKey, groqModel, setGroqApiKey, setGroqModel } = useSettingsStore();
   
   const scrollRef = useRef<ScrollView>(null);
@@ -358,9 +358,9 @@ export default function AIChatScreen() {
 
       response = await generateGroqChat(fullHistory, sysPrompt, groqModel, groqApiKey || undefined);
 
-      if (profile?.id) {
+      if (session?.user?.id) {
         await aiService.log({
-          user_id: profile.id,
+          user_id: session.user.id,
           patient_id: patientId,
           record_id: recordId,
           prompt: content,
@@ -384,7 +384,7 @@ export default function AIChatScreen() {
       error: isError,
     }]);
     scrollToEnd();
-  }, [input, loading, messages, patientCtx, profile?.id, patientId, recordId, scrollToEnd]);
+  }, [input, loading, messages, patientCtx, session?.user?.id, patientId, recordId, scrollToEnd]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (

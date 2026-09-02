@@ -1,11 +1,22 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useEffect } from 'react';
 import { COLORS, FONTS } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '../../store/authStore';
 
 import ErrorBoundary from '../../components/ErrorBoundary';
 
 export default function AppLayout() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/');
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) return null;
 
   const ProfileHeader = () => (
     <TouchableOpacity 

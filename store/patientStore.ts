@@ -27,7 +27,7 @@ export const usePatientStore = create<PatientState>()(
       selectedRecord: null,
       setPatients: (patients) => set({ patients }),
       setGuestRecords: (guestRecords) => set({ guestRecords }),
-      addGuestRecord: (r) => set(state => ({ guestRecords: [r, ...state.guestRecords].slice(0, 10) })), // Mantener últimos 10
+      addGuestRecord: (r) => set(state => ({ guestRecords: [r, ...state.guestRecords] })),
       setSelectedPatient: (p) => set({ selectedPatient: p }),
       setSelectedRecord: (r) => set({ selectedRecord: r }),
       addPatient: (p) => set(state => ({ patients: [p, ...state.patients] })),

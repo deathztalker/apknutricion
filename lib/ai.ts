@@ -1,8 +1,7 @@
 // lib/ai.ts — Motor IA Clínica v2: Groq Llama 3.1 (100% Gratuito sin Tarjeta)
 import { ClinicalRecord, Patient, AIAnalysis, ClinicalAlert, CalculationResult } from '@/types';
+import { useSettingsStore } from '../store/settingsStore';
 
-const GROQ_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
-const GROQ_MODEL = 'llama-3.1-70b-versatile';
 const MAX_RETRIES = 2;
 const TIMEOUT_MS = 15_000;
 
@@ -341,14 +340,17 @@ async function callGroqREST(
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+      const apiKey = useSettingsStore.getState().groqApiKey;
+      const currentModel = useSettingsStore.getState().groqModel || 'llama-3.1-70b-versatile';
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model: currentModel,
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.5,
           response_format: { type: 'json_object' }
@@ -394,8 +396,9 @@ export async function analyzeWithGemini(
     : (patient.age ?? 0);
 
   const ruleAlerts = generateRuleBasedAlerts(record, calc, age, patient.sex ?? '');
+  const apiKey = useSettingsStore.getState().groqApiKey;
 
-  if (GROQ_KEY) {
+  if (apiKey) {
     try {
       const parsed = await callGroqREST(buildPrompt(patient, record, calc, ruleAlerts));
 
@@ -724,7 +727,8 @@ Configura tu **API Key de Groq** en los ajustes para un análisis clínico narra
 }
 
 export async function fetchGroqModels(apiKey?: string): Promise<{id: string, name?: string}[]> {
-  const key = apiKey || GROQ_KEY;
+  const key = apiKey || useSettingsStore.getState().groqApiKey;
+  if (!key) throw new Error('No API Key provided');
   const response = await fetch('https://api.groq.com/openai/v1/models', {
     method: 'GET',
     headers: {
@@ -749,8 +753,9 @@ export async function generateGroqChat(
   model?: string,
   apiKey?: string
 ): Promise<string> {
-  const key = apiKey || GROQ_KEY;
-  const selectedModel = model || GROQ_MODEL;
+  const key = apiKey || useSettingsStore.getState().groqApiKey;
+  const selectedModel = model || useSettingsStore.getState().groqModel || 'llama-3.1-70b-versatile';
+  if (!key) throw new Error('No API Key provided');
 
   const payload = {
     model: selectedModel,

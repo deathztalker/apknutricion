@@ -40,12 +40,17 @@ const CONNECTIONS = [
   [0, 2], [1, 3], [4, 6], [5, 6]
 ];
 
+import { Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+const CONTAINER_HEIGHT = height * 0.8; // Approximate height of the 80% container
+
 const FlowingLine = ({ start, end }: { start: number, end: number }) => (
   <Line
-    x1={`${NODES[start].x}%`}
-    y1={`${NODES[start].y}%`}
-    x2={`${NODES[end].x}%`}
-    y2={`${NODES[end].y}%`}
+    x1={(NODES[start].x / 100) * width}
+    y1={(NODES[start].y / 100) * CONTAINER_HEIGHT}
+    x2={(NODES[end].x / 100) * width}
+    y2={(NODES[end].y / 100) * CONTAINER_HEIGHT}
     stroke={COLORS.neon}
     strokeWidth="1.5"
     strokeDasharray="4,6"
@@ -63,7 +68,7 @@ const SynapticNode = ({ node, onPress }: { node: any, onPress: () => void }) => 
   const SIZE = isHub ? 90 : 70;
   const RADIUS = SIZE / 2;
   return (
-    <View style={[{ position: 'absolute', left: `${node.x}%`, top: `${node.y}%`, width: SIZE, height: SIZE, marginLeft: -RADIUS, marginTop: -RADIUS }]}>
+    <View style={[{ position: 'absolute', left: (node.x / 100) * width, top: (node.y / 100) * CONTAINER_HEIGHT, width: SIZE, height: SIZE, marginLeft: -RADIUS, marginTop: -RADIUS }]}>
       <TouchableOpacity
         style={[styles.synapticNode, { width: SIZE, height: SIZE, borderRadius: RADIUS, borderColor: node.color, shadowColor: node.color }]}
         onPress={onPress}

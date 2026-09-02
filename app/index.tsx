@@ -10,7 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TerminalBackground from '../components/TerminalBackground';
 import CyberButton from '../components/CyberButton';
-import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/authStore';
 
 export default function Index() {
   const insets = useSafeAreaInsets();
@@ -30,13 +30,9 @@ export default function Index() {
     '[ OK ] ACCESO FIEND CLUB AUTORIZADO'
   ];
 
-  const [session, setSession] = useState<any>(null);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
     let index = 0;
     const interval = setInterval(() => {
       if (index < SEQUENCE.length) {
@@ -162,7 +158,7 @@ export default function Index() {
         <Animated.View style={[styles.buttonContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           {bootComplete && (
             <>
-              {session ? (
+              {isAuthenticated ? (
                 <CyberButton
                   title="ENTRAR AL SISTEMA"
                   onPress={async () => {

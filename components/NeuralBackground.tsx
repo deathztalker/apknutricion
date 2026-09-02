@@ -26,8 +26,8 @@ export default function NeuralBackground({ children }: { children: React.ReactNo
     // Primary glow pulse - orange tint (top)
     const loop1 = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1, duration: 5000, useNativeDriver: false }),
-        Animated.timing(pulseAnim, { toValue: 0, duration: 5000, useNativeDriver: false }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 5000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0, duration: 5000, useNativeDriver: true }),
       ])
     );
     loop1.start();
@@ -35,8 +35,8 @@ export default function NeuralBackground({ children }: { children: React.ReactNo
     const loop2 = Animated.loop(
       Animated.sequence([
         Animated.delay(2500),
-        Animated.timing(pulse2Anim, { toValue: 0, duration: 5000, useNativeDriver: false }),
-        Animated.timing(pulse2Anim, { toValue: 1, duration: 5000, useNativeDriver: false }),
+        Animated.timing(pulse2Anim, { toValue: 0, duration: 5000, useNativeDriver: true }),
+        Animated.timing(pulse2Anim, { toValue: 1, duration: 5000, useNativeDriver: true }),
       ])
     );
     loop2.start();
@@ -48,11 +48,11 @@ export default function NeuralBackground({ children }: { children: React.ReactNo
         const toX = Math.random() * width;
         const toY = Math.random() * height;
         Animated.parallel([
-          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: false }),
-          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: false }),
+          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: true }),
+          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: true }),
           Animated.sequence([
-            Animated.timing(p.opacity, { toValue: Math.random() * 0.6 + 0.4, duration: p.speed / 3, useNativeDriver: false }),
-            Animated.timing(p.opacity, { toValue: 0.1, duration: p.speed * 2 / 3, useNativeDriver: false }),
+            Animated.timing(p.opacity, { toValue: Math.random() * 0.6 + 0.4, duration: p.speed / 3, useNativeDriver: true }),
+            Animated.timing(p.opacity, { toValue: 0.1, duration: p.speed * 2 / 3, useNativeDriver: true }),
           ])
         ]).start(({ finished }) => {
           if (finished && isActive) animate();
