@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Platform, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Platform, Image, ScrollView } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
@@ -81,18 +81,19 @@ export default function Index() {
         ])
       );
 
-      Animated.parallel([
+      const introAnim = Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 1200,
-          useNativeDriver: Platform.OS !== 'web'
+          useNativeDriver: false
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 1200,
-          useNativeDriver: Platform.OS !== 'web'
+          useNativeDriver: false
         })
-      ]).start();
+      ]);
+      introAnim.start();
 
       xLoop.start();
       opLoop.start();
@@ -102,6 +103,11 @@ export default function Index() {
         xLoop.stop();
         opLoop.stop();
         scanLoop.stop();
+        glitchX.stopAnimation();
+        glitchOpacity.stopAnimation();
+        scannerAnim.stopAnimation();
+        fadeAnim.stopAnimation();
+        slideAnim.stopAnimation();
       };
     }, [])
   );
@@ -131,12 +137,26 @@ export default function Index() {
         </Animated.View>
 
         {/* Console Boot Output */}
-        <View style={{ height: 120, width: '100%', marginBottom: 30, paddingHorizontal: 20 }}>
-          {bootLines.map((line, i) => (
-            <Text key={i} style={{ color: line.includes('[ OK ]') ? COLORS.neon : COLORS.dim, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontSize: 12, marginBottom: 4, letterSpacing: 1 }}>
-              {line}
-            </Text>
-          ))}
+        <View style={styles.consoleContainer}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            ref={(ref: any) => ref?.scrollToEnd({ animated: true })}
+          >
+            {bootLines.map((line, i) => (
+              <Text key={i} style={{ 
+                color: line.includes('[ OK ]') ? COLORS.neon : line.includes('FIEND') ? COLORS.crimson : COLORS.dim, 
+                fontFamily: FONTS.space, 
+                fontSize: 11, 
+                marginBottom: 6, 
+                letterSpacing: 1,
+                textShadowColor: line.includes('[ OK ]') ? COLORS.neon : 'transparent',
+                textShadowOffset: { width: 0, height: 0 },
+                textShadowRadius: line.includes('[ OK ]') ? 5 : 0
+              }}>
+                {line}
+              </Text>
+            ))}
+          </ScrollView>
         </View>
 
         <Animated.View style={[styles.buttonContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
@@ -148,7 +168,7 @@ export default function Index() {
                   onPress={async () => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                     await new Promise(r => setTimeout(r, 150));
-                    router.replace('/(app)/dashboard');
+                    router.replace('/(app)/calculator');
                   }}
                   color={COLORS.neon}
                   icon={<Ionicons name="enter" size={24} color={COLORS.bg} />}
@@ -264,5 +284,18 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+  },
+  consoleContainer: {
+    height: 140,
+    width: '100%',
+    marginBottom: 30,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 60, 0.3)',
+    borderRadius: RADIUS.md,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.crimson,
   },
 });

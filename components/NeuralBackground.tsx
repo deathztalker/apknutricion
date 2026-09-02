@@ -21,38 +21,58 @@ export default function NeuralBackground({ children }: { children: React.ReactNo
   }))).current;
 
   useEffect(() => {
+    let isActive = true;
+
     // Primary glow pulse - orange tint (top)
-    Animated.loop(
+    const loop1 = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1, duration: 5000, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 0, duration: 5000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 5000, useNativeDriver: false }),
+        Animated.timing(pulseAnim, { toValue: 0, duration: 5000, useNativeDriver: false }),
       ])
-    ).start();
+    );
+    loop1.start();
     // Secondary glow pulse - neon green (bottom), offset
-    Animated.loop(
+    const loop2 = Animated.loop(
       Animated.sequence([
         Animated.delay(2500),
-        Animated.timing(pulse2Anim, { toValue: 0, duration: 5000, useNativeDriver: true }),
-        Animated.timing(pulse2Anim, { toValue: 1, duration: 5000, useNativeDriver: true }),
+        Animated.timing(pulse2Anim, { toValue: 0, duration: 5000, useNativeDriver: false }),
+        Animated.timing(pulse2Anim, { toValue: 1, duration: 5000, useNativeDriver: false }),
       ])
-    ).start();
+    );
+    loop2.start();
 
     // Drifting horror icons
     particles.forEach((p) => {
       const animate = () => {
+        if (!isActive) return;
         const toX = Math.random() * width;
         const toY = Math.random() * height;
         Animated.parallel([
-          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: true }),
-          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: true }),
+          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: false }),
+          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: false }),
           Animated.sequence([
-            Animated.timing(p.opacity, { toValue: Math.random() * 0.6 + 0.4, duration: p.speed / 3, useNativeDriver: true }),
-            Animated.timing(p.opacity, { toValue: 0.1, duration: p.speed * 2 / 3, useNativeDriver: true }),
+            Animated.timing(p.opacity, { toValue: Math.random() * 0.6 + 0.4, duration: p.speed / 3, useNativeDriver: false }),
+            Animated.timing(p.opacity, { toValue: 0.1, duration: p.speed * 2 / 3, useNativeDriver: false }),
           ])
-        ]).start(() => animate());
+        ]).start(({ finished }) => {
+          if (finished && isActive) animate();
+        });
       };
       animate();
     });
+
+    return () => {
+      isActive = false;
+      loop1.stop();
+      loop2.stop();
+      pulseAnim.stopAnimation();
+      pulse2Anim.stopAnimation();
+      particles.forEach(p => {
+        p.x.stopAnimation();
+        p.y.stopAnimation();
+        p.opacity.stopAnimation();
+      });
+    };
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions, Platform, Alert, Modal } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions, Platform, Alert, Modal, InteractionManager } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../../../constants/theme';
 import { patientService, recordService, mealPlanService } from '../../../lib/supabase';
@@ -46,7 +46,10 @@ export default function PatientDossier() {
         setLoading(false);
       }
     };
-    fetchData();
+    const task = InteractionManager.runAfterInteractions(() => {
+      fetchData();
+    });
+    return () => task.cancel();
   }, [id]);
 
   const handleGeneratePDF = async () => {

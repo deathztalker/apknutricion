@@ -3,6 +3,8 @@ import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { COLORS, FONTS } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
+import ErrorBoundary from '../../components/ErrorBoundary';
+
 export default function AppLayout() {
 
   const ProfileHeader = () => (
@@ -23,20 +25,22 @@ export default function AppLayout() {
   );
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: COLORS.bg },
-      }}
-    >
-      <Stack.Screen name="dashboard" options={{ title: 'TABLERO DE SISTEMA' }} />
-      <Stack.Screen name="patient/[id]" options={{ title: 'EXPEDIENTE DEL SUJETO' }} />
-      <Stack.Screen name="patient/new" options={{ title: 'INICIALIZAR SUJETO', presentation: 'modal' }} />
-      <Stack.Screen name="calculator" options={{ title: 'SOBREESCRITURA BIOMÉTRICA' }} />
-      <Stack.Screen name="patient/[id]/labs" options={{ title: 'TERMINAL BIOQUÍMICO' }} />
-      <Stack.Screen name="meal-plan/new" options={{ title: 'CONSTRUCTOR DE PORCIONES' }} />
-      <Stack.Screen name="ai-chat" options={{ title: 'NUTRIBOT IA', presentation: 'modal' }} />
-    </Stack>
+    <ErrorBoundary>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: COLORS.bg },
+        }}
+      >
+        <Stack.Screen name="dashboard" options={{ title: 'TABLERO DE SISTEMA' }} />
+        <Stack.Screen name="patient/[id]" options={{ title: 'EXPEDIENTE DEL SUJETO' }} />
+        <Stack.Screen name="patient/new" options={{ title: 'INICIALIZAR SUJETO', presentation: 'modal' }} />
+        <Stack.Screen name="calculator" options={{ title: 'SOBREESCRITURA BIOMÉTRICA' }} />
+        <Stack.Screen name="patient/[id]/labs" options={{ title: 'TERMINAL BIOQUÍMICO' }} />
+        <Stack.Screen name="meal-plan/new" options={{ title: 'CONSTRUCTOR DE PORCIONES' }} />
+        <Stack.Screen name="ai-chat" options={{ title: 'NUTRIBOT IA', presentation: 'modal' }} />
+      </Stack>
+    </ErrorBoundary>
   );
 }
 

@@ -147,10 +147,17 @@ function MessageBubble({ msg, onCopy }: { msg: Message; onCopy: (text: string) =
   const slideAnim = useRef(new Animated.Value(10)).current;
 
   useEffect(() => {
-    Animated.parallel([
+    const anim = Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 220, useNativeDriver: true }),
-    ]).start();
+    ]);
+    anim.start();
+    
+    return () => {
+      anim.stop();
+      fadeAnim.stopAnimation();
+      slideAnim.stopAnimation();
+    };
   }, []);
 
   const isUser = msg.role === 'user';
@@ -205,17 +212,26 @@ function TypingIndicator() {
   const dots = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
 
   useEffect(() => {
-    const animate = (dot: Animated.Value, delay: number) =>
-      Animated.loop(
+    const loops: any[] = [];
+    const animate = (dot: Animated.Value, delay: number) => {
+      const loop = Animated.loop(
         Animated.sequence([
           Animated.delay(delay),
           Animated.timing(dot, { toValue: 1, duration: 300, useNativeDriver: false }),
           Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: false }),
           Animated.delay(600),
         ])
-      ).start();
+      );
+      loop.start();
+      loops.push(loop);
+    };
 
     dots.forEach((d, i) => animate(d, i * 150));
+    
+    return () => {
+      loops.forEach(l => l.stop());
+      dots.forEach(d => d.stopAnimation());
+    };
   }, []);
 
   return (
@@ -225,11 +241,14 @@ function TypingIndicator() {
       </View>
       <View style={[styles.bubble, styles.bubbleBot, { paddingVertical: 14 }]}>
         <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+          <Text style={{ color: COLORS.neon, fontSize: 10, fontFamily: FONTS.space, letterSpacing: 1, marginRight: 4 }}>
+            PROCESANDO
+          </Text>
           {dots.map((d, i) => (
             <Animated.View
               key={i}
               style={{
-                width: 7, height: 7, borderRadius: 3.5,
+                width: 6, height: 6, borderRadius: 3,
                 backgroundColor: COLORS.neon,
                 opacity: d,
                 transform: [{ scale: d.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.2] }) }],

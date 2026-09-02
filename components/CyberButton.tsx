@@ -22,7 +22,7 @@ export default function CyberButton({
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1,
@@ -37,7 +37,13 @@ export default function CyberButton({
           useNativeDriver: false,
         }),
       ])
-    ).start();
+    );
+    loop.start();
+
+    return () => {
+      loop.stop();
+      pulseAnim.stopAnimation();
+    };
   }, []);
 
   const shadowOpacity = pulseAnim.interpolate({

@@ -20,31 +20,48 @@ export default function TerminalBackground({ children }: { children: React.React
   }))).current;
 
   useEffect(() => {
+    let isActive = true;
+
     // Subtle gradient pulse (Haunted Glow)
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 0.35, duration: 4000, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 0.1, duration: 4000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.35, duration: 4000, useNativeDriver: false }),
+        Animated.timing(pulseAnim, { toValue: 0.1, duration: 4000, useNativeDriver: false }),
       ])
-    ).start();
+    );
+    loop.start();
 
     // Drifting espectral de iconos
     particles.forEach((p) => {
       const animate = () => {
+        if (!isActive) return;
         const toX = Math.random() * width;
         const toY = Math.random() * height;
         
         Animated.parallel([
-          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: true }),
-          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: true }),
+          Animated.timing(p.x, { toValue: toX, duration: p.speed, useNativeDriver: false }),
+          Animated.timing(p.y, { toValue: toY, duration: p.speed, useNativeDriver: false }),
           Animated.sequence([
-            Animated.timing(p.opacity, { toValue: 0.25, duration: p.speed / 2, useNativeDriver: true }),
-            Animated.timing(p.opacity, { toValue: 0, duration: p.speed / 2, useNativeDriver: true }),
+            Animated.timing(p.opacity, { toValue: 0.25, duration: p.speed / 2, useNativeDriver: false }),
+            Animated.timing(p.opacity, { toValue: 0, duration: p.speed / 2, useNativeDriver: false }),
           ])
-        ]).start(() => animate());
+        ]).start(({ finished }) => {
+          if (finished && isActive) animate();
+        });
       };
       animate();
     });
+
+    return () => {
+      isActive = false;
+      loop.stop();
+      pulseAnim.stopAnimation();
+      particles.forEach(p => {
+        p.x.stopAnimation();
+        p.y.stopAnimation();
+        p.opacity.stopAnimation();
+      });
+    };
   }, []);
 
   return (

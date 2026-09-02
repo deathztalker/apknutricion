@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Alert, Image } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Alert, Image, InteractionManager } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { COLORS, SHADOWS, FONTS } from '../../constants/theme';
 import { supabase, patientService, recordService } from '../../lib/supabase';
@@ -66,7 +66,10 @@ export default function Dashboard() {
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
-      fetchData();
+      const task = InteractionManager.runAfterInteractions(() => {
+        fetchData();
+      });
+      return () => task.cancel();
     }, [activeView])
   );
 
@@ -97,6 +100,8 @@ export default function Dashboard() {
       return () => {
         xLoop.stop();
         opacityLoop.stop();
+        glitchX.stopAnimation();
+        glitchOpacity.stopAnimation();
         glitchX.setValue(0);
         glitchOpacity.setValue(1);
       };
@@ -300,6 +305,9 @@ function PulsingFab({ onPress }: { onPress: () => void }) {
         scaleLoop.stop();
         opLoop.stop();
         spinLoop.stop();
+        pulseScale.stopAnimation();
+        pulseOpacity.stopAnimation();
+        spin.stopAnimation();
       };
     }, [])
   );
